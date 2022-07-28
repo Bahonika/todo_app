@@ -9,5 +9,6 @@
     "important": "Important",
     "doneBy": "Done by",
     "delete": "Delete",
-    "datePickerDone": "DONE"
+    "datePickerDone": "DONE",
+    "newTodo": "New"
 }

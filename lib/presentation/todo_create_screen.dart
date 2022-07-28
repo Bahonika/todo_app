@@ -1,15 +1,14 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/components/wrapCard.dart';
-import 'package:todo_app/providers/create_task_data_provider.dart';
+import 'package:todo_app/domain/enums/importance.dart';
+import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/presentation/components/wrapCard.dart';
+import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
+import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/s.dart';
 import 'package:todo_app/theme.dart';
-import 'package:todo_app/providers/todos_provider.dart';
-
-import 'data/entities/todo.dart';
 
 class TodoCreateScreen extends StatefulWidget {
   const TodoCreateScreen({Key? key}) : super(key: key);
@@ -121,6 +120,7 @@ class ImportanceTile extends StatefulWidget {
 class _ImportanceTileState extends State<ImportanceTile> {
   List<DropdownMenuItem<Importance>> items = [];
 
+  //need fill function because of using context inside
   void itemsFill() {
     items = [
       DropdownMenuItem(
@@ -138,6 +138,8 @@ class _ImportanceTileState extends State<ImportanceTile> {
     ];
   }
 
+
+  //todo: not the best way I think
   @override
   void didChangeDependencies() {
     itemsFill();

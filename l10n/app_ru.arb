@@ -9,6 +9,6 @@
     "important": "Высокая",
     "doneBy": "Сделать до",
     "delete": "Удалить",
-    "datePickerDone": "ГОТОВО"
-
+    "datePickerDone": "ГОТОВО",
+    "newTodo": "Новое"
 }

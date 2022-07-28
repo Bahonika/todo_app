@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/providers/create_task_data_provider.dart';
+import 'package:todo_app/presentation/providers/revision_provider.dart';
+import 'package:todo_app/presentation/providers/todos_provider.dart';
+import 'package:todo_app/presentation/todo_list_screen.dart';
 import 'package:todo_app/s.dart';
 import 'package:todo_app/theme.dart';
-import 'package:todo_app/todo_list_screen.dart';
-import 'package:todo_app/providers/todos_provider.dart';
+import 'presentation/providers/create_task_data_provider.dart';
 
 void main() {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => TodosProvider()),
-      ChangeNotifierProvider(
-        create: (_) => CreateTaskDataProvider(),
-      ),
+      ChangeNotifierProvider(create: (_) => CreateTaskDataProvider()),
+      ChangeNotifierProvider(create: (_) => RevisionProvider()),
     ],
     child: const MyApp(),
   ));
@@ -27,11 +28,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // wont control manually
+  // todo: will set the same as in system settings
   var _isDark = false;
-  var _locale = S.en;
+  var _locale = S.ru;
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Theme.of(context).scaffoldBackgroundColor,
+        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.dark));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Todo App',
@@ -44,52 +53,15 @@ class _MyAppState extends State<MyApp> {
       ],
       supportedLocales: S.supportedLocales,
       locale: _locale,
-      // builder: (context, child) => SafeArea(
-      //   child: Material(
-      //     child: Stack(
-      //       children: [
-      //         Align(
-      //           alignment: Alignment.topLeft,
-      //           child: Row(
-      //             crossAxisAlignment: CrossAxisAlignment.center,
-      //             mainAxisSize: MainAxisSize.min,
-      //             children: [
-      //               Padding(
-      //                 padding: const EdgeInsets.all(12.0),
-      //                 child: IconButton(
-      //                   onPressed: () {
-      //                     final newMode = !_isDark;
-      //                     setState(() => _isDark = newMode);
-      //                   },
-      //                   icon: Icon(
-      //                     _isDark ? Icons.sunny : Icons.nightlight_round,
-      //                   ),
-      //                 ),
-      //               ),
-      //               Padding(
-      //                 padding: const EdgeInsets.all(12.0),
-      //                 child: InkResponse(
-      //                   child: Text(_locale.languageCode.toUpperCase()),
-      //                   onTap: () {
-      //                     final newLocale = S.isEn(_locale) ? S.ru : S.en;
-      //                     setState(() => _locale = newLocale);
-      //                   },
-      //                 ),
-      //               ),
-      //             ],
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
-
-      home: const Navigator(
-        pages: [
+      //Todo upgrade to navigator 2.0
+      home: Navigator(
+        pages: const [
           MaterialPage(
+            key: ValueKey('TodoListPage'),
             child: TodoListScreen(),
-          ),
+          )
         ],
+        onPopPage: (route, result) => route.didPop(result),
       ),
     );
   }

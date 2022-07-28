@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/data/entities/todo.dart';
+import 'package:todo_app/domain/enums/importance.dart';
 
 class CreateTaskDataProvider with ChangeNotifier{
   //Variables
   bool _showDate = false;
   Importance _selectedImportance = Importance.basic;
   DateTime _selectedDate = DateTime.now();
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   //Getters
   bool get showData => _showDate;

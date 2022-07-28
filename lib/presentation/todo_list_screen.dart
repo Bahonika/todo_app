@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/components/wrapCard.dart';
-import 'package:todo_app/data/entities/todo.dart';
+import 'package:todo_app/domain/enums/importance.dart';
+import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/presentation/components/mySliverPersistentHeader.dart';
+import 'package:todo_app/presentation/components/wrapCard.dart';
+import 'package:todo_app/presentation/providers/todos_provider.dart';
+import 'package:todo_app/presentation/todo_create_screen.dart';
 import 'package:todo_app/s.dart';
 import 'package:todo_app/theme.dart';
-import 'package:todo_app/todo_create_screen.dart';
-import 'package:todo_app/providers/todos_provider.dart';
 
 class TodoListScreen extends StatefulWidget {
   const TodoListScreen({Key? key}) : super(key: key);
@@ -15,81 +17,90 @@ class TodoListScreen extends StatefulWidget {
   State<TodoListScreen> createState() => _TodoListScreenState();
 }
 
-class _TodoListScreenState extends State<TodoListScreen> {
+class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProviderStateMixin{
+
   @override
   Widget build(BuildContext context) {
-    S.ru;
-    return Scaffold(
-      body: const CustomScrollView(
-        slivers: [
-          MySliverAppBar(),
-          SliverTodoList(),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => TodoCreateScreen()));
-        },
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
-        child: const Icon(
-          Icons.add,
+    context.read<TodosProvider>().getTodos();
+    return SafeArea(
+      child: Scaffold(
+        body: const CustomScrollView(
+          slivers: [
+            MySliverAppBar(),
+            SliverTodoList(),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TodoCreateScreen(),
+              ),
+            );
+          },
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          //todo capsule all icons
+          child: const Icon(
+            Icons.add,
+          ),
         ),
       ),
     );
   }
 }
 
-class MySliverAppBar extends StatelessWidget {
+class MySliverAppBar extends StatefulWidget {
   const MySliverAppBar({Key? key}) : super(key: key);
 
   @override
+  State<MySliverAppBar> createState() => _MySliverAppBarState();
+}
+
+class _MySliverAppBarState extends State<MySliverAppBar> with SingleTickerProviderStateMixin{
+  @override
   Widget build(BuildContext context) {
-    return SliverAppBar(
+    return SliverPersistentHeader(
+      delegate: MySliverPersistentHeader(thisVsync: this),
       pinned: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      expandedHeight: 150,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              S.of(context).myTodos,
-              style: CustomTextTheme.title(context),
-            ),
-            Text(
-              "${S.of(context).done}5",
-              style: CustomTextTheme.subtitle(context),
-            ),
-          ],
-        ),
-      ),
+      // floating: true,
     );
   }
 }
 
 class SliverTodoList extends StatelessWidget {
   const SliverTodoList({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildListDelegate(
-        [
-          WrapCard(
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              controller: ScrollController(),
-              itemBuilder: (BuildContext context, index) {
-                return TodoWidget(
-                    todo: context.watch<TodosProvider>().todos[index]);
-                // return Container(height: 120,);
-              },
-              itemCount: context.watch<TodosProvider>().todos.length,
-            ),
-          ),
-        ],
+    List<Todo> todos = context.watch<TodosProvider>().todos;
+    return SliverToBoxAdapter(
+      child: WrapCard(
+        child: ListView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          controller: ScrollController(),
+          itemBuilder: (BuildContext context, index) {
+            if (index == todos.length) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ListTile(
+                  leading: const SizedBox(),
+                  title: TextFormField(
+                    decoration: InputDecoration(
+                      hintText: S.of(context).newTodo,
+                      hintStyle: CustomTextTheme.importanceSubtitle(context),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              return TodoWidget(todo: todos[index]);
+            }
+          },
+          itemCount: todos.length + 1,
+        ),
       ),
     );
   }
@@ -125,7 +136,7 @@ class _TodoWidgetState extends State<TodoWidget> {
           ? DismissDirection.endToStart
           : DismissDirection.horizontal,
       onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart){
+        if (direction == DismissDirection.endToStart) {
           context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
         }
       },
@@ -146,11 +157,25 @@ class _TodoWidgetState extends State<TodoWidget> {
               : CustomTextTheme.todoText(context),
         ),
         subtitle: (widget.todo.deadline != null)
-            ? Text(DateFormat.yMMMMd().format(widget.todo.deadline!))
+            ? Text(
+                DateFormat.yMMMMd(S.ru.toString())
+                    .format(widget.todo.deadline!),
+                style: CustomTextTheme.importanceSubtitle(context),
+              )
             : null,
+        //todo capsule all icons
         trailing: const Icon(Icons.info_outlined),
       ),
     );
+  }
+}
+
+class DismissibleChild extends StatelessWidget {
+  const DismissibleChild({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
 
@@ -168,7 +193,11 @@ class DismissibleBackground extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: const [
-          Icon(Icons.done, color: Colors.white),
+          //todo capsule all icons
+          Icon(
+            Icons.done,
+            color: Colors.white,
+          ),
         ],
       ),
     );
@@ -189,7 +218,11 @@ class DismissibleSecondaryBackground extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: const [
-          Icon(Icons.delete, color: Colors.white),
+          //todo capsule all icons
+          Icon(
+            Icons.delete,
+            color: Colors.white,
+          ),
         ],
       ),
     );
