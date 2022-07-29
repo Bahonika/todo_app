@@ -5,6 +5,8 @@ import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/mySliverPersistentHeader.dart';
 import 'package:todo_app/presentation/components/wrapCard.dart';
+import 'package:todo_app/presentation/navigation/navigation_controller.dart';
+import 'package:todo_app/presentation/navigation/routes.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/todo_create_screen.dart';
 import 'package:todo_app/s.dart';
@@ -32,12 +34,15 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const TodoCreateScreen(),
-              ),
-            );
+            context
+                .read<NavigationController>()
+                .navigateTo(Routes.createTodo);
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => const TodoCreateScreen(),
+            //   ),
+            // );
           },
           backgroundColor: Theme.of(context).colorScheme.tertiary,
           //todo capsule all icons
@@ -82,19 +87,7 @@ class SliverTodoList extends StatelessWidget {
           controller: ScrollController(),
           itemBuilder: (BuildContext context, index) {
             if (index == todos.length) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: ListTile(
-                  leading: const SizedBox(),
-                  title: TextFormField(
-                    decoration: InputDecoration(
-                      hintText: S.of(context).newTodo,
-                      hintStyle: CustomTextTheme.importanceSubtitle(context),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              );
+              return const TextFieldTile(); // last tile with text field
             } else {
               return TodoWidget(todo: todos[index]);
             }
@@ -105,6 +98,28 @@ class SliverTodoList extends StatelessWidget {
     );
   }
 }
+
+class TextFieldTile extends StatelessWidget {
+  const TextFieldTile({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: ListTile(
+        leading: const SizedBox(),
+        title: TextFormField(
+          decoration: InputDecoration(
+            hintText: S.of(context).newTodo,
+            hintStyle: CustomTextTheme.importanceSubtitle(context),
+            border: InputBorder.none,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class TodoWidget extends StatefulWidget {
   final Todo todo;
@@ -130,41 +145,44 @@ class _TodoWidgetState extends State<TodoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: Key(widget.todo.uuid.toString()),
-      direction: widget.todo.done // if already done - cant swipe to right
-          ? DismissDirection.endToStart
-          : DismissDirection.horizontal,
-      onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart) {
-          context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
-        }
-      },
-      background: const DismissibleBackground(),
-      secondaryBackground: const DismissibleSecondaryBackground(),
-      child: ListTile(
-        leading: Checkbox(
-          value: widget.todo.done,
-          activeColor: Theme.of(context).colorScheme.primaryContainer,
-          onChanged: (bool? value) {},
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Dismissible(
+        key: Key(widget.todo.uuid.toString()),
+        direction: widget.todo.done // if already done - cant swipe to right
+            ? DismissDirection.endToStart
+            : DismissDirection.horizontal,
+        onDismissed: (direction) {
+          if (direction == DismissDirection.endToStart) {
+            context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
+          }
+        },
+        background: const DismissibleBackground(),
+        secondaryBackground: const DismissibleSecondaryBackground(),
+        child: ListTile(
+          leading: Checkbox(
+            value: widget.todo.done,
+            activeColor: Theme.of(context).colorScheme.primaryContainer,
+            onChanged: (bool? value) {},
+          ),
+          title: Text(
+            textPrefix + widget.todo.text,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: widget.todo.done
+                ? CustomTextTheme.todoTextDone(context)
+                : CustomTextTheme.todoText(context),
+          ),
+          subtitle: (widget.todo.deadline != null)
+              ? Text(
+                  DateFormat.yMMMMd(S.ru.toString())
+                      .format(widget.todo.deadline!),
+                  style: CustomTextTheme.importanceSubtitle(context),
+                )
+              : null,
+          //todo capsule all icons
+          trailing: const Icon(Icons.info_outlined),
         ),
-        title: Text(
-          textPrefix + widget.todo.text,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: widget.todo.done
-              ? CustomTextTheme.todoTextDone(context)
-              : CustomTextTheme.todoText(context),
-        ),
-        subtitle: (widget.todo.deadline != null)
-            ? Text(
-                DateFormat.yMMMMd(S.ru.toString())
-                    .format(widget.todo.deadline!),
-                style: CustomTextTheme.importanceSubtitle(context),
-              )
-            : null,
-        //todo capsule all icons
-        trailing: const Icon(Icons.info_outlined),
       ),
     );
   }
@@ -187,7 +205,6 @@ class DismissibleBackground extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
         color: Theme.of(context).colorScheme.primaryContainer,
       ),
       child: Row(
@@ -212,7 +229,6 @@ class DismissibleSecondaryBackground extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
         color: Theme.of(context).colorScheme.errorContainer,
       ),
       child: Row(

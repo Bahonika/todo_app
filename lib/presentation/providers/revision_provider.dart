@@ -10,5 +10,4 @@ class RevisionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-
 }

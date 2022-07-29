@@ -4,13 +4,16 @@ import 'package:dio/dio.dart';
 import 'package:todo_app/data/api/model/api_todo.dart';
 import 'package:todo_app/data/mappers/todo_mapper.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/presentation/providers/revision_provider.dart';
 
 class RemoteService {
   static const siteRoot = "https://beta.mrdekk.ru/todobackend";
-  static int revision = 31;
+  static int revision = 0;
 
-  getRevision(){
+  static RevisionProvider revisionProvider = RevisionProvider();
 
+  getRevision() {
+    revision = revisionProvider.revision;
   }
 
   final Dio dio = Dio(
@@ -30,19 +33,29 @@ class RemoteService {
     for (int i = 0; i < response.data["list"].length; i++) {
       todos.add(ApiTodo.fromApi(response.data["list"][i]));
     }
+    // final List<ApiTodo> todos =
+    //     response.data["list"].map((item) => ApiTodo.fromApi(item)).toList<ApiTodo>();
+
+    dio.options.headers
+        .addAll({"X-Last-Known-Revision": response.data["revision"]});
+    revisionProvider.revision = response.data["revision"];
     return todos;
   }
 
   Future<Map<String, dynamic>> delete({required String uuid}) async {
     final response = await dio.delete("$siteRoot/list/$uuid");
+    revision = response.data["revision"];
+    getTodos(); // todo: fix
     return response.data;
   }
 
   Future<Map<String, dynamic>> create({required Todo todo}) async {
     final response = await dio.post(
       "$siteRoot/list",
-      data: jsonEncode(TodoMapper.toApi(todo)),
+      data: TodoMapper.toApi(todo),
     );
+    revisionProvider.revision = response.data["revision"];
+
     return response.data;
   }
 }

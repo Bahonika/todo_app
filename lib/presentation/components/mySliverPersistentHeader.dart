@@ -15,6 +15,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
+    var todosProvider = context.read<TodosProvider>();
     return Card(
       color: Theme.of(context).scaffoldBackgroundColor,
       margin: EdgeInsets.zero,
@@ -28,8 +29,6 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
         ),
         child: Stack(
           fit: StackFit.expand,
-          // mainAxisAlignment: MainAxisAlignment.end,
-          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Positioned(
               bottom: bottomTitlePadding(shrinkOffset),
@@ -52,7 +51,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
               child: Opacity(
                 opacity: opacity(shrinkOffset),
                 child: Text(
-                  "${S.of(context).done}${context.read<TodosProvider>().todos.where((element) => element.done).length}",
+                  "${S.of(context).done}${todosProvider.completedTodos.length}",
                   style: CustomTextTheme.subtitle(context),
                 ),
               ),
@@ -79,8 +78,10 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     double difference = to - from;
 
     double result = from + difference * ratio;
-    double clampedResult = result.clamp(min(from, to),
-        max(from, to)); // to avoid getting out of the range of acceptable values
+    double clampedResult = result.clamp(
+        min(from, to),
+        max(from,
+            to)); // to avoid getting out of the range of acceptable values
     return clampedResult;
   }
 

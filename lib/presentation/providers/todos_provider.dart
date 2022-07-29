@@ -14,10 +14,13 @@ class TodosProvider with ChangeNotifier {
 
   List<Todo> get todos => _todos;
 
+  List<Todo> get completedTodos =>
+      _todos.where((element) => element.done).toList();
+
   Uuid uuid = const Uuid();
   ApiUtil apiUtil = ApiUtil(remoteService);
 
-  void getTodos() async {
+  Future<void> getTodos() async {
     _todos = await apiUtil.getTodos();
     notifyListeners();
   }
@@ -34,14 +37,15 @@ class TodosProvider with ChangeNotifier {
       importance: importance,
       deadline: deadline,
     );
+    _todos.add(tempTodo);
     await apiUtil.createTodo(tempTodo);
     getTodos();
-
     notifyListeners();
   }
 
   void deleteTodo(String uuid) {
-    _todos.removeWhere((element) => element.uuid == uuid);
+    _todos.removeWhere((element) =>
+        element.uuid == uuid); // if remove will throw dismissible bug
     apiUtil.deleteTodo(uuid);
     notifyListeners();
   }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -19,18 +18,12 @@ class TodoCreateScreen extends StatefulWidget {
 
 class _TodoCreateScreenState extends State<TodoCreateScreen> {
   createTask() {
+    var todoCreate =
+        Provider.of<CreateTaskDataProvider>(context, listen: false);
     context.read<TodosProvider>().createTodo(
-          importance:
-              Provider.of<CreateTaskDataProvider>(context, listen: false)
-                  .selectedImportance,
-          text: Provider.of<CreateTaskDataProvider>(context, listen: false)
-              .controller
-              .text,
-          deadline: (Provider.of<CreateTaskDataProvider>(context, listen: false)
-                  .showData)
-              ? Provider.of<CreateTaskDataProvider>(context, listen: false)
-                  .selectedDate
-              : null,
+          importance: todoCreate.selectedImportance,
+          text: todoCreate.controller.text,
+          deadline: todoCreate.showData ? todoCreate.selectedDate : null,
         );
     context.read<CreateTaskDataProvider>().eraseData();
   }
@@ -109,7 +102,6 @@ class TextFieldTile extends StatelessWidget {
   }
 }
 
-
 class ImportanceTile extends StatefulWidget {
   const ImportanceTile({Key? key}) : super(key: key);
 
@@ -138,7 +130,6 @@ class _ImportanceTileState extends State<ImportanceTile> {
     ];
   }
 
-
   //todo: not the best way I think
   @override
   void didChangeDependencies() {
@@ -156,15 +147,11 @@ class _ImportanceTileState extends State<ImportanceTile> {
           items: items,
           isDense: true,
           isExpanded: false,
-          value: context
-              .watch<CreateTaskDataProvider>()
-              .selectedImportance,
+          value: context.watch<CreateTaskDataProvider>().selectedImportance,
           style: CustomTextTheme.importanceSubtitle(context),
           icon: const SizedBox(),
           onChanged: (value) {
-              context
-                  .read<CreateTaskDataProvider>()
-                  .setImportance(value!);
+            context.read<CreateTaskDataProvider>().setImportance(value!);
           },
         ),
       ),
@@ -172,16 +159,15 @@ class _ImportanceTileState extends State<ImportanceTile> {
   }
 }
 
-
 class DateTile extends StatelessWidget {
   const DateTile({Key? key}) : super(key: key);
 
-  selectDate(BuildContext context) async {
+  Future<void> selectDate(BuildContext context) async {
     String hintText =
-    Provider.of<CreateTaskDataProvider>(context, listen: false)
-        .selectedDate
-        .year
-        .toString();
+        Provider.of<CreateTaskDataProvider>(context, listen: false)
+            .selectedDate
+            .year
+            .toString();
     DateTime initialDate =
         Provider.of<CreateTaskDataProvider>(context, listen: false)
             .selectedDate;
@@ -195,13 +181,10 @@ class DateTile extends StatelessWidget {
       helpText: hintText,
     );
     if (picked != null) {
+      //todo: fix maybe
       context.read<CreateTaskDataProvider>().setDatetime(picked);
     }
   }
-
-  // setPickedData(DateTime picked) {
-  //   context.read<CreateTaskDataProvider>().setDatetime(picked);
-  // }
 
   @override
   Widget build(BuildContext context) {
