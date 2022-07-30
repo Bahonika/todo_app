@@ -56,4 +56,15 @@ class RemoteService {
 
     return response.data;
   }
+
+  Future<Map<String, dynamic>> update(
+      {required String uuid, required Todo todo}) async {
+    final response = await dio.put(
+      "$siteRoot/list/$uuid",
+      data: TodoMapper.toApi(todo),
+    );
+    revision = response.data["revision"];
+    getTodos(); // todo: fix
+    return response.data;
+  }
 }

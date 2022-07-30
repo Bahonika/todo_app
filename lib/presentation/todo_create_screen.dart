@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
+import 'package:todo_app/presentation/components/theme.dart';
 import 'package:todo_app/presentation/components/wrapCard.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/s.dart';
-import 'package:todo_app/theme.dart';
+import 'package:todo_app/presentation/components/s.dart';
 
 class TodoCreateScreen extends StatefulWidget {
   const TodoCreateScreen({Key? key}) : super(key: key);

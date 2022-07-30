@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/s.dart';
+import 'package:todo_app/presentation/components/s.dart';
 
 class UnknownPage extends StatelessWidget {
   const UnknownPage({Key? key}) : super(key: key);

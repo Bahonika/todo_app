@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:todo_app/data/api/model/api_todo.dart';
 import 'package:todo_app/domain/models/todo.dart';
 
@@ -11,10 +9,13 @@ class TodoMapper {
       text: todo.text,
       importance: todo.importance,
       deadline: todo.deadline,
+      changedAt: todo.changedAt,
+      lastUpdatedBy: todo.lastUpdatedBy,
+      createdAt: todo.createdAt,
     );
   }
 
-  static Map<String, dynamic> toApi(Todo todo){
+  static Map<String, dynamic> toApi(Todo todo) {
     Map<String, dynamic> map = {};
     map["id"] = todo.uuid;
     map["done"] = todo.done;
@@ -32,6 +33,6 @@ class TodoMapper {
     map["changed_at"] = 1;
     map["last_updated_by"] = "123";
 
-    return {"element" : map};
+    return {"element": map};
   }
 }

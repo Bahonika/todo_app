@@ -3,12 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
-import 'package:todo_app/presentation/components/mySliverPersistentHeader.dart';
+import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
+import 'package:todo_app/presentation/components/theme.dart';
 import 'package:todo_app/presentation/components/wrapCard.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/s.dart';
-import 'package:todo_app/theme.dart';
+import 'package:todo_app/presentation/components/s.dart';
 
 class TodoListScreen extends StatefulWidget {
   const TodoListScreen({Key? key}) : super(key: key);
@@ -150,6 +150,8 @@ class _TodoWidgetState extends State<TodoWidget> {
         onDismissed: (direction) {
           if (direction == DismissDirection.endToStart) {
             context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
+          } else {
+            context.read<TodosProvider>().setAsDone(widget.todo);
           }
         },
         background: const DismissibleBackground(),
@@ -158,7 +160,9 @@ class _TodoWidgetState extends State<TodoWidget> {
           leading: Checkbox(
             value: widget.todo.done,
             activeColor: Theme.of(context).colorScheme.primaryContainer,
-            onChanged: (bool? value) {},
+            onChanged: (bool? value) {
+
+            },
           ),
           title: Text(
             textPrefix + widget.todo.text,
@@ -205,7 +209,6 @@ class DismissibleBackground extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: const [
-          //todo capsule all icons
           Icon(
             Icons.done,
             color: Colors.white,
@@ -229,7 +232,6 @@ class DismissibleSecondaryBackground extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: const [
-          //todo capsule all icons
           Icon(
             Icons.delete,
             color: Colors.white,

@@ -6,6 +6,9 @@ class ApiTodo {
   final String text;
   final Importance importance;
   final DateTime? deadline;
+  final DateTime createdAt;
+  final DateTime changedAt;
+  final String lastUpdatedBy;
 
   static Importance importanceFromString(String stringImportance) {
     switch (stringImportance) {
@@ -23,6 +26,9 @@ class ApiTodo {
         done = map["done"],
         text = map["text"],
         importance = importanceFromString(map["importance"]),
+        createdAt = DateTime.fromMillisecondsSinceEpoch(map["created_at"]),
+        changedAt = DateTime.fromMillisecondsSinceEpoch(map["created_at"]),
+        lastUpdatedBy = map["last_updated_by"],
         deadline = map["deadline"] != null
             ? DateTime.fromMillisecondsSinceEpoch(map["deadline"])
             : null;

@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_app/presentation/components/theme.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/s.dart';
-import 'package:todo_app/theme.dart';
+import 'package:todo_app/presentation/components/s.dart';
 
 class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   final TickerProvider thisVsync;

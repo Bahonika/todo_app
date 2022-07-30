@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/data/api/api_util.dart';
-import 'package:todo_app/data/api/services/local.dart';
-import 'package:todo_app/data/api/services/remote.dart';
+// import 'package:todo_app/data/api/services/local.dart';
+// import 'package:todo_app/data/api/services/remote.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/internal/dependencies/api_module.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/enums/importance.dart';
 
 class TodosProvider with ChangeNotifier {
   List<Todo> _todos = [];
-  static RemoteService remoteService = RemoteService();
-  static LocalService localService = LocalService(); //isn't in use yet
+  // static RemoteService remoteService = RemoteService();
+  // static LocalService localService = LocalService();
 
   List<Todo> get todos => _todos;
 
@@ -18,7 +19,7 @@ class TodosProvider with ChangeNotifier {
       _todos.where((element) => element.done).toList();
 
   Uuid uuid = const Uuid();
-  ApiUtil apiUtil = ApiUtil(remoteService);
+  ApiUtil apiUtil = ApiModule.apiUtil();
 
   Future<void> getTodos() async {
     _todos = await apiUtil.getTodos();
@@ -36,6 +37,9 @@ class TodosProvider with ChangeNotifier {
       text: text,
       importance: importance,
       deadline: deadline,
+      lastUpdatedBy: '123',
+      changedAt: DateTime.now(),
+      createdAt: DateTime.now(),
     );
     _todos.add(tempTodo);
     await apiUtil.createTodo(tempTodo);
@@ -51,10 +55,11 @@ class TodosProvider with ChangeNotifier {
   }
 
   //put same entity with done = true
-  setAsDone(String uuid) {
-    Todo todo = _todos.firstWhere((element) => element.uuid == uuid);
-    //todo: put this, maybe by updateTodo function
+  setAsDone(Todo todo) {
+    apiUtil.setDone(todo);
   }
 
-  void updateTodo(String uuid) {}
+  void updateTodo(Todo todo) {
+    apiUtil.updateTodo(todo);
+  }
 }
