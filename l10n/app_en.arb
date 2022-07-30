@@ -1,0 +1,15 @@
+{
+    "myTodos": "My todos",
+    "done": "Done - ",
+    "save": "Save",
+    "needToDo": "Need to do...",
+    "importance": "Importance",
+    "basic": "None",
+    "low": "Low",
+    "important": "Important",
+    "doneBy": "Done by",
+    "delete": "Delete",
+    "datePickerDone": "DONE",
+    "newTodo": "New",
+    "unknownPage": "Unknown page"
+}
