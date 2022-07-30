@@ -10,5 +10,6 @@
     "doneBy": "Done by",
     "delete": "Delete",
     "datePickerDone": "DONE",
-    "newTodo": "New"
+    "newTodo": "New",
+    "unknownPage": "Unknown page"
 }

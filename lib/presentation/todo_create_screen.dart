@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
-import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/wrapCard.dart';
+import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/s.dart';
@@ -40,14 +40,14 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             color: Theme.of(context).colorScheme.onPrimary,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            context.read<NavigationController>().pop();
           },
         ),
         actions: [
           TextButton(
             onPressed: () {
               createTask();
-              Navigator.pop(context);
+              context.read<NavigationController>().pop();
             },
             child: Text(
               S.of(context).save,

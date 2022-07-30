@@ -6,9 +6,7 @@ import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/mySliverPersistentHeader.dart';
 import 'package:todo_app/presentation/components/wrapCard.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/navigation/routes.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/presentation/todo_create_screen.dart';
 import 'package:todo_app/s.dart';
 import 'package:todo_app/theme.dart';
 
@@ -19,11 +17,16 @@ class TodoListScreen extends StatefulWidget {
   State<TodoListScreen> createState() => _TodoListScreenState();
 }
 
-class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProviderStateMixin{
+class _TodoListScreenState extends State<TodoListScreen>
+    with SingleTickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+    context.read<TodosProvider>().getTodos();
+  }
 
   @override
   Widget build(BuildContext context) {
-    context.read<TodosProvider>().getTodos();
     return SafeArea(
       child: Scaffold(
         body: const CustomScrollView(
@@ -34,15 +37,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context
-                .read<NavigationController>()
-                .navigateTo(Routes.createTodo);
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => const TodoCreateScreen(),
-            //   ),
-            // );
+            context.read<NavigationController>().openCreateTodo();
           },
           backgroundColor: Theme.of(context).colorScheme.tertiary,
           //todo capsule all icons
@@ -62,7 +57,8 @@ class MySliverAppBar extends StatefulWidget {
   State<MySliverAppBar> createState() => _MySliverAppBarState();
 }
 
-class _MySliverAppBarState extends State<MySliverAppBar> with SingleTickerProviderStateMixin{
+class _MySliverAppBarState extends State<MySliverAppBar>
+    with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return SliverPersistentHeader(
@@ -119,7 +115,6 @@ class TextFieldTile extends StatelessWidget {
     );
   }
 }
-
 
 class TodoWidget extends StatefulWidget {
   final Todo todo;

@@ -33,11 +33,9 @@ class RemoteService {
     for (int i = 0; i < response.data["list"].length; i++) {
       todos.add(ApiTodo.fromApi(response.data["list"][i]));
     }
-    // final List<ApiTodo> todos =
-    //     response.data["list"].map((item) => ApiTodo.fromApi(item)).toList<ApiTodo>();
-
-    dio.options.headers
-        .addAll({"X-Last-Known-Revision": response.data["revision"]});
+    dio.options.headers.addAll(
+      {"X-Last-Known-Revision": response.data["revision"]},
+    );
     revisionProvider.revision = response.data["revision"];
     return todos;
   }

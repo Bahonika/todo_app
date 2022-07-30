@@ -17,7 +17,7 @@ import 'package:todo_app/s.dart';
 import 'package:todo_app/theme.dart';
 import 'presentation/providers/create_task_data_provider.dart';
 
-void main()  {
+void main() {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => TodosProvider()),
@@ -39,11 +39,10 @@ class _MyAppState extends State<MyApp> {
   // wont control manually
   // todo: will set the same as in system settings
   var _isDark = false;
-  var _locale = S.en;
+  var _locale = S.ru;
 
   boxer() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
-
     Hive.init(appDocDir.path);
     await Hive.openBox("hello");
     var box = Hive.box("hello");
@@ -54,9 +53,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-
     final navigationController = NavigationController();
-    
+
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Theme.of(context).scaffoldBackgroundColor,
         systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
@@ -77,32 +75,14 @@ class _MyAppState extends State<MyApp> {
         ],
         supportedLocales: S.supportedLocales,
         locale: _locale,
+
         //Todo upgrade to navigator 2.0
-
-        onUnknownRoute: (settings) => MaterialPageRoute(builder: (context) => Container()),
-
-        initialRoute: Routes.todoList,
-        onGenerateRoute: (settings) {
-          switch (settings.name){
-            case Routes.todoList:
-              return MaterialPageRoute(
-                  builder: (_) => const TodoListScreen());
-            case Routes.createTodo:
-              return MaterialPageRoute(
-                  builder: (_) => const TodoCreateScreen());
-
-          }
-        },
+        onUnknownRoute: (settings) =>
+            MaterialPageRoute(builder: (context) => Container()),
+        initialRoute: navigationController.initialRoute,
+        onGenerateRoute: (settings) =>
+            navigationController.onGenerateRoute(settings),
         navigatorKey: navigationController.key,
-        // home: Navigator(
-        //   pages: const [
-        //     MaterialPage(
-        //       key: ValueKey('TodoListPage'),
-        //       child: TodoListScreen(),
-        //     )
-        //   ],
-        //   onPopPage: (route, result) => route.didPop(result),
-        // ),
       ),
     );
   }

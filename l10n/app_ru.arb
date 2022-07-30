@@ -10,5 +10,7 @@
     "doneBy": "Сделать до",
     "delete": "Удалить",
     "datePickerDone": "ГОТОВО",
-    "newTodo": "Новое"
+    "newTodo": "Новое",
+    "unknownPage": "Неизвестная страница"
+
 }

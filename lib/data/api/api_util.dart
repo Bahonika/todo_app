@@ -11,9 +11,6 @@ class ApiUtil {
     final result = await remoteService.getTodos();
     final List<Todo> todos =
         result.map((item) => TodoMapper.fromApi(item)).toList();
-    // for (int i = 0; i <result.length; i++){
-    //   todos.add(TodoMapper.fromApi(result[i]));
-    // }
     return todos;
   }
 

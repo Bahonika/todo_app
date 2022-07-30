@@ -1,5 +1,4 @@
 import 'package:todo_app/domain/enums/importance.dart';
-import 'package:todo_app/domain/models/todo.dart';
 
 class ApiTodo {
   final String uuid;
