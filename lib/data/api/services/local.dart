@@ -5,8 +5,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 
-class LocalService{
+class LocalService {
   static LocalService? _localService;
+
   static LocalService localService() {
     _localService ??= LocalService();
     return _localService!;
@@ -24,28 +25,31 @@ class LocalService{
     _todos = await Hive.openBox<Todo>("todos");
   }
 
-  dispose(){
+  dispose() {
     Hive.close();
   }
 
-  void initTodoBox()  {
+  void initTodoBox() {
     _todos = Hive.box<Todo>("todos");
   }
 
-  getTodos(){
+  getTodos() {
     return _todos.get("todos");
   }
 
-  create({required Todo todo}){
+  create({required Todo todo}) {
     _todos.add(todo);
   }
 
-  delete({required String uuid}){
-    _todos.delete(_todos.keys.firstWhere((element) => _todos.toMap()[element]!.uuid == uuid));
+  delete({required String uuid}) {
+    _todos.delete(_todos.keys
+        .firstWhere((element) => _todos.toMap()[element]!.uuid == uuid));
   }
 
-  update({required Todo todo}){
-    _todos.put(_todos.keys.firstWhere((element) => _todos.toMap()[element]!.uuid == todo.uuid), todo);
+  update({required Todo todo}) {
+    _todos.put(
+        _todos.keys.firstWhere(
+            (element) => _todos.toMap()[element]!.uuid == todo.uuid),
+        todo);
   }
-
 }

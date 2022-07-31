@@ -45,4 +45,8 @@ class ApiUtil {
   void setDone(Todo todo) async {
     updateTodo(todo.copyWith(done: true));
   }
+
+  void setUndone(Todo todo) async {
+    updateTodo(todo.copyWith(done: false));
+  }
 }

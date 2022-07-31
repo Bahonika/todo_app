@@ -138,9 +138,30 @@ class _TodoWidgetState extends State<TodoWidget> {
     super.initState();
   }
 
+  delete() async {
+    context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
+  }
+
+  Future<bool> setAsDone() async {
+    context.read<TodosProvider>().setAsDone(widget.todo);
+    return false;
+  }
+
+  bool setAsUndone() {
+    context.read<TodosProvider>().setAsUndone(widget.todo);
+    return true;
+  }
+
+  Future<bool> confirmDismiss(direction) async {
+    if (direction == DismissDirection.startToEnd) {
+      return setAsDone();
+    } else {
+      return true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    print(widget.todo.done);
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Dismissible(
@@ -148,14 +169,10 @@ class _TodoWidgetState extends State<TodoWidget> {
         direction: widget.todo.done // if already done - cant swipe to right
             ? DismissDirection.endToStart
             : DismissDirection.horizontal,
-        confirmDismiss: (direction) async {
-          return direction == DismissDirection.endToStart;
-        },
+        confirmDismiss: (direction) => confirmDismiss(direction),
         onDismissed: (direction) {
           if (direction == DismissDirection.endToStart) {
-            context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
-          } else {
-            context.read<TodosProvider>().setAsDone(widget.todo);
+            delete();
           }
         },
         background: const DismissibleBackground(),
@@ -164,7 +181,9 @@ class _TodoWidgetState extends State<TodoWidget> {
           leading: Checkbox(
             value: widget.todo.done,
             activeColor: Theme.of(context).colorScheme.primaryContainer,
-            onChanged: (bool? value) {},
+            onChanged: (bool? value) {
+              widget.todo.done ? setAsUndone() : setAsDone();
+            },
           ),
           title: Text(
             textPrefix + widget.todo.text,

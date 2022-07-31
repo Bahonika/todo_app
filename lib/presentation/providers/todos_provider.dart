@@ -52,11 +52,21 @@ class TodosProvider with ChangeNotifier {
   }
 
   //put same entity with done = true
-  setAsDone(Todo todo) {
+  void setAsDone(Todo todo) {
     apiUtil.setDone(todo);
+    getTodos();
+    notifyListeners();
+  }
+
+  void setAsUndone(Todo todo){
+    apiUtil.setUndone(todo);
+    getTodos();
+    notifyListeners();
   }
 
   void updateTodo(Todo todo) {
     apiUtil.updateTodo(todo);
+    getTodos();
+    notifyListeners();
   }
 }
