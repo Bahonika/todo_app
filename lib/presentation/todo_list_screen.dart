@@ -140,6 +140,7 @@ class _TodoWidgetState extends State<TodoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.todo.done);
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Dismissible(
@@ -147,6 +148,9 @@ class _TodoWidgetState extends State<TodoWidget> {
         direction: widget.todo.done // if already done - cant swipe to right
             ? DismissDirection.endToStart
             : DismissDirection.horizontal,
+        confirmDismiss: (direction) async {
+          return direction == DismissDirection.endToStart;
+        },
         onDismissed: (direction) {
           if (direction == DismissDirection.endToStart) {
             context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
@@ -160,9 +164,7 @@ class _TodoWidgetState extends State<TodoWidget> {
           leading: Checkbox(
             value: widget.todo.done,
             activeColor: Theme.of(context).colorScheme.primaryContainer,
-            onChanged: (bool? value) {
-
-            },
+            onChanged: (bool? value) {},
           ),
           title: Text(
             textPrefix + widget.todo.text,

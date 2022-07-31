@@ -31,6 +31,10 @@ class NavigationController {
     navigateTo(Routes.todoList);
   }
 
+  toUnknownPage(){
+    navigateTo(Routes.unknown);
+  }
+
   onGenerateRoute(settings) {
     switch (settings.name) {
       case Routes.todoList:

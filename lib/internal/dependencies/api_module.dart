@@ -6,7 +6,7 @@ class ApiModule {
   static ApiUtil? _apiUtil;
 
   static ApiUtil apiUtil() {
-    _apiUtil ??= ApiUtil(RemoteService(), LocalService());
+    _apiUtil ??= ApiUtil(RemoteService(), LocalService.localService());
     return _apiUtil!;
   }
 }

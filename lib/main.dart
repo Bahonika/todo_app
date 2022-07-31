@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/data/api/services/local.dart';
+import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/theme.dart';
 import 'package:todo_app/presentation/navigation/localozations_delegates.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
@@ -16,7 +20,7 @@ void main() async {
 
   //init hive storage
   LocalService localService = LocalService.localService();
-  await localService.init();
+  await localService.init().then((value) => print(localService.todos));
 
   runApp(
     MultiProvider(
@@ -46,6 +50,17 @@ class _MyAppState extends State<MyApp> {
   // late final Box todos;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    LocalService.localService().dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final navigationController = NavigationController();
 
@@ -55,29 +70,24 @@ class _MyAppState extends State<MyApp> {
         statusBarBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
         statusBarIconBrightness: Brightness.dark));
-    return
-      // ValueListenableBuilder(
-      // valueListenable: todos.listenable(),
-      // builder: (context, Box box, _) =>
-      Provider<NavigationController>.value(
-        value: navigationController,
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Todo App',
-          theme: CustomTheme.lightTheme,
-          localizationsDelegates: LocalizationsDelegates.delegates,
-          supportedLocales: S.supportedLocales,
-          locale: _locale,
 
-          //Todo upgrade to navigator 2.0
-          onUnknownRoute: (settings) =>
-              MaterialPageRoute(builder: (context) => Container()),
-          initialRoute: navigationController.initialRoute,
-          onGenerateRoute: (settings) =>
-              navigationController.onGenerateRoute(settings),
-          navigatorKey: navigationController.key,
-        ),
-      // ),
+    return Provider<NavigationController>.value(
+      value: navigationController,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Todo App',
+        theme: CustomTheme.lightTheme,
+        localizationsDelegates: LocalizationsDelegates.delegates,
+        supportedLocales: S.supportedLocales,
+        locale: _locale,
+
+        //Todo upgrade to navigator 2.0
+        onUnknownRoute: (settings) => navigationController.toUnknownPage(),
+        initialRoute: navigationController.initialRoute,
+        onGenerateRoute: (settings) =>
+            navigationController.onGenerateRoute(settings),
+        navigatorKey: navigationController.key,
+      ),
     );
   }
 }
