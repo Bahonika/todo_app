@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/presentation/components/theme.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/presentation/components/s.dart';
+import 'package:todo_app/presentation/localization/s.dart';
+
+import '../../domain/models/todo.dart';
 
 class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   final TickerProvider thisVsync;
@@ -15,53 +16,54 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    var todosProvider = context.read<TodosProvider>();
-    return Card(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      margin: EdgeInsets.zero,
-      elevation: elevation(shrinkOffset),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: leftPadding(shrinkOffset),
+    return Consumer<List<Todo>>(
+      builder: (context, todos, _) => Card(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        margin: EdgeInsets.zero,
+        elevation: elevation(shrinkOffset),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
         ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned(
-              bottom: bottomTitlePadding(shrinkOffset),
-              child: Text(
-                S.of(context).myTodos,
-                style: CustomTextTheme.title(context).copyWith(
-                  fontSize: titleSize(
-                    shrinkOffset,
-                    context,
-                  ),
-                  height: titleHeight(
-                    shrinkOffset,
-                    context,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 18,
-              child: Opacity(
-                opacity: opacity(shrinkOffset),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: leftPadding(shrinkOffset),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                bottom: bottomTitlePadding(shrinkOffset),
                 child: Text(
-                  "${S.of(context).done}${todosProvider.completedTodos.length}",
-                  style: CustomTextTheme.subtitle(context),
+                  S.of(context).myTodos,
+                  style: CustomTextTheme.title(context).copyWith(
+                    fontSize: titleSize(
+                      shrinkOffset,
+                      context,
+                    ),
+                    height: titleHeight(
+                      shrinkOffset,
+                      context,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: bottomIconPadding(shrinkOffset),
-              right: rightPadding(shrinkOffset),
-              child: const Icon(Icons.remove_red_eye, size: 24),
-            ),
-          ],
+              Positioned(
+                bottom: 18,
+                child: Opacity(
+                  opacity: opacity(shrinkOffset),
+                  child: Text(
+                    "${S.of(context).done}${todos.where((element) => element.done).length}",
+                    style: CustomTextTheme.subtitle(context),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: bottomIconPadding(shrinkOffset),
+                right: rightPadding(shrinkOffset),
+                child: const Icon(Icons.remove_red_eye, size: 24),
+              ),
+            ],
+          ),
         ),
       ),
     );

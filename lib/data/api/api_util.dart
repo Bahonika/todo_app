@@ -1,6 +1,9 @@
+import 'package:logger/logger.dart';
 import 'package:todo_app/data/api/services/local.dart';
 import 'package:todo_app/data/api/services/remote.dart';
+import 'package:todo_app/data/mappers/todo_mapper.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/presentation/logger/logging.dart';
 
 class ApiUtil {
   final RemoteService remoteService;
@@ -8,38 +11,86 @@ class ApiUtil {
 
   ApiUtil(this.remoteService, this.localService);
 
-  Future<List<Todo>> getTodos() async {
-    var result;
-    result = localService.todos.values.toList();
+  Logger log = Logging.logger();
+
+  List<Todo> getFromLocal() {
+    List<Todo> todos = [];
     try {
-      result = await remoteService.getTodos();
-    } catch (e) {}
-    return result;
+      todos = localService.todos.values.toList();
+      log.i("Get from local");
+    } catch (e) {
+      log.e("Can't get from local");
+    }
+
+    return todos;
+  }
+
+  Future<List<Todo>> getFromRemote() async {
+    List<Todo> todos = [];
+    try {
+      final result = await remoteService.getTodos().then((value) {
+        log.i("Get from remote");
+        return value;
+      });
+      todos = result.map((item) => TodoMapper.fromApi(item)).toList();
+    } catch (e) {
+      log.w("Can't get from remote");
+    }
+    return todos;
+  }
+
+  Future<List<Todo>> getTodos() async {
+    List<Todo> localTodos = getFromLocal();
+    List<Todo> remoteTodos = await getFromRemote();
+    return localTodos;
   }
 
   Future<void> deleteTodo(String uuid) async {
-    var result;
-
-    localService.delete(uuid: uuid);
     try {
-      result = await remoteService.delete(uuid: uuid);
+      localService.delete(uuid: uuid);
+      log.i("Delete on local");
     } catch (e) {
-      print(e);
+      log.e("Can't delete on local");
+    }
+    try {
+      await remoteService
+          .delete(uuid: uuid)
+          .then((value) => log.i("Delete on remote"));
+    } catch (e) {
+      log.w("Can't delete on remote");
     }
   }
 
   Future<void> createTodo(Todo todo) async {
-    localService.create(todo: todo);
     try {
-      final result = await remoteService.create(todo: todo);
-    } catch (e) {}
+      localService.create(todo: todo);
+      log.i("Create on local");
+    } catch (e) {
+      log.e("Can't create on local");
+    }
+    try {
+      await remoteService
+          .create(todo: todo)
+          .then((value) => log.i("Create on remote"));
+    } catch (e) {
+      log.w("Can't create on remote");
+    }
   }
 
   Future<void> updateTodo(Todo todo) async {
-    localService.update(todo: todo);
     try {
-      final result = await remoteService.update(uuid: todo.uuid, todo: todo);
-    } catch (e){}
+      localService.update(todo: todo);
+      log.i("Update local");
+    } catch (e) {
+      log.e("Can't update local", e);
+    }
+    try {
+      await remoteService
+          .update(uuid: todo.uuid, todo: todo)
+          .then((value) => log.i("Update remote"));
+    } catch (e) {
+      log.w("Can't update remote");
+    }
   }
 
   void setDone(Todo todo) async {

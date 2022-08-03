@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:todo_app/data/api/model/api_todo.dart';
 import 'package:todo_app/data/mappers/todo_mapper.dart';
@@ -33,17 +31,17 @@ class RemoteService {
     for (int i = 0; i < response.data["list"].length; i++) {
       todos.add(ApiTodo.fromApi(response.data["list"][i]));
     }
+
     dio.options.headers.addAll(
       {"X-Last-Known-Revision": response.data["revision"]},
     );
-    revisionProvider.revision = response.data["revision"];
+    revisionProvider.revision = await response.data["revision"];
     return todos;
   }
 
   Future<Map<String, dynamic>> delete({required String uuid}) async {
     final response = await dio.delete("$siteRoot/list/$uuid");
     revision = response.data["revision"];
-    getTodos(); // todo: fix
     return response.data;
   }
 
@@ -63,8 +61,17 @@ class RemoteService {
       "$siteRoot/list/$uuid",
       data: TodoMapper.toApi(todo),
     );
-    revision = response.data["revision"];
-    getTodos(); // todo: fix
+    revisionProvider.revision = response.data["revision"];
+
+    return response.data;
+  }
+
+
+  Future<List<Todo>> patch({required List<Todo> todos}) async {
+
+    final response = await dio.patch("$siteRoot/list", data: TodoMapper.listToApi(todos));
+    revisionProvider.revision = response.data["revision"];
+
     return response.data;
   }
 }

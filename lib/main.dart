@@ -1,26 +1,22 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/data/api/services/local.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/theme.dart';
-import 'package:todo_app/presentation/navigation/localozations_delegates.dart';
+import 'package:todo_app/presentation/localization/localozations_delegates.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
 import 'package:todo_app/presentation/providers/revision_provider.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/presentation/components/s.dart';
+import 'package:todo_app/presentation/localization/s.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //init hive storage
   LocalService localService = LocalService.localService();
-  await localService.init().then((value) => print(localService.todos));
+  await localService.init();
 
   runApp(
     MultiProvider(
@@ -28,6 +24,11 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TodosProvider()),
         ChangeNotifierProvider(create: (_) => CreateTaskDataProvider()),
         ChangeNotifierProvider(create: (_) => RevisionProvider()),
+        StreamProvider<List<Todo>>(
+          create: (context) =>
+              Provider.of<TodosProvider>(context, listen: false).todoListStream,
+          initialData: const <Todo>[],
+        )
       ],
       child: const MyApp(),
     ),
@@ -47,17 +48,15 @@ class _MyAppState extends State<MyApp> {
   // final _isDark = false;
   final _locale = S.ru;
 
-  // late final Box todos;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   void dispose() {
     LocalService.localService().dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -76,12 +75,16 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Todo App',
+
+        // theme
         theme: CustomTheme.lightTheme,
+
+        //localization
         localizationsDelegates: LocalizationsDelegates.delegates,
         supportedLocales: S.supportedLocales,
         locale: _locale,
 
-        //Todo upgrade to navigator 2.0
+        // navigation
         onUnknownRoute: (settings) => navigationController.toUnknownPage(),
         initialRoute: navigationController.initialRoute,
         onGenerateRoute: (settings) =>

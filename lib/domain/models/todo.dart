@@ -47,7 +47,7 @@ class Todo extends HiveObject {
       done: done ?? this.done,
       text: text ?? this.text,
       importance: importance ?? this.importance,
-      deadline: deadline ?? this.deadline,
+      deadline: deadline,
       changedAt: changedAt ?? this.changedAt,
       lastUpdatedBy: lastUpdatedBy ?? this.lastUpdatedBy,
       createdAt: createdAt ?? this.createdAt,

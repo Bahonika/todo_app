@@ -5,10 +5,10 @@ import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
 import 'package:todo_app/presentation/components/theme.dart';
-import 'package:todo_app/presentation/components/wrapCard.dart';
+import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/presentation/components/s.dart';
+import 'package:todo_app/presentation/localization/s.dart';
 
 class TodoListScreen extends StatefulWidget {
   const TodoListScreen({Key? key}) : super(key: key);
@@ -41,8 +41,9 @@ class _TodoListScreenState extends State<TodoListScreen>
           },
           backgroundColor: Theme.of(context).colorScheme.tertiary,
           //todo capsule all icons
-          child: const Icon(
+          child: Icon(
             Icons.add,
+            color: Theme.of(context).colorScheme.surface,
           ),
         ),
       ),
@@ -74,21 +75,22 @@ class SliverTodoList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Todo> todos = context.watch<TodosProvider>().todos;
     return SliverToBoxAdapter(
-      child: WrapCard(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          controller: ScrollController(),
-          itemBuilder: (BuildContext context, index) {
-            if (index == todos.length) {
-              return const TextFieldTile(); // last tile with text field
-            } else {
-              return TodoWidget(todo: todos[index]);
-            }
-          },
-          itemCount: todos.length + 1,
+      child: Consumer<List<Todo>>(
+        builder: (context, todos, _) => WrapCard(
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            controller: ScrollController(),
+            itemBuilder: (BuildContext context, index) {
+              if (index == todos.length) {
+                return const TextFieldTile(); // last tile with text field
+              } else {
+                return TodoWidget(todo: todos[index]);
+              }
+            },
+            itemCount: todos.length + 1,
+          ),
         ),
       ),
     );
@@ -126,19 +128,12 @@ class TodoWidget extends StatefulWidget {
 }
 
 class _TodoWidgetState extends State<TodoWidget> {
-  String textPrefix = "";
-
   @override
   void initState() {
-    if (widget.todo.importance == Importance.important) {
-      textPrefix = "!! ";
-    } else if (widget.todo.importance == Importance.low) {
-      textPrefix = "- ";
-    }
     super.initState();
   }
 
-  delete() async {
+  void delete() {
     context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
   }
 
@@ -177,31 +172,60 @@ class _TodoWidgetState extends State<TodoWidget> {
         },
         background: const DismissibleBackground(),
         secondaryBackground: const DismissibleSecondaryBackground(),
-        child: ListTile(
-          leading: Checkbox(
-            value: widget.todo.done,
-            activeColor: Theme.of(context).colorScheme.primaryContainer,
-            onChanged: (bool? value) {
-              widget.todo.done ? setAsUndone() : setAsDone();
-            },
+        child: InkWell(
+          onTap: () => context.read<NavigationController>().openCreateTodo(
+                isEdit: true,
+                todoForEdit: widget.todo,
+              ),
+          child: ListTile(
+            leading: Checkbox(
+              value: widget.todo.done,
+              activeColor: Theme.of(context).colorScheme.primaryContainer,
+              onChanged: (bool? value) {
+                if (widget.todo.done) {
+                  setAsUndone();
+                } else {
+                  setAsDone();
+                }
+              },
+            ),
+            title: RichText(
+              text: TextSpan(
+                  style: widget.todo.done
+                      ? CustomTextTheme.todoTextDone(context)
+                      : CustomTextTheme.todoText(context),
+                  children: [
+                    if (widget.todo.importance == Importance.important)
+                      TextSpan(
+                        text: "‼ ",
+                        style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.errorContainer),
+                      ),
+                    if (widget.todo.importance == Importance.low)
+                      const WidgetSpan(
+                        child: Icon(
+                          Icons.arrow_downward_outlined,
+                          size: 14,
+                        ),
+                      ),
+                    TextSpan(
+                      text: widget.todo.text,
+                    )
+                  ]),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: (widget.todo.deadline != null)
+                ? Text(
+                    DateFormat.yMMMMd(S.ru.toString())
+                        .format(widget.todo.deadline!),
+                    style: CustomTextTheme.importanceSubtitle(context),
+                  )
+                : null,
+            //todo capsule all icons
+            trailing: const Icon(Icons.info_outlined),
           ),
-          title: Text(
-            textPrefix + widget.todo.text,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: widget.todo.done
-                ? CustomTextTheme.todoTextDone(context)
-                : CustomTextTheme.todoText(context),
-          ),
-          subtitle: (widget.todo.deadline != null)
-              ? Text(
-                  DateFormat.yMMMMd(S.ru.toString())
-                      .format(widget.todo.deadline!),
-                  style: CustomTextTheme.importanceSubtitle(context),
-                )
-              : null,
-          //todo capsule all icons
-          trailing: const Icon(Icons.info_outlined),
         ),
       ),
     );

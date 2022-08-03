@@ -2,30 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
+import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/theme.dart';
-import 'package:todo_app/presentation/components/wrapCard.dart';
+import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
-import 'package:todo_app/presentation/components/s.dart';
+import 'package:todo_app/presentation/localization/s.dart';
 
 class TodoCreateScreen extends StatefulWidget {
-  const TodoCreateScreen({Key? key}) : super(key: key);
+  final bool isEdit;
+  final Todo? todoForEdit;
+
+  const TodoCreateScreen({Key? key, this.isEdit = false, this.todoForEdit})
+      : super(key: key);
 
   @override
   State<TodoCreateScreen> createState() => _TodoCreateScreenState();
 }
 
 class _TodoCreateScreenState extends State<TodoCreateScreen> {
-  createTask() {
-    var todoCreate =
-        Provider.of<CreateTaskDataProvider>(context, listen: false);
-    context.read<TodosProvider>().createTodo(
-          importance: todoCreate.selectedImportance,
-          text: todoCreate.controller.text,
-          deadline: todoCreate.showData ? todoCreate.selectedDate : null,
-        );
+  void createTask() {
+    Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
+    context.read<TodosProvider>().createTodo(todo: todo);
     context.read<CreateTaskDataProvider>().eraseData();
+  }
+
+  void editTask() {
+    Todo todo = context
+        .read<CreateTaskDataProvider>()
+        .modelingTodo(todo: widget.todoForEdit);
+    context.read<TodosProvider>().updateTodo(todo);
+    context.read<CreateTaskDataProvider>().eraseData();
+  }
+
+  void fieldsFill() {
+    var provider = context.read<CreateTaskDataProvider>();
+    if (widget.isEdit) {
+      provider.setControllerText(widget.todoForEdit!.text);
+      if (widget.todoForEdit!.deadline != null) {
+        provider.selectedDate = widget.todoForEdit!.deadline!;
+        provider.showDate = true;
+      }
+      provider.selectedImportance = widget.todoForEdit!.importance;
+    }
+  }
+
+  @override
+  void initState() {
+    fieldsFill();
+    super.initState();
   }
 
   @override
@@ -46,7 +72,11 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              createTask();
+              if (widget.isEdit) {
+                editTask();
+              } else {
+                createTask();
+              }
               context.read<NavigationController>().pop();
             },
             child: Text(
@@ -59,20 +89,20 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            TextFieldTile(),
-            ImportanceTile(),
-            Padding(
+          children: [
+            const TextFieldTile(),
+            const ImportanceTile(),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: Divider(),
             ),
-            DateTile(),
-            Padding(
+            const DateTile(),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: Divider(),
             ),
-            DeleteTile(),
-            SizedBox(
+            DeleteTile(isDisabled: !widget.isEdit, todo: widget.todoForEdit),
+            const SizedBox(
               height: 50,
             ),
           ],
@@ -151,7 +181,7 @@ class _ImportanceTileState extends State<ImportanceTile> {
           style: CustomTextTheme.importanceSubtitle(context),
           icon: const SizedBox(),
           onChanged: (value) {
-            context.read<CreateTaskDataProvider>().setImportance(value!);
+            context.read<CreateTaskDataProvider>().selectedImportance = value!;
           },
         ),
       ),
@@ -163,14 +193,11 @@ class DateTile extends StatelessWidget {
   const DateTile({Key? key}) : super(key: key);
 
   Future<void> selectDate(BuildContext context) async {
-    String hintText =
-        Provider.of<CreateTaskDataProvider>(context, listen: false)
-            .selectedDate
-            .year
-            .toString();
-    DateTime initialDate =
-        Provider.of<CreateTaskDataProvider>(context, listen: false)
-            .selectedDate;
+    var createTaskProvider =
+        Provider.of<CreateTaskDataProvider>(context, listen: false);
+
+    String hintText = createTaskProvider.selectedDate.year.toString();
+    DateTime initialDate = createTaskProvider.selectedDate;
 
     DateTime? picked = await showDatePicker(
       context: context,
@@ -182,7 +209,7 @@ class DateTile extends StatelessWidget {
     );
     if (picked != null) {
       //todo: fix maybe
-      context.read<CreateTaskDataProvider>().setDatetime(picked);
+      context.read<CreateTaskDataProvider>().selectedDate = picked;
     }
   }
 
@@ -190,7 +217,7 @@ class DateTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(S.of(context).doneBy),
-      subtitle: context.watch<CreateTaskDataProvider>().showData
+      subtitle: context.watch<CreateTaskDataProvider>().showDate
           ? InkWell(
               onTap: () => selectDate(context),
               child: Text(
@@ -201,12 +228,12 @@ class DateTile extends StatelessWidget {
             )
           : const SizedBox(),
       trailing: Switch(
-        value: context.watch<CreateTaskDataProvider>().showData,
+        value: context.watch<CreateTaskDataProvider>().showDate,
         activeTrackColor:
             Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
         activeColor: Theme.of(context).colorScheme.tertiary,
         onChanged: (bool value) {
-          context.read<CreateTaskDataProvider>().toggleShowDate(value);
+          context.read<CreateTaskDataProvider>().showDate = value;
         },
       ),
     );
@@ -214,24 +241,42 @@ class DateTile extends StatelessWidget {
 }
 
 class DeleteTile extends StatelessWidget {
-  const DeleteTile({Key? key}) : super(key: key);
+  final bool isDisabled;
+  final Todo? todo;
+
+  const DeleteTile({Key? key, required this.isDisabled, this.todo})
+      : super(key: key);
+
+  Function()? delete(BuildContext context) {
+    if (isDisabled) {
+      return null;
+    } else {
+      Provider.of<TodosProvider>(context, listen: false).deleteTodo(todo!.uuid);
+
+      context.read<NavigationController>().pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () {},
+      onPressed: () => delete(context),
       child: Row(
         children: [
           Icon(
             Icons.delete,
-            color: Theme.of(context).colorScheme.errorContainer,
+            color: isDisabled
+                ? Theme.of(context).colorScheme.secondaryContainer
+                : Theme.of(context).colorScheme.errorContainer,
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
               S.of(context).delete,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.errorContainer,
+                color: isDisabled
+                    ? Theme.of(context).colorScheme.secondaryContainer
+                    : Theme.of(context).colorScheme.errorContainer,
               ),
             ),
           ),

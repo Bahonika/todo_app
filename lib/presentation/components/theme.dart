@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class CustomTheme {
   static ThemeData get lightTheme {
     return ThemeData(
+      // Back Primary
       scaffoldBackgroundColor: const Color(0xFFF7F6F2),
       colorScheme: ColorScheme.fromSwatch().copyWith(
+        //Back Secondary
         secondary: const Color(0xFFFFFFFF),
+        // Color Blue
         tertiary: const Color(0xFF007AFF),
+        // Color Red
         errorContainer: const Color(0xFFFF3B30),
+        // Color Green
         primaryContainer: const Color(0xFF34C759),
+        // Color Gray
+        inversePrimary: const Color(0xFF8E8E93),
+        // Color Gray light
+        onInverseSurface: const Color(0xFFD1D1D6),
+        //Color White
+        surface: const Color(0xFFFFFFFF),
+        // Label Primary
         onPrimary: const Color(0xFF000000),
+        // Label Secondary
+        onSecondary: const Color(0x99999999),
+        // Label Tertiary
+        onTertiary:  const Color(0x4D000000),
+        // Label Disabled
+        secondaryContainer: const Color(0x26000000),
       ),
       textTheme: const TextTheme(
         // Large title — 32/38
