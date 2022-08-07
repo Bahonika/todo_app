@@ -3,8 +3,8 @@
 Todo flutter app
 
 features:
-    - getting todos from remote server
-    - can create and delete todos but need to set revision manually 
+    -getting todos from remote server
+    -can create and delete todos but need to set revision manually 
     - swipe todo to delete worked
     - ready to use light theme
     - ready to use internationalization 
