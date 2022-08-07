@@ -130,6 +130,8 @@ class TextFieldTile extends StatelessWidget {
                 onPressed: () => createTodo(context),
               )),
           onSaved: (value) => createTodo(context),
+          onEditingComplete: () => createTodo(context),
+          onFieldSubmitted: (value) => createTodo(context),
           minLines: 1,
           maxLines: null,
         ),

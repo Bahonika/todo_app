@@ -28,8 +28,8 @@ class TodoMapper {
           (todo.deadline!.toUtc().microsecondsSinceEpoch / 1000).round();
     }
 
-    map["created_at"] = todo.createdAt;
-    map["changed_at"] = todo.changedAt;
+    map["created_at"] = (todo.createdAt.toUtc().microsecondsSinceEpoch / 1000).round();
+    map["changed_at"] = (todo.changedAt.toUtc().microsecondsSinceEpoch / 1000).round();
     map["last_updated_by"] = "123";
 
     return {"element": map};

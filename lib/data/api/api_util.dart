@@ -28,10 +28,8 @@ class ApiUtil {
   Future<List<Todo>> getFromRemote() async {
     List<Todo> todos = [];
     try {
-      final result = await remoteService.getTodos().then((value) {
-        log.i("Get from remote");
-        return value;
-      });
+      final result = await remoteService.getTodos();
+      log.i("Get from remote");
       todos = result.map((item) => TodoMapper.fromApi(item)).toList();
     } catch (e) {
       log.w("Can't get from remote");
@@ -57,9 +55,8 @@ class ApiUtil {
       log.e("Can't delete on local");
     }
     try {
-      await remoteService
-          .delete(uuid: uuid)
-          .then((value) => log.i("Delete on remote"));
+      await remoteService.delete(uuid: uuid);
+      log.i("Delete on remote");
     } catch (e) {
       log.w("Can't delete on remote");
     }
@@ -73,11 +70,10 @@ class ApiUtil {
       log.e("Can't create on local");
     }
     try {
-      await remoteService
-          .create(todo: todo)
-          .then((value) => log.i("Create on remote"));
+      await remoteService.create(todo: todo);
+      log.i("Create on remote");
     } catch (e) {
-      log.w("Can't create on remote");
+      log.w("Can't create on remote", e);
     }
   }
 
@@ -89,9 +85,8 @@ class ApiUtil {
       log.e("Can't update local", e);
     }
     try {
-      await remoteService
-          .update(uuid: todo.uuid, todo: todo)
-          .then((value) => log.i("Update remote"));
+      await remoteService.update(uuid: todo.uuid, todo: todo);
+      log.i("Update remote");
     } catch (e) {
       log.w("Can't update remote");
     }

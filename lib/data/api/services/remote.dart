@@ -25,6 +25,8 @@ class RemoteService {
     dio.options.headers.addAll(
       {"X-Last-Known-Revision": revision},
     );
+    revisionProvider.revision = revision;
+
   }
 
   Future<List<ApiTodo>> getTodos({Map<String, String>? queryParams}) async {
@@ -36,7 +38,6 @@ class RemoteService {
     }
     updateRevision(response.data["revision"]);
 
-    revisionProvider.revision = await response.data["revision"];
     return todos;
   }
 
