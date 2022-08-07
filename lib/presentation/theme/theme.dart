@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/data/api/services/remote_config.dart';
 
 class CustomTheme {
   // static final RemoteConfigService _remoteConfigService =

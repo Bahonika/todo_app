@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
@@ -146,10 +145,9 @@ class _ImportanceTileState extends State<ImportanceTile> {
     ];
   }
 
-  //todo: not the best way I think
   @override
   void didChangeDependencies() {
-    itemsFill();
+    itemsFill(); // will fix in future
     super.didChangeDependencies();
   }
 
@@ -178,6 +176,8 @@ class _ImportanceTileState extends State<ImportanceTile> {
 class DateTile extends StatelessWidget {
   const DateTile({Key? key}) : super(key: key);
 
+  static DateTime? tempPickedDate;
+
   Future<void> selectDate(BuildContext context) async {
     var createTaskProvider =
         Provider.of<CreateTaskDataProvider>(context, listen: false);
@@ -185,7 +185,7 @@ class DateTile extends StatelessWidget {
     String hintText = createTaskProvider.selectedDate.year.toString();
     DateTime initialDate = createTaskProvider.selectedDate;
 
-    DateTime? picked = await showDatePicker(
+    tempPickedDate = await showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: DateTime.now(),
@@ -193,10 +193,14 @@ class DateTile extends StatelessWidget {
       confirmText: S.of(context).datePickerDone,
       helpText: hintText,
     );
-    if (picked != null) {
-      //todo: fix maybe
-      context.read<CreateTaskDataProvider>().selectedDate = picked;
-    }
+  }
+
+  setSelectedDate(BuildContext context) {
+    selectDate(context).then((value) {
+      if (tempPickedDate != null) {
+        context.read<CreateTaskDataProvider>().selectedDate = tempPickedDate!;
+      }
+    });
   }
 
   @override
@@ -205,9 +209,10 @@ class DateTile extends StatelessWidget {
       title: Text(S.of(context).doneBy),
       subtitle: context.watch<CreateTaskDataProvider>().showDate
           ? InkWell(
-              onTap: () => selectDate(context),
+              onTap: () => setSelectedDate(context),
               child: Text(
-                MyDateFormat().localeFormat(context.watch<CreateTaskDataProvider>().selectedDate),
+                MyDateFormat().localeFormat(
+                    context.watch<CreateTaskDataProvider>().selectedDate),
                 style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
               ),
             )

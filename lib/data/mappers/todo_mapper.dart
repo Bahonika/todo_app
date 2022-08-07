@@ -28,9 +28,8 @@ class TodoMapper {
           (todo.deadline!.toUtc().microsecondsSinceEpoch / 1000).round();
     }
 
-    //todo with no hardcode
-    map["created_at"] = 1;
-    map["changed_at"] = 1;
+    map["created_at"] = todo.createdAt;
+    map["changed_at"] = todo.changedAt;
     map["last_updated_by"] = "123";
 
     return {"element": map};
@@ -52,13 +51,11 @@ class TodoMapper {
             (todos[i].deadline!.toUtc().microsecondsSinceEpoch / 1000).round();
       }
 
-      //todo with no hardcode
-      map["created_at"] = 1;
-      map["changed_at"] = 1;
+      map["created_at"] = todos[i].createdAt;
+      map["changed_at"] = todos[i].changedAt;
       map["last_updated_by"] = "123";
       list.add(map);
     }
-    print(list);
 
     return {"list": list};
   }

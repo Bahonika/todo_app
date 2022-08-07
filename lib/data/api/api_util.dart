@@ -25,8 +25,6 @@ class ApiUtil {
     return todos;
   }
 
-
-  //todo: вывести ошибки в ui
   Future<List<Todo>> getFromRemote() async {
     List<Todo> todos = [];
     try {
@@ -43,6 +41,10 @@ class ApiUtil {
 
   Future<List<Todo>> getTodos() async {
     List<Todo> localTodos = getFromLocal();
+
+    // temporary ignore unused
+    // will be used when offline first
+    // ignore: unused_local_variable
     List<Todo> remoteTodos = await getFromRemote();
     return localTodos;
   }

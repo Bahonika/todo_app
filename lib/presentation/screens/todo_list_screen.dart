@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
@@ -42,7 +41,6 @@ class _TodoListScreenState extends State<TodoListScreen>
             context.read<NavigationController>().openCreateTodo();
           },
           backgroundColor: Theme.of(context).colorScheme.tertiary,
-          //todo capsule all icons
           child: Icon(
             Icons.add,
             color: Theme.of(context).colorScheme.surface,
