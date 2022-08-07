@@ -3,10 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
-import 'package:todo_app/presentation/components/theme.dart';
+import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
+import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
@@ -76,29 +78,42 @@ class SliverTodoList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
-      child: Consumer<List<Todo>>(
-        builder: (context, todos, _) => WrapCard(
+      child: Consumer<List<Todo>>(builder: (context, todos, _) {
+        // list, that user must see at this moment
+        List<Todo> todoToShow = context.watch<TodosProvider>().showCompleted
+            ? todos
+            : todos.where((element) => !element.done).toList();
+
+        return WrapCard(
           child: ListView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             controller: ScrollController(),
             itemBuilder: (BuildContext context, index) {
-              if (index == todos.length) {
-                return const TextFieldTile(); // last tile with text field
+              if (index == todoToShow.length) {
+                return TextFieldTile(); // last tile with text field
               } else {
-                return TodoWidget(todo: todos[index]);
+                return TodoWidget(todo: todoToShow[index]);
               }
             },
-            itemCount: todos.length + 1,
+            itemCount: todoToShow.length + 1,
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
 
 class TextFieldTile extends StatelessWidget {
-  const TextFieldTile({Key? key}) : super(key: key);
+  TextFieldTile({Key? key}) : super(key: key);
+
+  final TextEditingController _controller = TextEditingController();
+
+  createTodo(BuildContext context) {
+    context.read<CreateTaskDataProvider>().setControllerText(_controller.text);
+    Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
+    context.read<TodosProvider>().createTodo(todo: todo);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,11 +122,18 @@ class TextFieldTile extends StatelessWidget {
       child: ListTile(
         leading: const SizedBox(),
         title: TextFormField(
+          controller: _controller,
           decoration: InputDecoration(
-            hintText: S.of(context).newTodo,
-            hintStyle: CustomTextTheme.importanceSubtitle(context),
-            border: InputBorder.none,
-          ),
+              hintText: S.of(context).newTodo,
+              hintStyle: CustomTextTheme.importanceSubtitle(context),
+              border: InputBorder.none,
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.subdirectory_arrow_left_outlined),
+                onPressed: () => createTodo(context),
+              )),
+          onSaved: (value) => createTodo(context),
+          minLines: 1,
+          maxLines: null,
         ),
       ),
     );
@@ -128,11 +150,6 @@ class TodoWidget extends StatefulWidget {
 }
 
 class _TodoWidgetState extends State<TodoWidget> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void delete() {
     context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
   }
@@ -155,6 +172,24 @@ class _TodoWidgetState extends State<TodoWidget> {
     }
   }
 
+  void fieldsFill() {
+    var provider = context.read<CreateTaskDataProvider>();
+    provider.setControllerText(widget.todo.text);
+    if (widget.todo.deadline != null) {
+      provider.selectedDate = widget.todo.deadline!;
+      provider.showDate = true;
+    }
+    provider.selectedImportance = widget.todo.importance;
+  }
+
+  void toEditScreen() {
+    fieldsFill();
+    context.read<NavigationController>().openCreateTodo(
+          isEdit: true,
+          todoForEdit: widget.todo,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -173,10 +208,7 @@ class _TodoWidgetState extends State<TodoWidget> {
         background: const DismissibleBackground(),
         secondaryBackground: const DismissibleSecondaryBackground(),
         child: InkWell(
-          onTap: () => context.read<NavigationController>().openCreateTodo(
-                isEdit: true,
-                todoForEdit: widget.todo,
-              ),
+          onTap: () => toEditScreen(),
           child: ListTile(
             leading: Checkbox(
               value: widget.todo.done,
@@ -218,12 +250,10 @@ class _TodoWidgetState extends State<TodoWidget> {
             ),
             subtitle: (widget.todo.deadline != null)
                 ? Text(
-                    DateFormat.yMMMMd(S.ru.toString())
-                        .format(widget.todo.deadline!),
+              MyDateFormat().localeFormat(widget.todo.deadline!),
                     style: CustomTextTheme.importanceSubtitle(context),
                   )
                 : null,
-            //todo capsule all icons
             trailing: const Icon(Icons.info_outlined),
           ),
         ),
@@ -253,10 +283,10 @@ class DismissibleBackground extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        children: const [
+        children: [
           Icon(
             Icons.done,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.secondary,
           ),
         ],
       ),
@@ -276,10 +306,10 @@ class DismissibleSecondaryBackground extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
-        children: const [
+        children: [
           Icon(
             Icons.delete,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.secondary,
           ),
         ],
       ),

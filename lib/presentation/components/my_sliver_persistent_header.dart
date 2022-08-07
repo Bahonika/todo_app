@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/presentation/components/theme.dart';
+import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/localization/s.dart';
+import 'package:todo_app/presentation/providers/todos_provider.dart';
 
 import '../../domain/models/todo.dart';
 
@@ -60,7 +61,22 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
               Positioned(
                 bottom: bottomIconPadding(shrinkOffset),
                 right: rightPadding(shrinkOffset),
-                child: const Icon(Icons.remove_red_eye, size: 24),
+                child: InkWell(
+                    onTap: () {
+                      context.read<TodosProvider>().showCompleted =
+                          !context.read<TodosProvider>().showCompleted;
+                    },
+                    child: context.watch<TodosProvider>().showCompleted
+                        ? Icon(
+                            Icons.visibility_off,
+                            size: 24,
+                            color: Theme.of(context).colorScheme.tertiary,
+                          )
+                        : Icon(
+                            Icons.visibility,
+                            size: 24,
+                            color: Theme.of(context).colorScheme.tertiary,
+                          )),
               ),
             ],
           ),

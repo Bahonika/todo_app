@@ -1,11 +1,9 @@
 import 'dart:io';
 
 import 'package:hive/hive.dart';
-import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
-import 'package:todo_app/presentation/logger/logging.dart';
 
 class LocalService {
   static LocalService? _localService;

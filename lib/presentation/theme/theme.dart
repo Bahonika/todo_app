@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/data/api/services/remote_config.dart';
 
 class CustomTheme {
+  // static final RemoteConfigService _remoteConfigService =
+  //     RemoteConfigService.getInstance() as RemoteConfigService;
+  //
+  static bool isImportanceRed = true;
+
   static ThemeData get lightTheme {
     return ThemeData(
       // Back Primary
@@ -11,7 +17,7 @@ class CustomTheme {
         // Color Blue
         tertiary: const Color(0xFF007AFF),
         // Color Red
-        errorContainer: const Color(0xFFFF3B30),
+        errorContainer: isImportanceRed ? const Color(0xFFFF3B30) : const Color(0xFF793cd8),
         // Color Green
         primaryContainer: const Color(0xFF34C759),
         // Color Gray
@@ -25,7 +31,7 @@ class CustomTheme {
         // Label Secondary
         onSecondary: const Color(0x99999999),
         // Label Tertiary
-        onTertiary:  const Color(0x4D000000),
+        onTertiary: const Color(0x4D000000),
         // Label Disabled
         secondaryContainer: const Color(0x26000000),
       ),

@@ -25,7 +25,6 @@ class NavigationController {
   String get initialRoute => Routes.todoList;
 
   void openCreateTodo({Todo? todoForEdit, bool isEdit = false}) {
-
     navigateTo(Routes.createTodo, arguments: {
       'isEdit': isEdit,
       "todoForEdit": todoForEdit,

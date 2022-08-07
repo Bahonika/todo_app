@@ -25,6 +25,8 @@ class ApiUtil {
     return todos;
   }
 
+
+  //todo: вывести ошибки в ui
   Future<List<Todo>> getFromRemote() async {
     List<Todo> todos = [];
     try {

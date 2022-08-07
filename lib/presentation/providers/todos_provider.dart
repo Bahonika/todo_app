@@ -5,11 +5,15 @@ import 'package:todo_app/data/api/api_util.dart';
 
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/internal/dependencies/api_module.dart';
-import 'package:uuid/uuid.dart';
 
 class TodosProvider with ChangeNotifier {
   List<Todo> _todos = [];
+  bool _showCompleted = true;
+  ApiUtil apiUtil = ApiModule.apiUtil();
+
+
   final _streamController = StreamController<List<Todo>>.broadcast();
+  bool get showCompleted => _showCompleted;
 
   Stream<List<Todo>> get todoListStream async* {
     yield await getTodos();
@@ -22,10 +26,10 @@ class TodosProvider with ChangeNotifier {
     }
   }
 
-  List<Todo> get todos => _todos;
-
-  Uuid uuid = const Uuid();
-  ApiUtil apiUtil = ApiModule.apiUtil();
+  set showCompleted(bool value) {
+    _showCompleted = value;
+    notifyListeners();
+  }
 
   Future<List<Todo>> getTodos() async {
     _todos = await apiUtil.getTodos();

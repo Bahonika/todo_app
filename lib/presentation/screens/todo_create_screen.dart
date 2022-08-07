@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
-import 'package:todo_app/presentation/components/theme.dart';
+import 'package:todo_app/presentation/components/date_format.dart';
+import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
@@ -36,24 +37,6 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
     context.read<CreateTaskDataProvider>().eraseData();
   }
 
-  void fieldsFill() {
-    var provider = context.read<CreateTaskDataProvider>();
-    if (widget.isEdit) {
-      provider.setControllerText(widget.todoForEdit!.text);
-      if (widget.todoForEdit!.deadline != null) {
-        provider.selectedDate = widget.todoForEdit!.deadline!;
-        provider.showDate = true;
-      }
-      provider.selectedImportance = widget.todoForEdit!.importance;
-    }
-  }
-
-  @override
-  void initState() {
-    fieldsFill();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +49,9 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             color: Theme.of(context).colorScheme.onPrimary,
           ),
           onPressed: () {
+            if (widget.isEdit) {
+              context.read<CreateTaskDataProvider>().eraseData();
+            }
             context.read<NavigationController>().pop();
           },
         ),
@@ -126,7 +112,7 @@ class TextFieldTile extends StatelessWidget {
             hintStyle: CustomTextTheme.importanceSubtitle(context),
             contentPadding: const EdgeInsets.all(15)),
         minLines: 5,
-        maxLines: 50,
+        maxLines: null,
       ),
     );
   }
@@ -221,8 +207,7 @@ class DateTile extends StatelessWidget {
           ? InkWell(
               onTap: () => selectDate(context),
               child: Text(
-                DateFormat.yMMMMd().format(
-                    context.watch<CreateTaskDataProvider>().selectedDate),
+                MyDateFormat().localeFormat(context.watch<CreateTaskDataProvider>().selectedDate),
                 style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
               ),
             )
@@ -252,9 +237,9 @@ class DeleteTile extends StatelessWidget {
       return null;
     } else {
       Provider.of<TodosProvider>(context, listen: false).deleteTodo(todo!.uuid);
-
       context.read<NavigationController>().pop();
     }
+    return null;
   }
 
   @override
