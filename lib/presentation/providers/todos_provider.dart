@@ -1,60 +1,71 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:todo_app/data/api/api_util.dart';
-import 'package:todo_app/data/api/services/local.dart';
-import 'package:todo_app/data/api/services/remote.dart';
-import 'package:todo_app/domain/models/todo.dart';
-import 'package:uuid/uuid.dart';
 
-import '../../domain/enums/importance.dart';
+import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/internal/dependencies/api_module.dart';
 
 class TodosProvider with ChangeNotifier {
   List<Todo> _todos = [];
-  static RemoteService remoteService = RemoteService();
-  static LocalService localService = LocalService(); //isn't in use yet
+  bool _showCompleted = true;
+  ApiUtil apiUtil = ApiModule.apiUtil();
 
-  List<Todo> get todos => _todos;
 
-  List<Todo> get completedTodos =>
-      _todos.where((element) => element.done).toList();
+  final _streamController = StreamController<List<Todo>>.broadcast();
+  bool get showCompleted => _showCompleted;
 
-  Uuid uuid = const Uuid();
-  ApiUtil apiUtil = ApiUtil(remoteService);
+  Stream<List<Todo>> get todoListStream async* {
+    yield await getTodos();
+    yield* _streamController.stream;
+  }
 
-  Future<void> getTodos() async {
+  void _updateTodoStream() {
+    if (_streamController.hasListener) {
+      _streamController.add(getLocalTodos());
+    }
+  }
+
+  set showCompleted(bool value) {
+    _showCompleted = value;
+    notifyListeners();
+  }
+
+  Future<List<Todo>> getTodos() async {
     _todos = await apiUtil.getTodos();
-    notifyListeners();
+    return _todos;
   }
 
-  void createTodo({
-    required String text,
-    required Importance importance,
-    DateTime? deadline,
-  }) async {
-    Todo tempTodo = Todo(
-      uuid: uuid.v1(),
-      done: false,
-      text: text,
-      importance: importance,
-      deadline: deadline,
-    );
-    _todos.add(tempTodo);
-    await apiUtil.createTodo(tempTodo);
-    getTodos();
-    notifyListeners();
+  List<Todo> getLocalTodos() {
+    _todos = apiUtil.getFromLocal();
+    return _todos;
   }
 
-  void deleteTodo(String uuid) {
+  Future<void> createTodo({required Todo todo}) async {
+    await apiUtil.createTodo(todo);
+    _updateTodoStream();
+  }
+
+  void deleteTodo(String uuid) async {
     _todos.removeWhere((element) =>
-        element.uuid == uuid); // if remove will throw dismissible bug
+        element.uuid == uuid); //dismissible manually delete required
     apiUtil.deleteTodo(uuid);
-    notifyListeners();
+    _updateTodoStream();
   }
 
   //put same entity with done = true
-  setAsDone(String uuid) {
-    Todo todo = _todos.firstWhere((element) => element.uuid == uuid);
-    //todo: put this, maybe by updateTodo function
+  void setAsDone(Todo todo) {
+    apiUtil.setDone(todo);
+    _updateTodoStream();
   }
 
-  void updateTodo(String uuid) {}
+  void setAsUndone(Todo todo) {
+    apiUtil.setUndone(todo);
+    _updateTodoStream();
+  }
+
+  void updateTodo(Todo todo) {
+    apiUtil.updateTodo(todo);
+    _updateTodoStream();
+  }
 }
