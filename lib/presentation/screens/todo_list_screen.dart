@@ -4,6 +4,7 @@ import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
+import 'package:todo_app/presentation/theme/custmo_color_scheme.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
@@ -20,6 +21,7 @@ class TodoListScreen extends StatefulWidget {
 
 class _TodoListScreenState extends State<TodoListScreen>
     with SingleTickerProviderStateMixin {
+
   @override
   void initState() {
     super.initState();
@@ -40,10 +42,10 @@ class _TodoListScreenState extends State<TodoListScreen>
           onPressed: () {
             context.read<NavigationController>().openCreateTodo();
           },
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          backgroundColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
           child: Icon(
             Icons.add,
-            color: Theme.of(context).colorScheme.surface,
+            color: Theme.of(context).extension<CustomColors>()!.colorWhite,
           ),
         ),
       ),
@@ -108,9 +110,11 @@ class TextFieldTile extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
 
   createTodo(BuildContext context) {
-    context.read<CreateTaskDataProvider>().setControllerText(_controller.text);
-    Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
+    var createProvider = context.read<CreateTaskDataProvider>();
+    createProvider.setControllerText(_controller.text);
+    Todo todo = createProvider.modelingTodo();
     context.read<TodosProvider>().createTodo(todo: todo);
+    createProvider.eraseData();
   }
 
   @override
@@ -194,67 +198,71 @@ class _TodoWidgetState extends State<TodoWidget> {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: Dismissible(
-        key: Key(widget.todo.uuid.toString()),
-        direction: widget.todo.done // if already done - cant swipe to right
-            ? DismissDirection.endToStart
-            : DismissDirection.horizontal,
-        confirmDismiss: (direction) => confirmDismiss(direction),
-        onDismissed: (direction) {
-          if (direction == DismissDirection.endToStart) {
-            delete();
-          }
-        },
-        background: const DismissibleBackground(),
-        secondaryBackground: const DismissibleSecondaryBackground(),
-        child: InkWell(
-          onTap: () => toEditScreen(),
-          child: ListTile(
-            leading: Checkbox(
-              value: widget.todo.done,
-              activeColor: Theme.of(context).colorScheme.primaryContainer,
-              onChanged: (bool? value) {
-                if (widget.todo.done) {
-                  setAsUndone();
-                } else {
-                  setAsDone();
-                }
-              },
-            ),
-            title: RichText(
-              text: TextSpan(
-                  style: widget.todo.done
-                      ? CustomTextTheme.todoTextDone(context)
-                      : CustomTextTheme.todoText(context),
-                  children: [
-                    if (widget.todo.importance == Importance.important)
-                      TextSpan(
-                        text: "‼ ",
-                        style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.errorContainer),
-                      ),
-                    if (widget.todo.importance == Importance.low)
-                      const WidgetSpan(
-                        child: Icon(
-                          Icons.arrow_downward_outlined,
-                          size: 14,
+      child: GestureDetector(
+
+        child: Dismissible(
+          key: Key(widget.todo.uuid.toString()),
+          direction: widget.todo.done // if already done - cant swipe to right
+              ? DismissDirection.endToStart
+              : DismissDirection.horizontal,
+          confirmDismiss: (direction) => confirmDismiss(direction),
+          onDismissed: (direction) {
+            if (direction == DismissDirection.endToStart) {
+              delete();
+            }
+          },
+          background: const DismissibleBackground(),
+          secondaryBackground: const DismissibleSecondaryBackground(),
+          child: InkWell(
+            onTap: () => toEditScreen(),
+            child: ListTile(
+              leading: Checkbox(
+                value: widget.todo.done,
+                activeColor: Theme.of(context).extension<CustomColors>()!.colorGreen,
+                onChanged: (bool? value) {
+                  if (widget.todo.done) {
+                    setAsUndone();
+                  } else {
+                    setAsDone();
+                  }
+                },
+              ),
+              title: RichText(
+                text: TextSpan(
+                    style: widget.todo.done
+                        ? CustomTextTheme.todoTextDone(context)
+                        : CustomTextTheme.todoText(context),
+                    children: [
+                      if (widget.todo.importance == Importance.important)
+                        TextSpan(
+                          text: "‼ ",
+                          style: TextStyle(
+                              color:
+                              Theme.of(context).extension<CustomColors>()!.colorRed),
                         ),
-                      ),
-                    TextSpan(
-                      text: widget.todo.text,
+                      if (widget.todo.importance == Importance.low)
+                        const WidgetSpan(
+                          child: Icon(
+                            Icons.arrow_downward_outlined,
+                            size: 14,
+
+                          ),
+                        ),
+                      TextSpan(
+                        text: widget.todo.text,
+                      )
+                    ]),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: (widget.todo.deadline != null)
+                  ? Text(
+                MyDateFormat().localeFormat(widget.todo.deadline!),
+                      style: CustomTextTheme.importanceSubtitle(context),
                     )
-                  ]),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+                  : null,
+              trailing: const Icon(Icons.info_outlined),
             ),
-            subtitle: (widget.todo.deadline != null)
-                ? Text(
-              MyDateFormat().localeFormat(widget.todo.deadline!),
-                    style: CustomTextTheme.importanceSubtitle(context),
-                  )
-                : null,
-            trailing: const Icon(Icons.info_outlined),
           ),
         ),
       ),
@@ -279,14 +287,14 @@ class DismissibleBackground extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: Theme.of(context).extension<CustomColors>()!.colorGreen,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Icon(
             Icons.done,
-            color: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).extension<CustomColors>()!.colorWhite,
           ),
         ],
       ),
@@ -302,14 +310,14 @@ class DismissibleSecondaryBackground extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer,
+        color: Theme.of(context).extension<CustomColors>()!.colorRed,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Icon(
             Icons.delete,
-            color: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).extension<CustomColors>()!.colorWhite,
           ),
         ],
       ),

@@ -93,10 +93,10 @@ class ApiUtil {
   }
 
   void setDone(Todo todo) async {
-    updateTodo(todo.copyWith(done: true));
+    updateTodo(todo.copyWith(done: true, deadline: todo.deadline));
   }
 
   void setUndone(Todo todo) async {
-    updateTodo(todo.copyWith(done: false));
+    updateTodo(todo.copyWith(done: false,deadline: todo.deadline ));
   }
 }

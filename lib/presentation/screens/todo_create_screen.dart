@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
+import 'package:todo_app/presentation/theme/custmo_color_scheme.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
@@ -45,7 +46,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.close,
-            color: Theme.of(context).colorScheme.onPrimary,
+            color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
           ),
           onPressed: () {
             if (widget.isEdit) {
@@ -66,7 +67,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             },
             child: Text(
               S.of(context).save,
-              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+              style: TextStyle(color: Theme.of(context).extension<CustomColors>()!.colorBlue),
             ),
           ),
         ],
@@ -147,7 +148,7 @@ class _ImportanceTileState extends State<ImportanceTile> {
 
   @override
   void didChangeDependencies() {
-    itemsFill(); // will fix in future
+    itemsFill();
     super.didChangeDependencies();
   }
 
@@ -213,15 +214,15 @@ class DateTile extends StatelessWidget {
               child: Text(
                 MyDateFormat().localeFormat(
                     context.watch<CreateTaskDataProvider>().selectedDate),
-                style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                style: TextStyle(color: Theme.of(context).extension<CustomColors>()!.colorBlue),
               ),
             )
           : const SizedBox(),
       trailing: Switch(
         value: context.watch<CreateTaskDataProvider>().showDate,
         activeTrackColor:
-            Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
-        activeColor: Theme.of(context).colorScheme.tertiary,
+        Theme.of(context).extension<CustomColors>()!.colorBlue.withOpacity(0.3),
+        activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
         onChanged: (bool value) {
           context.read<CreateTaskDataProvider>().showDate = value;
         },
@@ -251,13 +252,16 @@ class DeleteTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () => delete(context),
+      style: TextButton.styleFrom(
+        primary: Theme.of(context).scaffoldBackgroundColor
+      ),
       child: Row(
         children: [
           Icon(
             Icons.delete,
             color: isDisabled
-                ? Theme.of(context).colorScheme.secondaryContainer
-                : Theme.of(context).colorScheme.errorContainer,
+                ? Theme.of(context).extension<CustomColors>()!.labelDisable
+                : Theme.of(context).extension<CustomColors>()!.colorRed,
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -265,8 +269,8 @@ class DeleteTile extends StatelessWidget {
               S.of(context).delete,
               style: TextStyle(
                 color: isDisabled
-                    ? Theme.of(context).colorScheme.secondaryContainer
-                    : Theme.of(context).colorScheme.errorContainer,
+                    ? Theme.of(context).extension<CustomColors>()!.labelDisable
+                    : Theme.of(context).extension<CustomColors>()!.colorRed,
               ),
             ),
           ),

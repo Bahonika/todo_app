@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_app/presentation/theme/custmo_color_scheme.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
@@ -70,12 +71,12 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                         ? Icon(
                             Icons.visibility_off,
                             size: 24,
-                            color: Theme.of(context).colorScheme.tertiary,
+                            color: Theme.of(context).extension<CustomColors>()!.colorBlue,
                           )
                         : Icon(
                             Icons.visibility,
                             size: 24,
-                            color: Theme.of(context).colorScheme.tertiary,
+                            color: Theme.of(context).extension<CustomColors>()!.colorBlue,
                           )),
               ),
             ],
@@ -175,6 +176,5 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
       OverScrollHeaderStretchConfiguration();
 
   @override
-  // TODO: implement vsync
   TickerProvider? get vsync => thisVsync;
 }

@@ -82,6 +82,8 @@ class _MyAppState extends State<MyApp> {
 
         // theme
         theme: CustomTheme.lightTheme,
+        darkTheme: CustomTheme.darkTheme,
+        themeMode: ThemeMode.system,
 
         //localization
         localizationsDelegates: LocalizationsDelegates.delegates,

@@ -26,7 +26,6 @@ class RemoteService {
       {"X-Last-Known-Revision": revision},
     );
     revisionProvider.revision = revision;
-
   }
 
   Future<List<ApiTodo>> getTodos({Map<String, String>? queryParams}) async {
