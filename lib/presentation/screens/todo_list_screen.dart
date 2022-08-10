@@ -4,8 +4,8 @@ import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
-import 'package:todo_app/presentation/theme/custmo_color_scheme.dart';
-import 'package:todo_app/presentation/theme/theme.dart';
+import 'package:todo_app/presentation/theme/custom_colors.dart';
+import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
@@ -21,7 +21,6 @@ class TodoListScreen extends StatefulWidget {
 
 class _TodoListScreenState extends State<TodoListScreen>
     with SingleTickerProviderStateMixin {
-
   @override
   void initState() {
     super.initState();
@@ -42,7 +41,8 @@ class _TodoListScreenState extends State<TodoListScreen>
           onPressed: () {
             context.read<NavigationController>().openCreateTodo();
           },
-          backgroundColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
+          backgroundColor:
+              Theme.of(context).extension<CustomColors>()!.colorBlue,
           child: Icon(
             Icons.add,
             color: Theme.of(context).extension<CustomColors>()!.colorWhite,
@@ -199,7 +199,6 @@ class _TodoWidgetState extends State<TodoWidget> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: GestureDetector(
-
         child: Dismissible(
           key: Key(widget.todo.uuid.toString()),
           direction: widget.todo.done // if already done - cant swipe to right
@@ -218,7 +217,8 @@ class _TodoWidgetState extends State<TodoWidget> {
             child: ListTile(
               leading: Checkbox(
                 value: widget.todo.done,
-                activeColor: Theme.of(context).extension<CustomColors>()!.colorGreen,
+                activeColor:
+                    Theme.of(context).extension<CustomColors>()!.colorGreen,
                 onChanged: (bool? value) {
                   if (widget.todo.done) {
                     setAsUndone();
@@ -230,22 +230,22 @@ class _TodoWidgetState extends State<TodoWidget> {
               title: RichText(
                 text: TextSpan(
                     style: widget.todo.done
-                        ? CustomTextTheme.todoTextDone(context)
-                        : CustomTextTheme.todoText(context),
+                        ? CustomTextTheme.bodyLineThrough(context)
+                        : CustomTextTheme.body(context),
                     children: [
                       if (widget.todo.importance == Importance.important)
                         TextSpan(
                           text: "‼ ",
                           style: TextStyle(
-                              color:
-                              Theme.of(context).extension<CustomColors>()!.colorRed),
+                              color: Theme.of(context)
+                                  .extension<CustomColors>()!
+                                  .colorRed),
                         ),
                       if (widget.todo.importance == Importance.low)
                         const WidgetSpan(
                           child: Icon(
                             Icons.arrow_downward_outlined,
                             size: 14,
-
                           ),
                         ),
                       TextSpan(
@@ -257,11 +257,15 @@ class _TodoWidgetState extends State<TodoWidget> {
               ),
               subtitle: (widget.todo.deadline != null)
                   ? Text(
-                MyDateFormat().localeFormat(widget.todo.deadline!),
+                      MyDateFormat().localeFormat(widget.todo.deadline!),
                       style: CustomTextTheme.importanceSubtitle(context),
                     )
                   : null,
-              trailing: const Icon(Icons.info_outlined),
+              trailing: Icon(
+                Icons.info_outlined,
+                color:
+                    Theme.of(context).extension<CustomColors>()!.labelTertiary,
+              ),
             ),
           ),
         ),

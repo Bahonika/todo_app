@@ -3,13 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
-import 'package:todo_app/presentation/theme/custmo_color_scheme.dart';
-import 'package:todo_app/presentation/theme/theme.dart';
+import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
+import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
 class TodoCreateScreen extends StatefulWidget {
   final bool isEdit;
@@ -67,7 +67,9 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             },
             child: Text(
               S.of(context).save,
-              style: TextStyle(color: Theme.of(context).extension<CustomColors>()!.colorBlue),
+              style: TextStyle(
+                  color:
+                      Theme.of(context).extension<CustomColors>()!.colorBlue),
             ),
           ),
         ],
@@ -79,14 +81,11 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             const TextFieldTile(),
             const ImportanceTile(),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Divider(),
             ),
             const DateTile(),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Divider(),
-            ),
+            const Divider(),
             DeleteTile(isDisabled: !widget.isEdit, todo: widget.todoForEdit),
             const SizedBox(
               height: 50,
@@ -106,6 +105,7 @@ class TextFieldTile extends StatelessWidget {
     return WrapCard(
       child: TextFormField(
         controller: context.watch<CreateTaskDataProvider>().controller,
+        style: CustomTextTheme.body(context),
         decoration: InputDecoration(
             border: InputBorder.none,
             hintText: S.of(context).needToDo,
@@ -155,7 +155,10 @@ class _ImportanceTileState extends State<ImportanceTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(S.of(context).importance),
+      title: Text(
+        S.of(context).importance,
+        style: CustomTextTheme.body(context),
+      ),
       subtitle: DropdownButtonHideUnderline(
         child: DropdownButton<Importance>(
           itemHeight: 49,
@@ -207,21 +210,28 @@ class DateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(S.of(context).doneBy),
+      title: Text(
+        S.of(context).doneBy,
+        style: CustomTextTheme.body(context),
+      ),
       subtitle: context.watch<CreateTaskDataProvider>().showDate
           ? InkWell(
               onTap: () => setSelectedDate(context),
               child: Text(
                 MyDateFormat().localeFormat(
                     context.watch<CreateTaskDataProvider>().selectedDate),
-                style: TextStyle(color: Theme.of(context).extension<CustomColors>()!.colorBlue),
+                style: TextStyle(
+                    color:
+                        Theme.of(context).extension<CustomColors>()!.colorBlue),
               ),
             )
           : const SizedBox(),
       trailing: Switch(
         value: context.watch<CreateTaskDataProvider>().showDate,
-        activeTrackColor:
-        Theme.of(context).extension<CustomColors>()!.colorBlue.withOpacity(0.3),
+        activeTrackColor: Theme.of(context)
+            .extension<CustomColors>()!
+            .colorBlue
+            .withOpacity(0.3),
         activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
         onChanged: (bool value) {
           context.read<CreateTaskDataProvider>().showDate = value;
@@ -253,8 +263,7 @@ class DeleteTile extends StatelessWidget {
     return TextButton(
       onPressed: () => delete(context),
       style: TextButton.styleFrom(
-        primary: Theme.of(context).scaffoldBackgroundColor
-      ),
+          primary: Theme.of(context).scaffoldBackgroundColor),
       child: Row(
         children: [
           Icon(

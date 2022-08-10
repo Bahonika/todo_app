@@ -1,37 +1,5 @@
 import 'package:flutter/material.dart';
 
-extension CustomColorScheme on ColorScheme {
-  Color get supportSeparator => const Color(0x33000000);
-
-  Color get supportOverlay => const Color(0x0F000000);
-
-  Color get labelPrimary => const Color(0xFF000000);
-
-  Color get labelSecondary => const Color(0x99000000);
-
-  Color get labelTertiary => const Color(0x4D000000);
-
-  Color get labelDisable => const Color(0x26000000);
-
-  Color get colorRed => const Color(0xFFFF3B30);
-
-  Color get colorGreen => const Color(0xFF34C759);
-
-  Color get colorBlue => const Color(0xFF007AFF);
-
-  Color get colorGray => const Color(0xFF8E8E93);
-
-  Color get colorGrayLight => const Color(0xFFD1D1D6);
-
-  Color get colorWhite => const Color(0xFFFFFFFF);
-
-  Color get backPrimary => const Color(0xFFF7F6F2);
-
-  Color get backSecondary => const Color(0xFFFFFFFF);
-
-  Color get backElevated => const Color(0xFFFFFFFF);
-}
-
 class CustomColors extends ThemeExtension<CustomColors> {
   CustomColors({
     required this.supportSeparator,
@@ -49,6 +17,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     required this.backPrimary,
     required this.backSecondary,
     required this.backElevated,
+    required this.backSecondaryForHeader,
   });
 
   final Color supportSeparator;
@@ -66,6 +35,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
   final Color backPrimary;
   final Color backSecondary;
   final Color backElevated;
+  final Color backSecondaryForHeader;
 
   @override
   CustomColors copyWith({
@@ -84,6 +54,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     Color? backPrimary,
     Color? backSecondary,
     Color? backElevated,
+    Color? backSecondaryForHeader,
   }) {
     return CustomColors(
       supportSeparator: supportSeparator ?? this.supportSeparator,
@@ -101,6 +72,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
       backPrimary: backPrimary ?? this.backPrimary,
       backSecondary: backSecondary ?? this.backSecondary,
       backElevated: backElevated ?? this.backElevated,
+      backSecondaryForHeader: backSecondaryForHeader ?? this.backSecondaryForHeader,
     );
   }
 
@@ -127,6 +99,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
       backPrimary: Color.lerp(backPrimary, other.backPrimary, t)!,
       backSecondary: Color.lerp(backSecondary, other.backSecondary, t)!,
       backElevated: Color.lerp(backElevated, other.backElevated, t)!,
+      backSecondaryForHeader: Color.lerp(backSecondaryForHeader, other.backSecondaryForHeader, t)!,
     );
   }
 
@@ -146,6 +119,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     backPrimary: const Color(0xFFF7F6F2),
     backSecondary: const Color(0xFFFFFFFF),
     backElevated: const Color(0xFFFFFFFF),
+      backSecondaryForHeader: const Color(0xFFF7F6F2),
   );
 
   static final dark = CustomColors(
@@ -164,5 +138,6 @@ class CustomColors extends ThemeExtension<CustomColors> {
     backPrimary: const Color(0xFF161618),
     backSecondary: const Color(0xFF252528),
     backElevated: const Color(0xFF3C3C3F),
+    backSecondaryForHeader: const Color(0xFF252528),
   );
 }

@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_app/presentation/theme/custmo_color_scheme.dart';
-import 'package:todo_app/presentation/theme/theme.dart';
+import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
+import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
 import '../../domain/models/todo.dart';
 
@@ -20,7 +20,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Consumer<List<Todo>>(
       builder: (context, todos, _) => Card(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: background(shrinkOffset, context),
         margin: EdgeInsets.zero,
         elevation: elevation(shrinkOffset),
         shape: const RoundedRectangleBorder(
@@ -71,12 +71,16 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                         ? Icon(
                             Icons.visibility_off,
                             size: 24,
-                            color: Theme.of(context).extension<CustomColors>()!.colorBlue,
+                            color: Theme.of(context)
+                                .extension<CustomColors>()!
+                                .colorBlue,
                           )
                         : Icon(
                             Icons.visibility,
                             size: 24,
-                            color: Theme.of(context).extension<CustomColors>()!.colorBlue,
+                            color: Theme.of(context)
+                                .extension<CustomColors>()!
+                                .colorBlue,
                           )),
               ),
             ],
@@ -102,6 +106,14 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
         max(from,
             to)); // to avoid getting out of the range of acceptable values
     return clampedResult;
+  }
+
+  Color background(double shrinkOffset, BuildContext context) {
+    Color? temp = Color.lerp(
+        Theme.of(context).extension<CustomColors>()!.backPrimary,
+        Theme.of(context).extension<CustomColors>()!.backSecondaryForHeader,
+        transition(from: 0, to: 1, shrinkOffset: shrinkOffset));
+    return temp!;
   }
 
   double elevation(double shrinkOffset) {

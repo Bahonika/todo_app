@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/presentation/theme/custmo_color_scheme.dart';
+import 'package:todo_app/presentation/theme/custom_colors.dart';
 
 class CustomTheme {
   // static final RemoteConfigService _remoteConfigService =
@@ -49,6 +49,9 @@ class CustomTheme {
         trackColor: MaterialStateColor.resolveWith(
           (states) => CustomColors.light.supportOverlay,
         ),
+        thumbColor: MaterialStateColor.resolveWith(
+          (states) => CustomColors.light.backElevated,
+        ),
       ),
       unselectedWidgetColor: CustomColors.light.supportSeparator,
       dividerColor: CustomColors.light.supportSeparator,
@@ -61,46 +64,13 @@ class CustomTheme {
       textTheme: textTheme,
       scaffoldBackgroundColor: CustomColors.dark.backPrimary,
       switchTheme: SwitchThemeData(
-        trackColor: MaterialStateColor.resolveWith(
-            (states) => CustomColors.dark.supportOverlay),
-      ),
+          trackColor: MaterialStateColor.resolveWith(
+              (states) => CustomColors.dark.supportOverlay),
+          thumbColor: MaterialStateColor.resolveWith(
+              (states) => CustomColors.dark.backElevated)),
       unselectedWidgetColor: CustomColors.dark.supportSeparator,
       dividerColor: CustomColors.dark.supportSeparator,
     );
   }
 }
 
-class CustomTextTheme {
-  static TextStyle title(BuildContext context) {
-    return Theme.of(context).textTheme.headline1!.copyWith(
-          color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
-        );
-  }
-
-  static TextStyle subtitle(BuildContext context) {
-    return Theme.of(context).textTheme.bodyText1!.copyWith(
-          color: Theme.of(context).extension<CustomColors>()!.labelTertiary,
-        );
-  }
-
-  static TextStyle importanceSubtitle(BuildContext context) {
-    return Theme.of(context).textTheme.subtitle1!.copyWith(
-          color: Theme.of(context).extension<CustomColors>()!.labelTertiary,
-        );
-  }
-
-  static TextStyle todoText(BuildContext context) {
-    return Theme.of(context).textTheme.bodyText1!.copyWith(
-          color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
-        );
-  }
-
-  static TextStyle todoTextDone(BuildContext context) {
-    return Theme.of(context).textTheme.bodyText1!.copyWith(
-          color: Theme.of(context).extension<CustomColors>()!.labelTertiary,
-          decoration: TextDecoration.lineThrough,
-          decorationColor:
-              Theme.of(context).extension<CustomColors>()!.labelTertiary,
-        );
-  }
-}

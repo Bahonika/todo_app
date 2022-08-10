@@ -22,7 +22,6 @@ void main() async {
   LocalService localService = LocalService.localService();
   await localService.init();
 
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -76,26 +75,28 @@ class _MyAppState extends State<MyApp> {
 
     return Provider<NavigationController>.value(
       value: navigationController,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Todo App',
+      child: OrientationBuilder(
+        builder: (context, orientation) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Todo App',
 
-        // theme
-        theme: CustomTheme.lightTheme,
-        darkTheme: CustomTheme.darkTheme,
-        themeMode: ThemeMode.system,
+          // theme
+          theme: CustomTheme.lightTheme,
+          darkTheme: CustomTheme.darkTheme,
+          themeMode: ThemeMode.light,
 
-        //localization
-        localizationsDelegates: LocalizationsDelegates.delegates,
-        supportedLocales: S.supportedLocales,
-        locale: _locale,
+          //localization
+          localizationsDelegates: LocalizationsDelegates.delegates,
+          supportedLocales: S.supportedLocales,
+          locale: _locale,
 
-        // navigation
-        onUnknownRoute: (settings) => navigationController.toUnknownPage(),
-        initialRoute: navigationController.initialRoute,
-        onGenerateRoute: (settings) =>
-            navigationController.onGenerateRoute(settings),
-        navigatorKey: navigationController.key,
+          // navigation
+          onUnknownRoute: (settings) => navigationController.toUnknownPage(),
+          initialRoute: navigationController.initialRoute,
+          onGenerateRoute: (settings) =>
+              navigationController.onGenerateRoute(settings),
+          navigatorKey: navigationController.key,
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/presentation/theme/custom_colors.dart';
 
 class WrapCard extends StatelessWidget {
   final Widget child;
@@ -13,6 +14,7 @@ class WrapCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
+      color: Theme.of(context).extension<CustomColors>()!.backSecondary,
       child: child,
     );
   }
