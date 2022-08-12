@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
@@ -8,8 +10,6 @@ import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
 class TodoListScreen extends StatefulWidget {
@@ -24,7 +24,6 @@ class _TodoListScreenState extends State<TodoListScreen>
   @override
   void initState() {
     super.initState();
-    context.read<TodosProvider>().getTodos();
   }
 
   @override
@@ -39,6 +38,7 @@ class _TodoListScreenState extends State<TodoListScreen>
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
+
             context.read<NavigationController>().openCreateTodo();
           },
           backgroundColor:
@@ -76,30 +76,23 @@ class SliverTodoList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var todoToShow = [];
     return SliverToBoxAdapter(
-      child: Consumer<List<Todo>>(builder: (context, todos, _) {
-        // list, that user must see at this moment
-        final List<Todo> todoToShow =
-            context.watch<TodosProvider>().showCompleted
-                ? todos
-                : todos.where((element) => !element.done).toList();
-
-        return WrapCard(
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            controller: ScrollController(),
-            itemBuilder: (BuildContext context, index) {
-              if (index == todoToShow.length) {
-                return TextFieldTile(); // last tile with text field
-              } else {
-                return TodoWidget(todo: todoToShow[index]);
-              }
-            },
-            itemCount: todoToShow.length + 1,
-          ),
-        );
-      }),
+      child: WrapCard(
+        child: ListView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          controller: ScrollController(),
+          itemBuilder: (BuildContext context, index) {
+            if (index == todoToShow.length) {
+              return TextFieldTile(); // last tile with text field
+            } else {
+              return TodoWidget(todo: todoToShow[index]);
+            }
+          },
+          itemCount: todoToShow.length + 1,
+        ),
+      ),
     );
   }
 }
@@ -110,11 +103,7 @@ class TextFieldTile extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
 
   createTodo(BuildContext context) {
-    final createProvider = context.read<CreateTaskDataProvider>();
-    createProvider.setControllerText(_controller.text);
-    final Todo todo = createProvider.modelingTodo();
-    context.read<TodosProvider>().createTodo(todo: todo);
-    createProvider.eraseData();
+
   }
 
   @override
@@ -157,16 +146,13 @@ class TodoWidget extends StatefulWidget {
 
 class _TodoWidgetState extends State<TodoWidget> {
   void delete() {
-    context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
   }
 
   Future<bool> setAsDone() async {
-    context.read<TodosProvider>().setAsDone(widget.todo);
     return false;
   }
 
   bool setAsUndone() {
-    context.read<TodosProvider>().setAsUndone(widget.todo);
     return false;
   }
 
@@ -183,13 +169,6 @@ class _TodoWidgetState extends State<TodoWidget> {
   }
 
   void fieldsFill() {
-    var provider = context.read<CreateTaskDataProvider>();
-    provider.setControllerText(widget.todo.text);
-    if (widget.todo.deadline != null) {
-      provider.selectedDate = widget.todo.deadline!;
-      provider.showDate = true;
-    }
-    provider.selectedImportance = widget.todo.importance;
   }
 
   void toEditScreen() {

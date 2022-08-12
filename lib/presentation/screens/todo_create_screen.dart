@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/main.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
-import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
@@ -23,83 +21,61 @@ class TodoCreateScreen extends StatefulWidget {
 }
 
 class _TodoCreateScreenState extends State<TodoCreateScreen> {
-  void createTask() {
-    final Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
-    context.read<TodosProvider>().createTodo(todo: todo);
-    context.read<CreateTaskDataProvider>().eraseData();
-  }
+  void createTask() {}
 
-  void editTask() {
-    final Todo todo = context
-        .read<CreateTaskDataProvider>()
-        .modelingTodo(todo: widget.todoForEdit);
-    context.read<TodosProvider>().updateTodo(todo);
-    context.read<CreateTaskDataProvider>().eraseData();
-  }
+  void editTask() {}
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
-          ),
-          onPressed: () {
-            if (widget.isEdit) {
-              context.read<CreateTaskDataProvider>().eraseData();
-            }
-            context.read<NavigationController>().pop();
-          },
-        ),
-        actions: [
-          TextButton(
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
+            ),
             onPressed: () {
-              if (context
-                  .read<CreateTaskDataProvider>()
-                  .controller
-                  .text
-                  .isNotEmpty) {
-                if (widget.isEdit) {
-                  editTask();
-                } else {
-                  createTask();
-                }
-                context.read<NavigationController>().pop();
-              }
+              ref.read(navigationProvider).pop();
             },
-            child: Text(
-              S.of(context).save,
-              style: TextStyle(
-                  color:
-                      Theme.of(context).extension<CustomColors>()!.colorBlue),
-            ),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TextFieldTile(),
-            const ImportanceTile(),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Divider(),
-            ),
-            const DateTile(),
-            const Divider(),
-            DeleteTile(isDisabled: !widget.isEdit, todo: widget.todoForEdit),
-            const SizedBox(
-              height: 50,
+          actions: [
+            TextButton(
+              onPressed: () {
+                ref.read(navigationProvider).pop();
+              },
+              child: Text(
+                S.of(context).save,
+                style: TextStyle(
+                    color:
+                        Theme.of(context).extension<CustomColors>()!.colorBlue),
+              ),
             ),
           ],
         ),
-      ),
-    );
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const TextFieldTile(),
+              const ImportanceTile(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Divider(),
+              ),
+              const DateTile(),
+              const Divider(),
+              DeleteTile(isDisabled: !widget.isEdit, todo: widget.todoForEdit),
+              const SizedBox(
+                height: 50,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 }
 
@@ -108,11 +84,9 @@ class TextFieldTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var controller = context.watch<CreateTaskDataProvider>().controller;
-
     return WrapCard(
       child: TextFormField(
-        controller: controller,
+        controller: TextEditingController(),
         style: CustomTextTheme.body(context),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -161,12 +135,10 @@ class _ImportanceTileState extends State<ImportanceTile> {
           ],
           isDense: true,
           isExpanded: false,
-          value: context.watch<CreateTaskDataProvider>().selectedImportance,
+          value: Importance.basic,
           style: CustomTextTheme.importanceSubtitle(context),
           icon: const SizedBox(),
-          onChanged: (value) {
-            context.read<CreateTaskDataProvider>().selectedImportance = value!;
-          },
+          onChanged: (value) {},
         ),
       ),
     );
@@ -179,11 +151,8 @@ class DateTile extends StatelessWidget {
   static DateTime? tempPickedDate;
 
   Future<void> selectDate(BuildContext context) async {
-    final createTaskProvider =
-        Provider.of<CreateTaskDataProvider>(context, listen: false);
-
-    final String hintText = createTaskProvider.selectedDate.year.toString();
-    final DateTime initialDate = createTaskProvider.selectedDate;
+    final String hintText = DateTime.now().year.toString();
+    final DateTime initialDate = DateTime.now();
 
     tempPickedDate = await showDatePicker(
       context: context,
@@ -197,9 +166,7 @@ class DateTile extends StatelessWidget {
 
   void setSelectedDate(BuildContext context) {
     selectDate(context).then((value) {
-      if (tempPickedDate != null) {
-        context.read<CreateTaskDataProvider>().selectedDate = tempPickedDate!;
-      }
+      if (tempPickedDate != null) {}
     });
   }
 
@@ -210,12 +177,11 @@ class DateTile extends StatelessWidget {
         S.of(context).doneBy,
         style: CustomTextTheme.body(context),
       ),
-      subtitle: context.watch<CreateTaskDataProvider>().showDate
+      subtitle: true
           ? InkWell(
               onTap: () => setSelectedDate(context),
               child: Text(
-                MyDateFormat().localeFormat(
-                    context.watch<CreateTaskDataProvider>().selectedDate),
+                MyDateFormat().localeFormat(DateTime.now()),
                 style: TextStyle(
                     color:
                         Theme.of(context).extension<CustomColors>()!.colorBlue),
@@ -223,21 +189,19 @@ class DateTile extends StatelessWidget {
             )
           : const SizedBox(),
       trailing: Switch(
-        value: context.watch<CreateTaskDataProvider>().showDate,
+        value: true,
         activeTrackColor: Theme.of(context)
             .extension<CustomColors>()!
             .colorBlue
             .withOpacity(0.3),
         activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
-        onChanged: (bool value) {
-          context.read<CreateTaskDataProvider>().showDate = value;
-        },
+        onChanged: (bool value) {},
       ),
     );
   }
 }
 
-class DeleteTile extends StatelessWidget {
+class DeleteTile extends ConsumerWidget {
   final bool isDisabled;
   final Todo? todo;
 
@@ -246,8 +210,6 @@ class DeleteTile extends StatelessWidget {
 
   void delete(BuildContext context) {
     if (!isDisabled) {
-      Provider.of<TodosProvider>(context, listen: false).deleteTodo(todo!.uuid);
-      context.read<NavigationController>().pop();
     }
   }
 

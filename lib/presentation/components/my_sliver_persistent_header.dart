@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/localization/s.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
 import '../../domain/models/todo.dart';
@@ -21,8 +20,8 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return Consumer<List<Todo>>(
-      builder: (context, todos, _) => Card(
+    var todos = [];
+    return  Card(
         color: background(shrinkOffset, context),
         margin: EdgeInsets.zero,
         elevation: elevation(shrinkOffset),
@@ -67,11 +66,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                 bottom: bottomIconPadding(shrinkOffset),
                 right: rightPadding(shrinkOffset),
                 child: InkWell(
-                  onTap: () {
-                    context.read<TodosProvider>().showCompleted =
-                        !context.read<TodosProvider>().showCompleted;
-                  },
-                  child: context.watch<TodosProvider>().showCompleted
+                  child: true
                       ? Icon(
                           Icons.visibility_off,
                           size: 24,
@@ -91,7 +86,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
             ],
           ),
         ),
-      ),
+
     );
   }
 
