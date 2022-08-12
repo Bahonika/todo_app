@@ -2,15 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/data/api/services/local.dart';
-import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/localization/localozations_delegates.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
-import 'package:todo_app/presentation/providers/revision_provider.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
 import 'firebase_options.dart';
@@ -30,21 +26,15 @@ Future<void> main() async {
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => TodosProvider()),
-        ChangeNotifierProvider(create: (_) => CreateTaskDataProvider()),
-        ChangeNotifierProvider(create: (_) => RevisionProvider()),
-        StreamProvider<List<Todo>>(
-          create: (context) =>
-              Provider.of<TodosProvider>(context, listen: false).todoListStream,
-          initialData: const <Todo>[],
-        )
-      ],
-      child: const MyApp(),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }
+
+final navigationProvider = Provider<NavigationController>((ref) {
+  return NavigationController();
+});
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -62,8 +52,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    late final navigationController = NavigationController();
-
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Theme.of(context).scaffoldBackgroundColor,
@@ -74,9 +62,8 @@ class _MyAppState extends State<MyApp> {
       ),
     );
 
-    return Provider<NavigationController>.value(
-      value: navigationController,
-      child: MaterialApp(
+    return Consumer(builder: (BuildContext context, WidgetRef ref, _) {
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
 
         // theme
@@ -90,12 +77,13 @@ class _MyAppState extends State<MyApp> {
         locale: S.current,
 
         // navigation
-        onUnknownRoute: (settings) => navigationController.toUnknownPage(),
-        initialRoute: navigationController.initialRoute,
+        onUnknownRoute: (settings) =>
+            ref.read(navigationProvider).toUnknownPage(),
+        initialRoute: ref.read(navigationProvider).initialRoute,
         onGenerateRoute: (settings) =>
-            navigationController.onGenerateRoute(settings),
-        navigatorKey: navigationController.key,
-      ),
-    );
+            ref.read(navigationProvider).onGenerateRoute(settings),
+        navigatorKey: ref.read(navigationProvider).key,
+      );
+    });
   }
 }
