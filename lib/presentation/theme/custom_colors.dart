@@ -72,7 +72,8 @@ class CustomColors extends ThemeExtension<CustomColors> {
       backPrimary: backPrimary ?? this.backPrimary,
       backSecondary: backSecondary ?? this.backSecondary,
       backElevated: backElevated ?? this.backElevated,
-      backSecondaryForHeader: backSecondaryForHeader ?? this.backSecondaryForHeader,
+      backSecondaryForHeader:
+          backSecondaryForHeader ?? this.backSecondaryForHeader,
     );
   }
 
@@ -99,7 +100,8 @@ class CustomColors extends ThemeExtension<CustomColors> {
       backPrimary: Color.lerp(backPrimary, other.backPrimary, t)!,
       backSecondary: Color.lerp(backSecondary, other.backSecondary, t)!,
       backElevated: Color.lerp(backElevated, other.backElevated, t)!,
-      backSecondaryForHeader: Color.lerp(backSecondaryForHeader, other.backSecondaryForHeader, t)!,
+      backSecondaryForHeader:
+          Color.lerp(backSecondaryForHeader, other.backSecondaryForHeader, t)!,
     );
   }
 
@@ -119,7 +121,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     backPrimary: const Color(0xFFF7F6F2),
     backSecondary: const Color(0xFFFFFFFF),
     backElevated: const Color(0xFFFFFFFF),
-      backSecondaryForHeader: const Color(0xFFF7F6F2),
+    backSecondaryForHeader: const Color(0xFFF7F6F2),
   );
 
   static final dark = CustomColors(

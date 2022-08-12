@@ -67,7 +67,6 @@ class _MySliverAppBarState extends State<MySliverAppBar>
     return SliverPersistentHeader(
       delegate: MySliverPersistentHeader(thisVsync: this),
       pinned: true,
-      // floating: true,
     );
   }
 }
@@ -80,9 +79,10 @@ class SliverTodoList extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Consumer<List<Todo>>(builder: (context, todos, _) {
         // list, that user must see at this moment
-        List<Todo> todoToShow = context.watch<TodosProvider>().showCompleted
-            ? todos
-            : todos.where((element) => !element.done).toList();
+        final List<Todo> todoToShow =
+            context.watch<TodosProvider>().showCompleted
+                ? todos
+                : todos.where((element) => !element.done).toList();
 
         return WrapCard(
           child: ListView.builder(
@@ -110,9 +110,9 @@ class TextFieldTile extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
 
   createTodo(BuildContext context) {
-    var createProvider = context.read<CreateTaskDataProvider>();
+    final createProvider = context.read<CreateTaskDataProvider>();
     createProvider.setControllerText(_controller.text);
-    Todo todo = createProvider.modelingTodo();
+    final Todo todo = createProvider.modelingTodo();
     context.read<TodosProvider>().createTodo(todo: todo);
     createProvider.eraseData();
   }
@@ -126,13 +126,15 @@ class TextFieldTile extends StatelessWidget {
         title: TextFormField(
           controller: _controller,
           decoration: InputDecoration(
-              hintText: S.of(context).newTodo,
-              hintStyle: CustomTextTheme.importanceSubtitle(context),
-              border: InputBorder.none,
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.subdirectory_arrow_left_outlined),
-                onPressed: () => createTodo(context),
-              )),
+            hintText: S.of(context).newTodo,
+            hintStyle: CustomTextTheme.importanceSubtitle(context),
+            border: InputBorder.none,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.subdirectory_arrow_left_outlined),
+              onPressed: () => createTodo(context),
+            ),
+          ),
+          style: CustomTextTheme.body(context),
           onSaved: (value) => createTodo(context),
           onEditingComplete: () => createTodo(context),
           onFieldSubmitted: (value) => createTodo(context),
@@ -147,7 +149,7 @@ class TextFieldTile extends StatelessWidget {
 class TodoWidget extends StatefulWidget {
   final Todo todo;
 
-  const TodoWidget({Key? key, required this.todo}) : super(key: key);
+  const TodoWidget({required this.todo, Key? key}) : super(key: key);
 
   @override
   State<TodoWidget> createState() => _TodoWidgetState();
@@ -165,12 +167,16 @@ class _TodoWidgetState extends State<TodoWidget> {
 
   bool setAsUndone() {
     context.read<TodosProvider>().setAsUndone(widget.todo);
-    return true;
+    return false;
   }
 
   Future<bool> confirmDismiss(direction) async {
     if (direction == DismissDirection.startToEnd) {
-      return setAsDone();
+      if (widget.todo.done) {
+        return setAsUndone();
+      } else {
+        return setAsDone();
+      }
     } else {
       return true;
     }
@@ -201,9 +207,7 @@ class _TodoWidgetState extends State<TodoWidget> {
       child: GestureDetector(
         child: Dismissible(
           key: Key(widget.todo.uuid.toString()),
-          direction: widget.todo.done // if already done - cant swipe to right
-              ? DismissDirection.endToStart
-              : DismissDirection.horizontal,
+          direction: DismissDirection.horizontal,
           confirmDismiss: (direction) => confirmDismiss(direction),
           onDismissed: (direction) {
             if (direction == DismissDirection.endToStart) {
@@ -271,15 +275,6 @@ class _TodoWidgetState extends State<TodoWidget> {
         ),
       ),
     );
-  }
-}
-
-class DismissibleChild extends StatelessWidget {
-  const DismissibleChild({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
 

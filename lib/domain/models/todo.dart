@@ -22,15 +22,16 @@ class Todo extends HiveObject {
   @HiveField(7)
   final String lastUpdatedBy;
 
-  Todo(
-      {required this.createdAt,
-      required this.changedAt,
-      required this.lastUpdatedBy,
-      required this.uuid,
-      this.deadline,
-      required this.done,
-      required this.text,
-      required this.importance});
+  Todo({
+    required this.createdAt,
+    required this.changedAt,
+    required this.lastUpdatedBy,
+    required this.uuid,
+    this.deadline,
+    required this.done,
+    required this.text,
+    required this.importance,
+  });
 
   Todo copyWith({
     String? uuid,

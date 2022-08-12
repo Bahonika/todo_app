@@ -13,11 +13,14 @@ import '../../domain/models/todo.dart';
 class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   final TickerProvider thisVsync;
 
-  MySliverPersistentHeader({required this.thisVsync});
+  const MySliverPersistentHeader({required this.thisVsync});
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Consumer<List<Todo>>(
       builder: (context, todos, _) => Card(
         color: background(shrinkOffset, context),
@@ -54,7 +57,8 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                 child: Opacity(
                   opacity: opacity(shrinkOffset),
                   child: Text(
-                    "${S.of(context).done}${todos.where((element) => element.done).length}",
+                    "${S.of(context).done}"
+                    "${todos.where((element) => element.done).length}",
                     style: CustomTextTheme.subtitle(context),
                   ),
                 ),
@@ -63,25 +67,26 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                 bottom: bottomIconPadding(shrinkOffset),
                 right: rightPadding(shrinkOffset),
                 child: InkWell(
-                    onTap: () {
-                      context.read<TodosProvider>().showCompleted =
-                          !context.read<TodosProvider>().showCompleted;
-                    },
-                    child: context.watch<TodosProvider>().showCompleted
-                        ? Icon(
-                            Icons.visibility_off,
-                            size: 24,
-                            color: Theme.of(context)
-                                .extension<CustomColors>()!
-                                .colorBlue,
-                          )
-                        : Icon(
-                            Icons.visibility,
-                            size: 24,
-                            color: Theme.of(context)
-                                .extension<CustomColors>()!
-                                .colorBlue,
-                          )),
+                  onTap: () {
+                    context.read<TodosProvider>().showCompleted =
+                        !context.read<TodosProvider>().showCompleted;
+                  },
+                  child: context.watch<TodosProvider>().showCompleted
+                      ? Icon(
+                          Icons.visibility_off,
+                          size: 24,
+                          color: Theme.of(context)
+                              .extension<CustomColors>()!
+                              .colorBlue,
+                        )
+                      : Icon(
+                          Icons.visibility,
+                          size: 24,
+                          color: Theme.of(context)
+                              .extension<CustomColors>()!
+                              .colorBlue,
+                        ),
+                ),
               ),
             ],
           ),
@@ -94,22 +99,21 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     required double from,
     required double to,
     required double shrinkOffset,
-    double speed = 1,
+    double speed = 1, // Speed means how fast ratio is changing
   }) {
-    // Speed means how fast ratio is changing
-    num ratio = pow(shrinkOffset / maxExtent, 1 / speed); // from 0.0 to 1.0
-    double difference = to - from;
+    final ratio = pow(shrinkOffset / maxExtent, 1 / speed); // from 0.0 to 1.0
+    final difference = to - from;
 
-    double result = from + difference * ratio;
-    double clampedResult = result.clamp(
-        min(from, to),
-        max(from,
-            to)); // to avoid getting out of the range of acceptable values
+    final result = from + difference * ratio;
+    final double clampedResult = result.clamp(
+      min(from, to),
+      max(from, to),
+    ); // to avoid getting out of the range of acceptable values
     return clampedResult;
   }
 
   Color background(double shrinkOffset, BuildContext context) {
-    Color? temp = Color.lerp(
+    final temp = Color.lerp(
         Theme.of(context).extension<CustomColors>()!.backPrimary,
         Theme.of(context).extension<CustomColors>()!.backSecondaryForHeader,
         transition(from: 0, to: 1, shrinkOffset: shrinkOffset));
@@ -117,50 +121,50 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   }
 
   double elevation(double shrinkOffset) {
-    double min = 0;
-    double max = 3;
+    const min = 0.0;
+    const max = 3.0;
     return transition(from: min, to: max, shrinkOffset: shrinkOffset);
   }
 
   double titleSize(double shrinkOffset, BuildContext context) {
-    double min = Theme.of(context).textTheme.headline2!.fontSize!;
-    double max = Theme.of(context).textTheme.headline1!.fontSize!;
+    final min = Theme.of(context).textTheme.headline2!.fontSize!;
+    final max = Theme.of(context).textTheme.headline1!.fontSize!;
     return transition(from: max, to: min, shrinkOffset: shrinkOffset);
   }
 
   titleHeight(double shrinkOffset, BuildContext context) {
-    double max = Theme.of(context).textTheme.headline2!.height!;
-    double min = Theme.of(context).textTheme.headline1!.height!;
+    final max = Theme.of(context).textTheme.headline2!.height!;
+    final min = Theme.of(context).textTheme.headline1!.height!;
     return transition(from: max, to: min, shrinkOffset: shrinkOffset);
   }
 
   double leftPadding(double shrinkOffset) {
-    const double min = 16;
-    const double max = 60;
+    const min = 16.0;
+    const max = 60.0;
     return transition(from: max, to: min, shrinkOffset: shrinkOffset);
   }
 
   double rightPadding(double shrinkOffset) {
-    const double min = 19;
-    const double max = 25;
+    const min = 19.0;
+    const max = 25.0;
     return transition(from: max, to: min, shrinkOffset: shrinkOffset);
   }
 
   double bottomTitlePadding(double shrinkOffset) {
-    const double min = 16;
-    const double max = 44;
+    const min = 16.0;
+    const max = 44.0;
     return transition(from: max, to: min, shrinkOffset: shrinkOffset);
   }
 
   double bottomIconPadding(double shrinkOffset) {
-    const double min = 16;
-    const double max = 18;
+    const min = 16.0;
+    const max = 18.0;
     return transition(from: max, to: min, shrinkOffset: shrinkOffset);
   }
 
   double opacity(double shrinkOffset) {
-    const double min = 0;
-    const double max = 1;
+    const min = 0.0;
+    const max = 1.0;
     return transition(from: max, to: min, shrinkOffset: shrinkOffset, speed: 4);
   }
 

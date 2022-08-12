@@ -16,7 +16,7 @@ class TodoMapper {
   }
 
   static Map<String, dynamic> toApi(Todo todo) {
-    Map<String, dynamic> map = {};
+    final map = <String, dynamic>{};
     map["id"] = todo.uuid;
     map["done"] = todo.done;
     map["text"] = todo.text;
@@ -28,18 +28,20 @@ class TodoMapper {
           (todo.deadline!.toUtc().microsecondsSinceEpoch / 1000).round();
     }
 
-    map["created_at"] = (todo.createdAt.toUtc().microsecondsSinceEpoch / 1000).round();
-    map["changed_at"] = (todo.changedAt.toUtc().microsecondsSinceEpoch / 1000).round();
+    map["created_at"] =
+        (todo.createdAt.toUtc().microsecondsSinceEpoch / 1000).round();
+    map["changed_at"] =
+        (todo.changedAt.toUtc().microsecondsSinceEpoch / 1000).round();
     map["last_updated_by"] = "123";
 
     return {"element": map};
   }
 
-  static Map<String, dynamic> listToApi(List<Todo> todos){
-    List<Map<String, dynamic>> list = [];
+  static Map<String, dynamic> listToApi(List<Todo> todos) {
+    final list = <Map<String, dynamic>>[];
 
-    for (int i = 0; i < todos.length; i++){
-      Map<String, dynamic> map = {};
+    for (int i = 0; i < todos.length; i++) {
+      final map = <String, dynamic>{};
       map["id"] = todos[i].uuid;
       map["done"] = todos[i].done;
       map["text"] = todos[i].text;

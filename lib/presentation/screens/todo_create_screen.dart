@@ -24,13 +24,13 @@ class TodoCreateScreen extends StatefulWidget {
 
 class _TodoCreateScreenState extends State<TodoCreateScreen> {
   void createTask() {
-    Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
+    final Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
     context.read<TodosProvider>().createTodo(todo: todo);
     context.read<CreateTaskDataProvider>().eraseData();
   }
 
   void editTask() {
-    Todo todo = context
+    final Todo todo = context
         .read<CreateTaskDataProvider>()
         .modelingTodo(todo: widget.todoForEdit);
     context.read<TodosProvider>().updateTodo(todo);
@@ -126,32 +126,6 @@ class ImportanceTile extends StatefulWidget {
 }
 
 class _ImportanceTileState extends State<ImportanceTile> {
-  List<DropdownMenuItem<Importance>> items = [];
-
-  //need fill function because of using context inside
-  void itemsFill() {
-    items = [
-      DropdownMenuItem(
-        value: Importance.basic,
-        child: Text(S.of(context).basic),
-      ),
-      DropdownMenuItem(
-        value: Importance.low,
-        child: Text(S.of(context).low),
-      ),
-      DropdownMenuItem(
-        value: Importance.important,
-        child: Text(S.of(context).important),
-      ),
-    ];
-  }
-
-  @override
-  void didChangeDependencies() {
-    itemsFill();
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -162,7 +136,20 @@ class _ImportanceTileState extends State<ImportanceTile> {
       subtitle: DropdownButtonHideUnderline(
         child: DropdownButton<Importance>(
           itemHeight: 49,
-          items: items,
+          items: [
+            DropdownMenuItem(
+              value: Importance.basic,
+              child: Text(S.of(context).basic),
+            ),
+            DropdownMenuItem(
+              value: Importance.low,
+              child: Text(S.of(context).low),
+            ),
+            DropdownMenuItem(
+              value: Importance.important,
+              child: Text(S.of(context).important),
+            ),
+          ],
           isDense: true,
           isExpanded: false,
           value: context.watch<CreateTaskDataProvider>().selectedImportance,
@@ -183,11 +170,11 @@ class DateTile extends StatelessWidget {
   static DateTime? tempPickedDate;
 
   Future<void> selectDate(BuildContext context) async {
-    var createTaskProvider =
+    final createTaskProvider =
         Provider.of<CreateTaskDataProvider>(context, listen: false);
 
-    String hintText = createTaskProvider.selectedDate.year.toString();
-    DateTime initialDate = createTaskProvider.selectedDate;
+    final String hintText = createTaskProvider.selectedDate.year.toString();
+    final DateTime initialDate = createTaskProvider.selectedDate;
 
     tempPickedDate = await showDatePicker(
       context: context,
@@ -199,7 +186,7 @@ class DateTile extends StatelessWidget {
     );
   }
 
-  setSelectedDate(BuildContext context) {
+  void setSelectedDate(BuildContext context) {
     selectDate(context).then((value) {
       if (tempPickedDate != null) {
         context.read<CreateTaskDataProvider>().selectedDate = tempPickedDate!;
@@ -248,14 +235,11 @@ class DeleteTile extends StatelessWidget {
   const DeleteTile({Key? key, required this.isDisabled, this.todo})
       : super(key: key);
 
-  Function()? delete(BuildContext context) {
-    if (isDisabled) {
-      return null;
-    } else {
+  void delete(BuildContext context) {
+    if (!isDisabled) {
       Provider.of<TodosProvider>(context, listen: false).deleteTodo(todo!.uuid);
       context.read<NavigationController>().pop();
     }
-    return null;
   }
 
   @override

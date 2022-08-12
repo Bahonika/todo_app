@@ -9,5 +9,4 @@ class RevisionProvider with ChangeNotifier {
     _revision = value;
     notifyListeners();
   }
-
 }

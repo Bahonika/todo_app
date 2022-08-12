@@ -15,11 +15,11 @@ import 'package:todo_app/presentation/localization/s.dart';
 
 import 'firebase_options.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //init hive storage
-  LocalService localService = LocalService.localService();
+  final LocalService localService = LocalService.localService();
   await localService.init();
 
   await Firebase.initializeApp(
@@ -54,8 +54,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _locale = S.current;
-
   @override
   void dispose() {
     LocalService.localService().dispose();
@@ -64,39 +62,39 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final navigationController = NavigationController();
+    late final navigationController = NavigationController();
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
         statusBarColor: Theme.of(context).scaffoldBackgroundColor,
         systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
         statusBarBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.dark));
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     return Provider<NavigationController>.value(
       value: navigationController,
-      child: OrientationBuilder(
-        builder: (context, orientation) => MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Todo App',
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
 
-          // theme
-          theme: CustomTheme.lightTheme,
-          darkTheme: CustomTheme.darkTheme,
-          themeMode: ThemeMode.light,
+        // theme
+        theme: CustomTheme.lightTheme,
+        darkTheme: CustomTheme.darkTheme,
+        themeMode: ThemeMode.light,
 
-          //localization
-          localizationsDelegates: LocalizationsDelegates.delegates,
-          supportedLocales: S.supportedLocales,
-          locale: _locale,
+        //localization
+        localizationsDelegates: LocalizationsDelegates.delegates,
+        supportedLocales: S.supportedLocales,
+        locale: S.current,
 
-          // navigation
-          onUnknownRoute: (settings) => navigationController.toUnknownPage(),
-          initialRoute: navigationController.initialRoute,
-          onGenerateRoute: (settings) =>
-              navigationController.onGenerateRoute(settings),
-          navigatorKey: navigationController.key,
-        ),
+        // navigation
+        onUnknownRoute: (settings) => navigationController.toUnknownPage(),
+        initialRoute: navigationController.initialRoute,
+        onGenerateRoute: (settings) =>
+            navigationController.onGenerateRoute(settings),
+        navigatorKey: navigationController.key,
       ),
     );
   }
