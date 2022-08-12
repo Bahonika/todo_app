@@ -58,12 +58,18 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              if (widget.isEdit) {
-                editTask();
-              } else {
-                createTask();
+              if (context
+                  .read<CreateTaskDataProvider>()
+                  .controller
+                  .text
+                  .isNotEmpty) {
+                if (widget.isEdit) {
+                  editTask();
+                } else {
+                  createTask();
+                }
+                context.read<NavigationController>().pop();
               }
-              context.read<NavigationController>().pop();
             },
             child: Text(
               S.of(context).save,
@@ -102,15 +108,18 @@ class TextFieldTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var controller = context.watch<CreateTaskDataProvider>().controller;
+
     return WrapCard(
       child: TextFormField(
-        controller: context.watch<CreateTaskDataProvider>().controller,
+        controller: controller,
         style: CustomTextTheme.body(context),
         decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: S.of(context).needToDo,
-            hintStyle: CustomTextTheme.importanceSubtitle(context),
-            contentPadding: const EdgeInsets.all(15)),
+          border: InputBorder.none,
+          hintText: S.of(context).needToDo,
+          hintStyle: CustomTextTheme.importanceSubtitle(context),
+          contentPadding: const EdgeInsets.all(15),
+        ),
         minLines: 5,
         maxLines: null,
       ),

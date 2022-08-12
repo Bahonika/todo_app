@@ -34,4 +34,11 @@ class CustomTextTheme {
               Theme.of(context).extension<CustomColors>()!.labelTertiary,
         );
   }
+
+  static TextStyle error(BuildContext context) {
+    return Theme.of(context)
+        .textTheme
+        .bodyText1!
+        .copyWith(color: Theme.of(context).extension<CustomColors>()!.colorRed);
+  }
 }

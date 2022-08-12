@@ -39,8 +39,8 @@ class ServiceUtil {
 
   Future<List<Todo>> getTodos() async {
     List<Todo> localTodos = getFromLocal();
-    // List<Todo> remoteTodos = await getFromRemote();
-    return localTodos;
+    List<Todo> remoteTodos = await getFromRemote();
+    return remoteTodos;
   }
 
   Future<void> deleteTodo(String uuid) async {
