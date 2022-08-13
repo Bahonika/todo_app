@@ -2,15 +2,23 @@
 
 Todo flutter app
 
-## Getting Started
+Features:
+   - Interlocalization according to the platform language with intl
+   - flutter_lines added and running
+   - All code formatted
+   - Four architectural layers were used
+   - Provider as State Manager
+   - Local and Remote data layers
+   - Connected crashlitics
+   - Connected Logger
 
-This project is a starting point for a Flutter application.
+APK:
+   - https://disk.yandex.ru/d/IH_w8AT6P2VB6w
 
-A few resources to get you started if this is your first Flutter project:
+Firebase:
+   - https://console.firebase.google.com/u/0/project/done-9bf58/overview
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Images:
+   - ![1](https://user-images.githubusercontent.com/74249484/183281965-5e93414e-fcd7-4c40-ab2a-ecdc2bc84253.png)
+   - ![2](https://user-images.githubusercontent.com/74249484/183281981-3de0862a-e01e-497c-b330-a940659efe7c.png)
+   - ![3](https://user-images.githubusercontent.com/74249484/183281983-570ab4e6-e2eb-4590-9d3d-677d2cd9d71c.png)
