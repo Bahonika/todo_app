@@ -16,10 +16,10 @@ class ServiceUtil {
   List<Todo> getFromLocal() {
     List<Todo> todos = [];
     try {
-      todos = _localService.todos.values.toList();
+      todos = _localService.getTodos();
       _log.i("Get from local");
     } catch (e) {
-      _log.e("Can't get from local");
+      _log.e("Can't get from local", e);
     }
 
     return todos;

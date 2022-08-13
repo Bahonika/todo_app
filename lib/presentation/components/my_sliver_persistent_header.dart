@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:provider/provider.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';

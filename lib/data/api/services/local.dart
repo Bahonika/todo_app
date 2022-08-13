@@ -43,6 +43,11 @@ class LocalService {
     Hive.close();
   }
 
+  List<Todo> getTodos(){
+    final data = _todos.values.toList();
+    return data;
+  }
+
   void create({required Todo todo}) {
     _todos.add(todo);
   }

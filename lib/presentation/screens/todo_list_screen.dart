@@ -1,26 +1,26 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/main.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
+import 'package:todo_app/presentation/providers/todos_controller.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
-import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
-class TodoListScreen extends StatefulWidget {
+class TodoListScreen extends ConsumerStatefulWidget {
   const TodoListScreen({Key? key}) : super(key: key);
 
   @override
-  State<TodoListScreen> createState() => _TodoListScreenState();
+  ConsumerState createState() => _TodoListScreenState();
 }
 
-class _TodoListScreenState extends State<TodoListScreen>
+class _TodoListScreenState extends ConsumerState<TodoListScreen>
     with SingleTickerProviderStateMixin {
+
   @override
   void initState() {
     super.initState();
@@ -38,8 +38,7 @@ class _TodoListScreenState extends State<TodoListScreen>
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-
-            context.read<NavigationController>().openCreateTodo();
+            ref.read(navigationProvider).openCreateTodo();
           },
           backgroundColor:
               Theme.of(context).extension<CustomColors>()!.colorBlue,
@@ -71,12 +70,12 @@ class _MySliverAppBarState extends State<MySliverAppBar>
   }
 }
 
-class SliverTodoList extends StatelessWidget {
+class SliverTodoList extends ConsumerWidget {
   const SliverTodoList({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    var todoToShow = [];
+  Widget build(BuildContext context, WidgetRef ref) {
+    var todoToShow = ref.watch(todosController);
     return SliverToBoxAdapter(
       child: WrapCard(
         child: ListView.builder(
@@ -135,16 +134,16 @@ class TextFieldTile extends StatelessWidget {
   }
 }
 
-class TodoWidget extends StatefulWidget {
+class TodoWidget extends ConsumerStatefulWidget {
   final Todo todo;
 
   const TodoWidget({required this.todo, Key? key}) : super(key: key);
 
   @override
-  State<TodoWidget> createState() => _TodoWidgetState();
+  ConsumerState createState() => _TodoWidgetState();
 }
 
-class _TodoWidgetState extends State<TodoWidget> {
+class _TodoWidgetState extends ConsumerState<TodoWidget> {
   void delete() {
   }
 
@@ -173,10 +172,10 @@ class _TodoWidgetState extends State<TodoWidget> {
 
   void toEditScreen() {
     fieldsFill();
-    context.read<NavigationController>().openCreateTodo(
-          isEdit: true,
-          todoForEdit: widget.todo,
-        );
+    ref.read(navigationProvider).openCreateTodo(
+      isEdit: true,
+      todoForEdit: widget.todo,
+    );
   }
 
   @override
