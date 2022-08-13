@@ -4,25 +4,34 @@ import 'package:todo_app/data/api/services/local.dart';
 import 'package:todo_app/data/api/services/remote.dart';
 import 'package:todo_app/domain/models/todo.dart';
 
-final remoteServiceProvider = Provider<RemoteService>((ref) {
-  return RemoteService();
-});
+final remoteServiceProvider = Provider<RemoteService>(
+  (ref) {
+    return RemoteService();
+  },
+);
 
-final localServiceProvider = Provider<LocalService>((ref) {
-  return LocalService();
-});
+final localServiceProvider = Provider<LocalService>(
+  (ref) {
+    final LocalService localService = LocalService();
+    return localService;
+  },
+);
 
-final serviceUtilProvider = Provider<ServiceUtil>((ref) {
-  return ServiceUtil(
-    ref.watch(remoteServiceProvider),
-    ref.watch(localServiceProvider),
-  );
-});
+final serviceUtilProvider = Provider<ServiceUtil>(
+  (ref) {
+    return ServiceUtil(
+      ref.watch(remoteServiceProvider),
+      ref.watch(localServiceProvider),
+    );
+  },
+);
 
-final todosController = StateNotifierProvider<TodosNotifier, List<Todo>>((ref) {
-  final serviceUtil = ref.watch(serviceUtilProvider);
-  return TodosNotifier(serviceUtil);
-});
+final todosController = StateNotifierProvider<TodosNotifier, List<Todo>>(
+  (ref) {
+    final serviceUtil = ref.watch(serviceUtilProvider);
+    return TodosNotifier(serviceUtil);
+  },
+);
 
 class TodosNotifier extends StateNotifier<List<Todo>> {
   TodosNotifier(this.serviceUtil) : super([]) {
@@ -32,6 +41,7 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
   final ServiceUtil serviceUtil;
 
   void _init() {
+    serviceUtil.localService.init();
     state = const [];
     load();
   }

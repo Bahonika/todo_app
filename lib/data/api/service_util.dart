@@ -13,6 +13,8 @@ class ServiceUtil {
 
   final Logger _log = Logging.logger();
 
+  LocalService get localService => _localService;
+
   List<Todo> getFromLocal() {
     List<Todo> todos = [];
     try {
@@ -21,7 +23,6 @@ class ServiceUtil {
     } catch (e) {
       _log.e("Can't get from local", e);
     }
-
     return todos;
   }
 

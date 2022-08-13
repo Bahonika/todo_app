@@ -6,14 +6,7 @@ import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 
 class LocalService {
-  static LocalService? _localService;
-
   static const _revisionKey = "revision";
-
-  static LocalService localService() {
-    _localService ??= LocalService();
-    return _localService!;
-  }
 
   late Box<Todo> _todos;
   late Box<int> _revision;
@@ -43,7 +36,7 @@ class LocalService {
     Hive.close();
   }
 
-  List<Todo> getTodos(){
+  List<Todo> getTodos() {
     final data = _todos.values.toList();
     return data;
   }

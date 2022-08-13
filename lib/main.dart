@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/data/api/services/local.dart';
+import 'package:todo_app/presentation/providers/todos_controller.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/localization/localozations_delegates.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
@@ -15,8 +16,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //init hive storage
-  final LocalService localService = LocalService.localService();
-  await localService.init();
+  // final LocalService localService = LocalService();
+  // await localService.init();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -36,17 +37,17 @@ final navigationProvider = Provider<NavigationController>((ref) {
   return NavigationController();
 });
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends ConsumerState<MyApp> {
   @override
   void dispose() {
-    LocalService.localService().dispose();
+    ref.read(localServiceProvider).dispose();
     super.dispose();
   }
 
