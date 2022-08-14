@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
@@ -20,7 +22,6 @@ class TodoListScreen extends ConsumerStatefulWidget {
 
 class _TodoListScreenState extends ConsumerState<TodoListScreen>
     with SingleTickerProviderStateMixin {
-
   @override
   void initState() {
     super.initState();
@@ -29,22 +30,27 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        body: const CustomScrollView(
-          slivers: [
-            MySliverAppBar(),
-            SliverTodoList(),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            ref.read(navigationProvider).openCreateTodo();
-          },
-          backgroundColor:
-              Theme.of(context).extension<CustomColors>()!.colorBlue,
-          child: Icon(
-            Icons.add,
-            color: Theme.of(context).extension<CustomColors>()!.colorWhite,
+      child: GestureDetector(
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: Scaffold(
+          body: const CustomScrollView(
+            slivers: [
+              MySliverAppBar(),
+              SliverTodoList(),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              ref.read(navigationProvider).openCreateTodo();
+            },
+            backgroundColor:
+                Theme.of(context).extension<CustomColors>()!.colorBlue,
+            child: Icon(
+              Icons.add,
+              color: Theme.of(context).extension<CustomColors>()!.colorWhite,
+            ),
           ),
         ),
       ),
@@ -96,17 +102,19 @@ class SliverTodoList extends ConsumerWidget {
   }
 }
 
-class TextFieldTile extends StatelessWidget {
+class TextFieldTile extends ConsumerWidget {
   TextFieldTile({Key? key}) : super(key: key);
 
   final TextEditingController _controller = TextEditingController();
 
-  createTodo(BuildContext context) {
-
+  createTodo(WidgetRef ref) {
+    ref.read(textControllerProvider).text = _controller.text;
+    final todo = ref.read(todosController.notifier).generateTodo(ref);
+    ref.read(todosController.notifier).create(todo);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
@@ -119,15 +127,13 @@ class TextFieldTile extends StatelessWidget {
             border: InputBorder.none,
             suffixIcon: IconButton(
               icon: const Icon(Icons.subdirectory_arrow_left_outlined),
-              onPressed: () => createTodo(context),
+              onPressed: () => createTodo(ref),
             ),
           ),
           style: CustomTextTheme.body(context),
-          onSaved: (value) => createTodo(context),
-          onEditingComplete: () => createTodo(context),
-          onFieldSubmitted: (value) => createTodo(context),
+          onFieldSubmitted: (value) => createTodo(ref),
           minLines: 1,
-          maxLines: null,
+          maxLines: 1,
         ),
       ),
     );
@@ -145,13 +151,16 @@ class TodoWidget extends ConsumerStatefulWidget {
 
 class _TodoWidgetState extends ConsumerState<TodoWidget> {
   void delete() {
+    ref.read(todosController.notifier).delete(widget.todo);
   }
 
   Future<bool> setAsDone() async {
+    ref.read(todosController.notifier).setAsDone(widget.todo);
     return false;
   }
 
   bool setAsUndone() {
+    ref.read(todosController.notifier).setAsUndone(widget.todo);
     return false;
   }
 
@@ -167,15 +176,14 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
     }
   }
 
-  void fieldsFill() {
-  }
+  void fieldsFill() {}
 
   void toEditScreen() {
     fieldsFill();
     ref.read(navigationProvider).openCreateTodo(
-      isEdit: true,
-      todoForEdit: widget.todo,
-    );
+          isEdit: true,
+          todoForEdit: widget.todo,
+        );
   }
 
   @override

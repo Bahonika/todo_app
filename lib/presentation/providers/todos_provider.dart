@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:todo_app/domain/models/todo.dart';
 
+
 class TodosProvider with ChangeNotifier {
   List<Todo> _todos = [];
   bool _showCompleted = true;

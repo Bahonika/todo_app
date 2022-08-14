@@ -4,6 +4,7 @@ import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
+import 'package:todo_app/presentation/providers/todos_controller.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/localization/s.dart';
@@ -21,7 +22,10 @@ class TodoCreateScreen extends ConsumerStatefulWidget {
 }
 
 class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
-  void createTask() {}
+  void createTask() {
+    final todo = ref.read(todosController.notifier).generateTodo(ref);
+    ref.read(todosController.notifier).create(todo);
+  }
 
   void editTask() {}
 
@@ -43,6 +47,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
         actions: [
           TextButton(
             onPressed: () {
+              createTask();
               ref.read(navigationProvider).pop();
             },
             child: Text(
@@ -84,7 +89,7 @@ class TextFieldTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WrapCard(
       child: TextFormField(
-        controller: TextEditingController(),
+        controller: ref.watch(textControllerProvider),
         style: CustomTextTheme.body(context),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -99,14 +104,14 @@ class TextFieldTile extends ConsumerWidget {
   }
 }
 
-class ImportanceTile extends StatefulWidget {
+class ImportanceTile extends ConsumerStatefulWidget {
   const ImportanceTile({Key? key}) : super(key: key);
 
   @override
-  State<ImportanceTile> createState() => _ImportanceTileState();
+  ConsumerState<ImportanceTile> createState() => _ImportanceTileState();
 }
 
-class _ImportanceTileState extends State<ImportanceTile> {
+class _ImportanceTileState extends ConsumerState<ImportanceTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -133,10 +138,12 @@ class _ImportanceTileState extends State<ImportanceTile> {
           ],
           isDense: true,
           isExpanded: false,
-          value: Importance.basic,
+          value: ref.watch(selectedImportanceProvider),
           style: CustomTextTheme.importanceSubtitle(context),
           icon: const SizedBox(),
-          onChanged: (value) {},
+          onChanged: (value) {
+            ref.read(selectedImportanceProvider.notifier).setImportance(value!);
+          },
         ),
       ),
     );
@@ -162,9 +169,11 @@ class DateTile extends ConsumerWidget {
     );
   }
 
-  void setSelectedDate(BuildContext context) {
+  void setSelectedDate(BuildContext context, WidgetRef ref) {
     selectDate(context).then((value) {
-      if (tempPickedDate != null) {}
+      if (tempPickedDate != null) {
+        ref.read(selectedDateProvider.notifier).setDate(tempPickedDate!);
+      }
     });
   }
 
@@ -175,11 +184,11 @@ class DateTile extends ConsumerWidget {
         S.of(context).doneBy,
         style: CustomTextTheme.body(context),
       ),
-      subtitle: true
+      subtitle: ref.watch(showDateProvider)
           ? InkWell(
-              onTap: () => setSelectedDate(context),
+              onTap: () => setSelectedDate(context, ref),
               child: Text(
-                MyDateFormat().localeFormat(DateTime.now()),
+                MyDateFormat().localeFormat(ref.watch(selectedDateProvider)),
                 style: TextStyle(
                     color:
                         Theme.of(context).extension<CustomColors>()!.colorBlue),
@@ -187,13 +196,15 @@ class DateTile extends ConsumerWidget {
             )
           : const SizedBox(),
       trailing: Switch(
-        value: true,
+        value: ref.watch(showDateProvider),
         activeTrackColor: Theme.of(context)
             .extension<CustomColors>()!
             .colorBlue
             .withOpacity(0.3),
         activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
-        onChanged: (bool value) {},
+        onChanged: (bool value) {
+          ref.read(showDateProvider.notifier).toggle();
+        },
       ),
     );
   }
