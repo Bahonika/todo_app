@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/presentation/providers/bool_providers.dart';
 import 'package:todo_app/presentation/providers/todos_controller.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/localization/s.dart';
@@ -19,7 +20,6 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    var todos = [];
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         return Card(

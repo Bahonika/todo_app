@@ -3,10 +3,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/data/api/services/local.dart';
-import 'package:todo_app/presentation/providers/todos_controller.dart';
+import 'package:todo_app/presentation/providers/services_providers.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
-import 'package:todo_app/presentation/localization/localozations_delegates.dart';
+import 'package:todo_app/presentation/localization/localizations_delegates.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
@@ -14,10 +13,6 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  //init hive storage
-  // final LocalService localService = LocalService();
-  // await localService.init();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

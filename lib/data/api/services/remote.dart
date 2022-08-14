@@ -2,13 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:todo_app/data/api/model/api_todo.dart';
 import 'package:todo_app/data/mappers/todo_mapper.dart';
 import 'package:todo_app/domain/models/todo.dart';
-import 'package:todo_app/presentation/providers/revision_provider.dart';
 
 class RemoteService {
   final _siteRoot = "https://beta.mrdekk.ru/todobackend";
   int revision = 0;
   late final Dio dio;
-  RevisionProvider revisionProvider = RevisionProvider();
 
   static const _headerRevisionKey = "X-Last-Known-Revision";
 
@@ -28,7 +26,6 @@ class RemoteService {
     dio.options.headers.addAll(
       {_headerRevisionKey: revision},
     );
-    revisionProvider.revision = revision;
   }
 
   Future<List<ApiTodo>> getTodos({Map<String, String>? queryParams}) async {
