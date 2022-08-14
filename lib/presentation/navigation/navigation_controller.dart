@@ -44,12 +44,7 @@ class NavigationController {
       case Routes.todoList:
         return MaterialPageRoute(builder: (_) => const TodoListScreen());
       case Routes.createTodo:
-        return MaterialPageRoute(
-          builder: (_) => TodoCreateScreen(
-            isEdit: settings.arguments["isEdit"],
-            todoForEdit: settings.arguments["todoForEdit"],
-          ),
-        );
+        return MaterialPageRoute(builder: (_) => const TodoCreateScreen());
       case Routes.unknown:
         return MaterialPageRoute(builder: (_) => const UnknownPage());
       default:

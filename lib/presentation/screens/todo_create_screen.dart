@@ -11,11 +11,9 @@ import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
 class TodoCreateScreen extends ConsumerStatefulWidget {
-  final bool isEdit;
   final Todo? todoForEdit;
 
-  const TodoCreateScreen({Key? key, this.isEdit = false, this.todoForEdit})
-      : super(key: key);
+  const TodoCreateScreen({Key? key, this.todoForEdit}) : super(key: key);
 
   @override
   ConsumerState createState() => _TodoCreateScreenState();
@@ -27,7 +25,19 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
     ref.read(todosController.notifier).create(todo);
   }
 
-  void editTask() {}
+  void editTask() {
+
+  }
+
+  void _tapHandler() {
+    if (ref.watch(isEditProvider)) {
+      editTask();
+    } else {
+      createTask();
+    }
+
+    ref.read(navigationProvider).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +56,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              createTask();
-              ref.read(navigationProvider).pop();
-            },
+            onPressed: () => _tapHandler(),
             child: Text(
               S.of(context).save,
               style: TextStyle(
@@ -62,17 +69,17 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TextFieldTile(),
-            const ImportanceTile(),
-            const Padding(
+          children: const [
+            TextFieldTile(),
+            ImportanceTile(),
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Divider(),
             ),
-            const DateTile(),
-            const Divider(),
-            DeleteTile(isDisabled: !widget.isEdit, todo: widget.todoForEdit),
-            const SizedBox(
+            DateTile(),
+            Divider(),
+            DeleteTile(),
+            SizedBox(
               height: 50,
             ),
           ],
@@ -211,14 +218,10 @@ class DateTile extends ConsumerWidget {
 }
 
 class DeleteTile extends ConsumerWidget {
-  final bool isDisabled;
-  final Todo? todo;
-
-  const DeleteTile({Key? key, required this.isDisabled, this.todo})
-      : super(key: key);
+  const DeleteTile({Key? key}) : super(key: key);
 
   void delete(WidgetRef ref) {
-    if (!isDisabled) {}
+    if (!ref.watch(isEditProvider)) {}
   }
 
   @override
@@ -231,7 +234,7 @@ class DeleteTile extends ConsumerWidget {
         children: [
           Icon(
             Icons.delete,
-            color: isDisabled
+            color: ref.watch(isEditProvider)
                 ? Theme.of(context).extension<CustomColors>()!.labelDisable
                 : Theme.of(context).extension<CustomColors>()!.colorRed,
           ),
@@ -240,7 +243,7 @@ class DeleteTile extends ConsumerWidget {
             child: Text(
               S.of(context).delete,
               style: TextStyle(
-                color: isDisabled
+                color: ref.watch(isEditProvider)
                     ? Theme.of(context).extension<CustomColors>()!.labelDisable
                     : Theme.of(context).extension<CustomColors>()!.colorRed,
               ),

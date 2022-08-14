@@ -93,6 +93,18 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
   }
 }
 
+final completedTodosProvider = Provider<List<Todo>>((ref) {
+  final todos =
+      ref.watch(todosController).where((element) => element.done).toList();
+  return todos;
+});
+
+final uncompletedTodosProvider = Provider<List<Todo>>((ref) {
+  final todos =
+      ref.watch(todosController).where((element) => !element.done).toList();
+  return todos;
+});
+
 final showDateProvider = StateNotifierProvider<ShowDateNotifier, bool>((ref) {
   return ShowDateNotifier();
 });
@@ -149,5 +161,51 @@ class TextControllerNotifier extends StateNotifier<TextEditingController> {
 
   void setDefault() {
     state.text = "";
+  }
+}
+
+final showAllTodosProvider =
+    StateNotifierProvider<ShowAllTodosNotifier, bool>((ref) {
+  return ShowAllTodosNotifier();
+});
+
+class ShowAllTodosNotifier extends StateNotifier<bool> {
+  ShowAllTodosNotifier() : super(true);
+
+  void toggle() {
+    state = !state;
+  }
+}
+
+final isEditProvider = StateNotifierProvider<IsEditNotifier, bool>((ref) {
+  return IsEditNotifier();
+});
+
+class IsEditNotifier extends StateNotifier<bool> {
+  IsEditNotifier() : super(false);
+
+  void set(bool value) {
+    state = value;
+  }
+
+  void toggle() {
+    state = !state;
+  }
+}
+
+final todoForEditProvider =
+    StateNotifierProvider<TodoForEditNotifier, Todo?>((ref) {
+  return TodoForEditNotifier();
+});
+
+class TodoForEditNotifier extends StateNotifier<Todo?> {
+  TodoForEditNotifier() : super(null);
+
+  setTodo(Todo todo) {
+    state = todo;
+  }
+
+  void setDefault() {
+    state = null;
   }
 }
