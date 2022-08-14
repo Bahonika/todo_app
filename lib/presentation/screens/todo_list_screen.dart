@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -178,14 +177,13 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
     }
   }
 
-  void fieldsFill() {}
+  void fieldsFill() {
+    ref.read(createScreenProvider.notifier).setEditingData(ref, widget.todo);
+  }
 
   void toEditScreen() {
     fieldsFill();
-    ref.read(navigationProvider).openCreateTodo(
-          isEdit: true,
-          todoForEdit: widget.todo,
-        );
+    ref.read(navigationProvider).openCreateTodo();
   }
 
   @override

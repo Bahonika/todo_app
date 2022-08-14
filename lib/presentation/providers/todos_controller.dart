@@ -57,6 +57,19 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
     load();
   }
 
+  Todo alterTodo(WidgetRef ref, Todo todo) {
+    final alteredTodo = todo.copyWith(
+      deadline:
+          ref.read(showDateProvider) ? ref.read(selectedDateProvider) : null,
+      text: ref.read(textControllerProvider).text,
+      changedAt: DateTime.now(),
+      importance: ref.read(selectedImportanceProvider),
+      lastUpdatedBy: "123",
+    );
+
+    return alteredTodo;
+  }
+
   Todo generateTodo(WidgetRef ref) {
     Uuid uuid = const Uuid();
     final todo = Todo(
@@ -112,6 +125,18 @@ final showDateProvider = StateNotifierProvider<ShowDateNotifier, bool>((ref) {
 class ShowDateNotifier extends StateNotifier<bool> {
   ShowDateNotifier() : super(false);
 
+  void setTrue(){
+    state = true;
+  }
+
+  void setFalse(){
+    state = false;
+  }
+
+  void setDefault(){
+    setFalse();
+  }
+
   void toggle() {
     state = !state;
   }
@@ -162,6 +187,10 @@ class TextControllerNotifier extends StateNotifier<TextEditingController> {
   void setDefault() {
     state.text = "";
   }
+
+  void setText(String text) {
+    state.text = text;
+  }
 }
 
 final showAllTodosProvider =
@@ -207,5 +236,36 @@ class TodoForEditNotifier extends StateNotifier<Todo?> {
 
   void setDefault() {
     state = null;
+  }
+}
+
+final createScreenProvider = StateNotifierProvider<CreateScreenNotifier, bool?>((ref) {
+  return CreateScreenNotifier();
+});
+
+
+class CreateScreenNotifier extends StateNotifier<bool> {
+  CreateScreenNotifier() : super(true);
+
+  void setDefaults(WidgetRef ref){
+    ref.read(todoForEditProvider.notifier).setDefault();
+    ref.read(textControllerProvider.notifier).setDefault();
+    ref.read(selectedImportanceProvider.notifier).setDefault();
+    ref.read(selectedDateProvider.notifier).setDefault();
+    ref.read(showDateProvider.notifier).setDefault();
+    ref.read(isEditProvider.notifier).set(false);
+  }
+
+  void setEditingData(WidgetRef ref, Todo todo){
+    ref.read(isEditProvider.notifier).set(true);
+    ref.read(todoForEditProvider.notifier).setTodo(todo);
+    ref.read(textControllerProvider.notifier).setText(todo.text);
+    if (todo.deadline != null) {
+      ref.read(showDateProvider.notifier).setTrue();
+      ref.read(selectedDateProvider.notifier).setDate(todo.deadline!);
+    } else {
+      ref.read(showDateProvider.notifier).setFalse();
+    }
+    ref.read(selectedImportanceProvider.notifier).setImportance(todo.importance);
   }
 }

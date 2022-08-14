@@ -26,7 +26,10 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void editTask() {
-
+    final todoForEdit = ref.read(todoForEditProvider);
+    final todo =
+        ref.read(todosController.notifier).alterTodo(ref, todoForEdit!);
+    ref.read(todosController.notifier).update(todo);
   }
 
   void _tapHandler() {
@@ -35,7 +38,11 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
     } else {
       createTask();
     }
+    setDefaultDataAndPop();
+  }
 
+  void setDefaultDataAndPop() {
+    ref.read(createScreenProvider.notifier).setDefaults(ref);
     ref.read(navigationProvider).pop();
   }
 
@@ -50,9 +57,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
             Icons.close,
             color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
           ),
-          onPressed: () {
-            ref.read(navigationProvider).pop();
-          },
+          onPressed: () => setDefaultDataAndPop(),
         ),
         actions: [
           TextButton(
@@ -195,7 +200,7 @@ class DateTile extends ConsumerWidget {
           ? InkWell(
               onTap: () => setSelectedDate(context, ref),
               child: Text(
-                MyDateFormat().localeFormat(ref.watch(selectedDateProvider)),
+                MyDateFormat().localeFormat(ref.watch(selectedDateProvider)!),
                 style: TextStyle(
                     color:
                         Theme.of(context).extension<CustomColors>()!.colorBlue),

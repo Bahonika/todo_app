@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/unknown_page.dart';
 import 'package:todo_app/presentation/navigation/routes.dart';
 import 'package:todo_app/presentation/screens/todo_create_screen.dart';
@@ -24,11 +23,8 @@ class NavigationController {
 
   String get initialRoute => Routes.todoList;
 
-  void openCreateTodo({Todo? todoForEdit, bool isEdit = false}) {
-    navigateTo(Routes.createTodo, arguments: {
-      'isEdit': isEdit,
-      "todoForEdit": todoForEdit,
-    });
+  void openCreateTodo() {
+    navigateTo(Routes.createTodo);
   }
 
   void openTodoList() {
