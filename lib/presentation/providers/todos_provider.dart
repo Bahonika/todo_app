@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:todo_app/data/api/api_util.dart';
+import 'package:todo_app/data/api/service_util.dart';
 
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/internal/dependencies/api_module.dart';
@@ -9,10 +9,10 @@ import 'package:todo_app/internal/dependencies/api_module.dart';
 class TodosProvider with ChangeNotifier {
   List<Todo> _todos = [];
   bool _showCompleted = true;
-  ApiUtil apiUtil = ApiModule.apiUtil();
-
+  final ServiceUtil apiUtil = ApiModule.apiUtil();
 
   final _streamController = StreamController<List<Todo>>.broadcast();
+
   bool get showCompleted => _showCompleted;
 
   Stream<List<Todo>> get todoListStream async* {
@@ -20,9 +20,9 @@ class TodosProvider with ChangeNotifier {
     yield* _streamController.stream;
   }
 
-  void _updateTodoStream() {
+  Future<void> _updateTodoStream() async {
     if (_streamController.hasListener) {
-      _streamController.add(getLocalTodos());
+      _streamController.add(await getTodos());
     }
   }
 
@@ -46,7 +46,7 @@ class TodosProvider with ChangeNotifier {
     _updateTodoStream();
   }
 
-  void deleteTodo(String uuid) async {
+  Future<void> deleteTodo(String uuid) async {
     _todos.removeWhere((element) =>
         element.uuid == uuid); //dismissible manually delete required
     apiUtil.deleteTodo(uuid);

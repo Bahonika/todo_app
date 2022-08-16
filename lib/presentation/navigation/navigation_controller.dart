@@ -39,18 +39,21 @@ class NavigationController {
     navigateTo(Routes.unknown);
   }
 
-  onGenerateRoute(settings) {
+  MaterialPageRoute onGenerateRoute(settings) {
     switch (settings.name) {
       case Routes.todoList:
         return MaterialPageRoute(builder: (_) => const TodoListScreen());
       case Routes.createTodo:
         return MaterialPageRoute(
-            builder: (_) => TodoCreateScreen(
-                  isEdit: settings.arguments["isEdit"],
-                  todoForEdit: settings.arguments["todoForEdit"],
-                ));
+          builder: (_) => TodoCreateScreen(
+            isEdit: settings.arguments["isEdit"],
+            todoForEdit: settings.arguments["todoForEdit"],
+          ),
+        );
       case Routes.unknown:
-        MaterialPageRoute(builder: (context) => const UnknownPage());
+        return MaterialPageRoute(builder: (_) => const UnknownPage());
+      default:
+        return MaterialPageRoute(builder: (_) => const UnknownPage());
     }
   }
 }

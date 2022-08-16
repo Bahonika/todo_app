@@ -11,5 +11,6 @@
     "delete": "Delete",
     "datePickerDone": "DONE",
     "newTodo": "New",
-    "unknownPage": "Unknown page"
+    "unknownPage": "Unknown page",
+    "emptyField": "Text field can't be empty"
 }

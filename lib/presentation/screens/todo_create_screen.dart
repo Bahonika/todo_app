@@ -3,12 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
-import 'package:todo_app/presentation/theme/theme.dart';
+import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
 import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
+import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
 class TodoCreateScreen extends StatefulWidget {
   final bool isEdit;
@@ -23,13 +24,13 @@ class TodoCreateScreen extends StatefulWidget {
 
 class _TodoCreateScreenState extends State<TodoCreateScreen> {
   void createTask() {
-    Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
+    final Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
     context.read<TodosProvider>().createTodo(todo: todo);
     context.read<CreateTaskDataProvider>().eraseData();
   }
 
   void editTask() {
-    Todo todo = context
+    final Todo todo = context
         .read<CreateTaskDataProvider>()
         .modelingTodo(todo: widget.todoForEdit);
     context.read<TodosProvider>().updateTodo(todo);
@@ -45,7 +46,7 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.close,
-            color: Theme.of(context).colorScheme.onPrimary,
+            color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
           ),
           onPressed: () {
             if (widget.isEdit) {
@@ -57,16 +58,24 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              if (widget.isEdit) {
-                editTask();
-              } else {
-                createTask();
+              if (context
+                  .read<CreateTaskDataProvider>()
+                  .controller
+                  .text
+                  .isNotEmpty) {
+                if (widget.isEdit) {
+                  editTask();
+                } else {
+                  createTask();
+                }
+                context.read<NavigationController>().pop();
               }
-              context.read<NavigationController>().pop();
             },
             child: Text(
               S.of(context).save,
-              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+              style: TextStyle(
+                  color:
+                      Theme.of(context).extension<CustomColors>()!.colorBlue),
             ),
           ),
         ],
@@ -78,14 +87,11 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             const TextFieldTile(),
             const ImportanceTile(),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Divider(),
             ),
             const DateTile(),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Divider(),
-            ),
+            const Divider(),
             DeleteTile(isDisabled: !widget.isEdit, todo: widget.todoForEdit),
             const SizedBox(
               height: 50,
@@ -102,14 +108,18 @@ class TextFieldTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var controller = context.watch<CreateTaskDataProvider>().controller;
+
     return WrapCard(
       child: TextFormField(
-        controller: context.watch<CreateTaskDataProvider>().controller,
+        controller: controller,
+        style: CustomTextTheme.body(context),
         decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: S.of(context).needToDo,
-            hintStyle: CustomTextTheme.importanceSubtitle(context),
-            contentPadding: const EdgeInsets.all(15)),
+          border: InputBorder.none,
+          hintText: S.of(context).needToDo,
+          hintStyle: CustomTextTheme.importanceSubtitle(context),
+          contentPadding: const EdgeInsets.all(15),
+        ),
         minLines: 5,
         maxLines: null,
       ),
@@ -125,40 +135,30 @@ class ImportanceTile extends StatefulWidget {
 }
 
 class _ImportanceTileState extends State<ImportanceTile> {
-  List<DropdownMenuItem<Importance>> items = [];
-
-  //need fill function because of using context inside
-  void itemsFill() {
-    items = [
-      DropdownMenuItem(
-        value: Importance.basic,
-        child: Text(S.of(context).basic),
-      ),
-      DropdownMenuItem(
-        value: Importance.low,
-        child: Text(S.of(context).low),
-      ),
-      DropdownMenuItem(
-        value: Importance.important,
-        child: Text(S.of(context).important),
-      ),
-    ];
-  }
-
-  @override
-  void didChangeDependencies() {
-    itemsFill(); // will fix in future
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(S.of(context).importance),
+      title: Text(
+        S.of(context).importance,
+        style: CustomTextTheme.body(context),
+      ),
       subtitle: DropdownButtonHideUnderline(
         child: DropdownButton<Importance>(
           itemHeight: 49,
-          items: items,
+          items: [
+            DropdownMenuItem(
+              value: Importance.basic,
+              child: Text(S.of(context).basic),
+            ),
+            DropdownMenuItem(
+              value: Importance.low,
+              child: Text(S.of(context).low),
+            ),
+            DropdownMenuItem(
+              value: Importance.important,
+              child: Text(S.of(context).important),
+            ),
+          ],
           isDense: true,
           isExpanded: false,
           value: context.watch<CreateTaskDataProvider>().selectedImportance,
@@ -179,11 +179,11 @@ class DateTile extends StatelessWidget {
   static DateTime? tempPickedDate;
 
   Future<void> selectDate(BuildContext context) async {
-    var createTaskProvider =
+    final createTaskProvider =
         Provider.of<CreateTaskDataProvider>(context, listen: false);
 
-    String hintText = createTaskProvider.selectedDate.year.toString();
-    DateTime initialDate = createTaskProvider.selectedDate;
+    final String hintText = createTaskProvider.selectedDate.year.toString();
+    final DateTime initialDate = createTaskProvider.selectedDate;
 
     tempPickedDate = await showDatePicker(
       context: context,
@@ -195,7 +195,7 @@ class DateTile extends StatelessWidget {
     );
   }
 
-  setSelectedDate(BuildContext context) {
+  void setSelectedDate(BuildContext context) {
     selectDate(context).then((value) {
       if (tempPickedDate != null) {
         context.read<CreateTaskDataProvider>().selectedDate = tempPickedDate!;
@@ -206,22 +206,29 @@ class DateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(S.of(context).doneBy),
+      title: Text(
+        S.of(context).doneBy,
+        style: CustomTextTheme.body(context),
+      ),
       subtitle: context.watch<CreateTaskDataProvider>().showDate
           ? InkWell(
               onTap: () => setSelectedDate(context),
               child: Text(
                 MyDateFormat().localeFormat(
                     context.watch<CreateTaskDataProvider>().selectedDate),
-                style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                style: TextStyle(
+                    color:
+                        Theme.of(context).extension<CustomColors>()!.colorBlue),
               ),
             )
           : const SizedBox(),
       trailing: Switch(
         value: context.watch<CreateTaskDataProvider>().showDate,
-        activeTrackColor:
-            Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
-        activeColor: Theme.of(context).colorScheme.tertiary,
+        activeTrackColor: Theme.of(context)
+            .extension<CustomColors>()!
+            .colorBlue
+            .withOpacity(0.3),
+        activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
         onChanged: (bool value) {
           context.read<CreateTaskDataProvider>().showDate = value;
         },
@@ -237,27 +244,26 @@ class DeleteTile extends StatelessWidget {
   const DeleteTile({Key? key, required this.isDisabled, this.todo})
       : super(key: key);
 
-  Function()? delete(BuildContext context) {
-    if (isDisabled) {
-      return null;
-    } else {
+  void delete(BuildContext context) {
+    if (!isDisabled) {
       Provider.of<TodosProvider>(context, listen: false).deleteTodo(todo!.uuid);
       context.read<NavigationController>().pop();
     }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () => delete(context),
+      style: TextButton.styleFrom(
+          primary: Theme.of(context).scaffoldBackgroundColor),
       child: Row(
         children: [
           Icon(
             Icons.delete,
             color: isDisabled
-                ? Theme.of(context).colorScheme.secondaryContainer
-                : Theme.of(context).colorScheme.errorContainer,
+                ? Theme.of(context).extension<CustomColors>()!.labelDisable
+                : Theme.of(context).extension<CustomColors>()!.colorRed,
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -265,8 +271,8 @@ class DeleteTile extends StatelessWidget {
               S.of(context).delete,
               style: TextStyle(
                 color: isDisabled
-                    ? Theme.of(context).colorScheme.secondaryContainer
-                    : Theme.of(context).colorScheme.errorContainer,
+                    ? Theme.of(context).extension<CustomColors>()!.labelDisable
+                    : Theme.of(context).extension<CustomColors>()!.colorRed,
               ),
             ),
           ),

@@ -11,6 +11,6 @@
     "delete": "Удалить",
     "datePickerDone": "ГОТОВО",
     "newTodo": "Новое",
-    "unknownPage": "Неизвестная страница"
-
+    "unknownPage": "Неизвестная страница",
+    "emptyField": "Поле не может быть пустым"
 }

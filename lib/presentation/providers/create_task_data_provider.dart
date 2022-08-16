@@ -38,7 +38,7 @@ class CreateTaskDataProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  setControllerText(String text) {
+  void setControllerText(String text) {
     _controller.text = text;
     notifyListeners();
   }
@@ -68,7 +68,7 @@ class CreateTaskDataProvider with ChangeNotifier {
     return tempTodo;
   }
 
-  eraseData() {
+  void eraseData() {
     selectedImportance = Importance.basic;
     selectedDate = DateTime.now();
     setControllerText("");

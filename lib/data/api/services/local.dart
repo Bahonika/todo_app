@@ -8,6 +8,8 @@ import 'package:todo_app/domain/models/todo.dart';
 class LocalService {
   static LocalService? _localService;
 
+  static const _revisionKey = "revision";
+
   static LocalService localService() {
     _localService ??= LocalService();
     return _localService!;
@@ -21,36 +23,36 @@ class LocalService {
   Box<int> get revision => _revision;
 
   void setRevision(int value) {
-    _revision.put("revision", value);
-  }
-  void incrementRevision(){
-    setRevision(_revision.get("revision")!);
+    _revision.put(_revisionKey, value);
   }
 
+  void incrementRevision() {
+    setRevision(_revision.get(_revisionKey)!);
+  }
 
   Future<void> init() async {
-    Directory directory = await getApplicationDocumentsDirectory();
+    final Directory directory = await getApplicationDocumentsDirectory();
     Hive.init(directory.path);
     Hive.registerAdapter(TodoAdapter());
     Hive.registerAdapter(ImportanceAdapter());
     _todos = await Hive.openBox<Todo>("todos");
-    _revision = await Hive.openBox<int>("revision");
+    _revision = await Hive.openBox<int>(_revisionKey);
   }
 
-  dispose() {
+  void dispose() {
     Hive.close();
   }
 
-  create({required Todo todo}) {
+  void create({required Todo todo}) {
     _todos.add(todo);
   }
 
-  delete({required String uuid}) {
+  void delete({required String uuid}) {
     _todos.delete(_todos.keys
         .firstWhere((element) => _todos.toMap()[element]!.uuid == uuid));
   }
 
-  update({required Todo todo}) {
+  void update({required Todo todo}) {
     _todos.put(
         _todos.keys.firstWhere(
             (element) => _todos.toMap()[element]!.uuid == todo.uuid),
