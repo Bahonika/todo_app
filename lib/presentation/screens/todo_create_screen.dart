@@ -41,6 +41,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void setDefaultDataAndPop() {
+    // не придумал как лучше это сделать пока что
     ref.refresh(DataProviders.textControllerProvider.notifier);
     ref.refresh(DataProviders.selectedImportanceProvider.notifier);
     ref.refresh(DataProviders.selectedDateProvider.notifier);

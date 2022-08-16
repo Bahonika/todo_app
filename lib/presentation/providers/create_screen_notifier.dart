@@ -25,10 +25,6 @@ class CreateScreenNotifier extends StateNotifier<bool?> {
     required this.todoForEdit,
   }) : super(null);
 
-  void setDefaultData(){
-
-  }
-
   void setEditingData() {
     selectedImportanceNotifier.setImportance(todoForEdit.importance);
     textControllerNotifier.setText(todoForEdit.text);
