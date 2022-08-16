@@ -42,7 +42,6 @@ class NavigationController {
       case Routes.createTodo:
         return MaterialPageRoute(builder: (_) => const TodoCreateScreen());
       case Routes.unknown:
-        return MaterialPageRoute(builder: (_) => const UnknownPage());
       default:
         return MaterialPageRoute(builder: (_) => const UnknownPage());
     }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
@@ -6,10 +5,8 @@ import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
-import 'package:todo_app/presentation/providers/bool_providers.dart';
-import 'package:todo_app/presentation/providers/create_screen_provider.dart';
-import 'package:todo_app/presentation/providers/text_provider.dart';
-import 'package:todo_app/presentation/providers/todos_controller.dart';
+import 'package:todo_app/presentation/providers/providers.dart';
+import 'package:todo_app/presentation/providers/todos_notifier.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
@@ -83,8 +80,8 @@ class SliverTodoList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var todoToShow = ref.watch(showAllTodosProvider)
-        ? ref.watch(todosController)
+    var todoToShow = ref.watch(DataProviders.showAllTodosProvider)
+        ? ref.watch(DataProviders.todosController)
         : ref.watch(uncompletedTodosProvider);
     return SliverToBoxAdapter(
       child: WrapCard(
@@ -99,7 +96,7 @@ class SliverTodoList extends ConsumerWidget {
               return TodoWidget(todo: todoToShow[index]);
             }
           },
-          itemCount: todoToShow.length + 1,
+          itemCount: todoToShow.length + 1, // todos count + one extra tile
         ),
       ),
     );
@@ -112,9 +109,10 @@ class TextFieldTile extends ConsumerWidget {
   final TextEditingController _controller = TextEditingController();
 
   createTodo(WidgetRef ref) {
-    ref.read(textControllerProvider).text = _controller.text;
-    final todo = ref.read(todosController.notifier).generateTodo(ref);
-    ref.read(todosController.notifier).create(todo);
+    ref.read(DataProviders.textControllerProvider).text = _controller.text;
+    final todo =
+        ref.read(DataProviders.todosController.notifier).generateTodo(ref);
+    ref.read(DataProviders.todosController.notifier).create(todo);
   }
 
   @override
@@ -155,16 +153,16 @@ class TodoWidget extends ConsumerStatefulWidget {
 
 class _TodoWidgetState extends ConsumerState<TodoWidget> {
   void delete() {
-    ref.read(todosController.notifier).delete(widget.todo);
+    ref.read(DataProviders.todosController.notifier).delete(widget.todo);
   }
 
   Future<bool> setAsDone() async {
-    ref.read(todosController.notifier).setAsDone(widget.todo);
+    ref.read(DataProviders.todosController.notifier).setAsDone(widget.todo);
     return false;
   }
 
   bool setAsUndone() {
-    ref.read(todosController.notifier).setAsUndone(widget.todo);
+    ref.read(DataProviders.todosController.notifier).setAsUndone(widget.todo);
     return false;
   }
 
@@ -181,7 +179,11 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
   }
 
   void fieldsFill() {
-    ref.read(createScreenProvider.notifier).setEditingData(ref, widget.todo);
+    ref.read(DataProviders.todoForEditProvider.notifier).setTodo(widget.todo);
+    final todo = ref.read(DataProviders.todoForEditProvider);
+    ref
+        .read(DataProviders.createScreenProvider(todo!).notifier)
+        .setEditingData();
   }
 
   void toEditScreen() {
@@ -197,7 +199,7 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
         child: Dismissible(
           key: Key(widget.todo.uuid.toString()),
           direction: DismissDirection.horizontal,
-          confirmDismiss: (direction) => confirmDismiss(direction),
+          confirmDismiss: confirmDismiss,
           onDismissed: (direction) {
             if (direction == DismissDirection.endToStart) {
               delete();

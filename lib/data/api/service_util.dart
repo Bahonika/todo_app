@@ -46,16 +46,16 @@ class ServiceUtil {
 
   Future<void> deleteTodo(String uuid) async {
     try {
-      _localService.delete(uuid: uuid);
-      _log.i("Delete on local");
-    } catch (e) {
-      _log.e("Can't delete on local");
-    }
-    try {
       await _remoteService.delete(uuid: uuid);
       _log.i("Delete on remote");
     } catch (e) {
       _log.w("Can't delete on remote");
+    }
+    try {
+      _localService.delete(uuid: uuid);
+      _log.i("Delete on local");
+    } catch (e) {
+      _log.e("Can't delete on local");
     }
   }
 

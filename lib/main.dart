@@ -42,7 +42,7 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   @override
   void dispose() {
-    ref.read(localServiceProvider).dispose();
+    ref.read(ServicesProviders.localServiceProvider).dispose();
     super.dispose();
   }
 

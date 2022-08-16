@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
-import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
-import 'package:todo_app/presentation/providers/bool_providers.dart';
-import 'package:todo_app/presentation/providers/create_screen_provider.dart';
-import 'package:todo_app/presentation/providers/date_provider.dart';
-import 'package:todo_app/presentation/providers/importance_provider.dart';
-import 'package:todo_app/presentation/providers/text_provider.dart';
-import 'package:todo_app/presentation/providers/todo_for_edit_provider.dart';
-import 'package:todo_app/presentation/providers/todos_controller.dart';
+import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
 class TodoCreateScreen extends ConsumerStatefulWidget {
-  final Todo? todoForEdit;
-
-  const TodoCreateScreen({Key? key, this.todoForEdit}) : super(key: key);
+  const TodoCreateScreen({Key? key}) : super(key: key);
 
   @override
   ConsumerState createState() => _TodoCreateScreenState();
@@ -27,19 +18,21 @@ class TodoCreateScreen extends ConsumerStatefulWidget {
 
 class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   void createTask() {
-    final todo = ref.read(todosController.notifier).generateTodo(ref);
-    ref.read(todosController.notifier).create(todo);
+    final todo =
+        ref.read(DataProviders.todosController.notifier).generateTodo(ref);
+    ref.read(DataProviders.todosController.notifier).create(todo);
   }
 
   void editTask() {
-    final todoForEdit = ref.read(todoForEditProvider);
-    final todo =
-        ref.read(todosController.notifier).alterTodo(ref, todoForEdit!);
-    ref.read(todosController.notifier).update(todo);
+    final todoForEdit = ref.read(DataProviders.todoForEditProvider);
+    final todo = ref
+        .read(DataProviders.todosController.notifier)
+        .alterTodo(ref, todoForEdit!);
+    ref.read(DataProviders.todosController.notifier).update(todo);
   }
 
   void _tapHandler() {
-    if (ref.watch(isEditProvider)) {
+    if (ref.watch(DataProviders.isEditProvider)) {
       editTask();
     } else {
       createTask();
@@ -48,7 +41,11 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void setDefaultDataAndPop() {
-    ref.read(createScreenProvider.notifier).setDefaults(ref);
+    ref.refresh(DataProviders.textControllerProvider.notifier);
+    ref.refresh(DataProviders.selectedImportanceProvider.notifier);
+    ref.refresh(DataProviders.selectedDateProvider.notifier);
+    ref.refresh(DataProviders.showDateProvider.notifier);
+    ref.refresh(DataProviders.isEditProvider.notifier);
     ref.read(navigationProvider).pop();
   }
 
@@ -107,7 +104,7 @@ class TextFieldTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return WrapCard(
       child: TextFormField(
-        controller: ref.watch(textControllerProvider),
+        controller: ref.watch(DataProviders.textControllerProvider),
         style: CustomTextTheme.body(context),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -156,11 +153,13 @@ class _ImportanceTileState extends ConsumerState<ImportanceTile> {
           ],
           isDense: true,
           isExpanded: false,
-          value: ref.watch(selectedImportanceProvider),
+          value: ref.watch(DataProviders.selectedImportanceProvider),
           style: CustomTextTheme.importanceSubtitle(context),
           icon: const SizedBox(),
           onChanged: (value) {
-            ref.read(selectedImportanceProvider.notifier).setImportance(value!);
+            ref
+                .read(DataProviders.selectedImportanceProvider.notifier)
+                .setImportance(value!);
           },
         ),
       ),
@@ -190,7 +189,9 @@ class DateTile extends ConsumerWidget {
   void setSelectedDate(BuildContext context, WidgetRef ref) {
     selectDate(context).then((value) {
       if (tempPickedDate != null) {
-        ref.read(selectedDateProvider.notifier).setDate(tempPickedDate!);
+        ref
+            .read(DataProviders.selectedDateProvider.notifier)
+            .setDate(tempPickedDate!);
       }
     });
   }
@@ -202,11 +203,12 @@ class DateTile extends ConsumerWidget {
         S.of(context).doneBy,
         style: CustomTextTheme.body(context),
       ),
-      subtitle: ref.watch(showDateProvider)
+      subtitle: ref.watch(DataProviders.showDateProvider)
           ? InkWell(
               onTap: () => setSelectedDate(context, ref),
               child: Text(
-                MyDateFormat().localeFormat(ref.watch(selectedDateProvider)!),
+                MyDateFormat().localeFormat(
+                    ref.watch(DataProviders.selectedDateProvider)!),
                 style: TextStyle(
                     color:
                         Theme.of(context).extension<CustomColors>()!.colorBlue),
@@ -214,14 +216,14 @@ class DateTile extends ConsumerWidget {
             )
           : const SizedBox(),
       trailing: Switch(
-        value: ref.watch(showDateProvider),
+        value: ref.watch(DataProviders.showDateProvider),
         activeTrackColor: Theme.of(context)
             .extension<CustomColors>()!
             .colorBlue
             .withOpacity(0.3),
         activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
         onChanged: (bool value) {
-          ref.read(showDateProvider.notifier).toggle();
+          ref.read(DataProviders.showDateProvider.notifier).toggle();
         },
       ),
     );
@@ -232,7 +234,7 @@ class DeleteTile extends ConsumerWidget {
   const DeleteTile({Key? key}) : super(key: key);
 
   void delete(WidgetRef ref) {
-    if (!ref.watch(isEditProvider)) {}
+    if (!ref.watch(DataProviders.isEditProvider)) {}
   }
 
   @override
@@ -245,7 +247,7 @@ class DeleteTile extends ConsumerWidget {
         children: [
           Icon(
             Icons.delete,
-            color: ref.watch(isEditProvider)
+            color: ref.watch(DataProviders.isEditProvider)
                 ? Theme.of(context).extension<CustomColors>()!.labelDisable
                 : Theme.of(context).extension<CustomColors>()!.colorRed,
           ),
@@ -254,7 +256,7 @@ class DeleteTile extends ConsumerWidget {
             child: Text(
               S.of(context).delete,
               style: TextStyle(
-                color: ref.watch(isEditProvider)
+                color: ref.watch(DataProviders.isEditProvider)
                     ? Theme.of(context).extension<CustomColors>()!.labelDisable
                     : Theme.of(context).extension<CustomColors>()!.colorRed,
               ),
