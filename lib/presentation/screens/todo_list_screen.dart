@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
@@ -12,43 +13,35 @@ import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
-class TodoListScreen extends ConsumerStatefulWidget {
+class TodoListScreen extends ConsumerWidget {
   const TodoListScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState createState() => _TodoListScreenState();
-}
-
-class _TodoListScreenState extends ConsumerState<TodoListScreen>
-    with SingleTickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: GestureDetector(
-        onTap: () {
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
-        child: Scaffold(
-          body: const CustomScrollView(
-            slivers: [
-              MySliverAppBar(),
-              SliverTodoList(),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              ref.read(navigationProvider).openCreateTodo();
-            },
-            backgroundColor:
-                Theme.of(context).extension<CustomColors>()!.colorBlue,
-            child: Icon(
-              Icons.add,
-              color: Theme.of(context).extension<CustomColors>()!.colorWhite,
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: Theme.of(context).appBarTheme.systemOverlayStyle!,
+      child: SafeArea(
+        child: GestureDetector(
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: Scaffold(
+            body: const CustomScrollView(
+              slivers: [
+                MySliverAppBar(),
+                SliverTodoList(),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                ref.read(navigationProvider).openCreateTodo();
+              },
+              backgroundColor:
+                  Theme.of(context).extension<CustomColors>()!.colorBlue,
+              child: Icon(
+                Icons.add,
+                color: Theme.of(context).extension<CustomColors>()!.colorWhite,
+              ),
             ),
           ),
         ),
@@ -90,7 +83,12 @@ class SliverTodoList extends ConsumerWidget {
           shrinkWrap: true,
           controller: ScrollController(),
           itemBuilder: (BuildContext context, index) {
-            if (index == todoToShow.length) {
+            if (index == 0) {
+              return TodoWidget(
+                todo: todoToShow[index],
+                isFirst: true,
+              );
+            } else if (index == todoToShow.length) {
               return TextFieldTile(); // last tile with text field
             } else {
               return TodoWidget(todo: todoToShow[index]);
@@ -144,8 +142,10 @@ class TextFieldTile extends ConsumerWidget {
 
 class TodoWidget extends ConsumerStatefulWidget {
   final Todo todo;
+  final bool isFirst;
 
-  const TodoWidget({required this.todo, Key? key}) : super(key: key);
+  const TodoWidget({required this.todo, this.isFirst = false, Key? key})
+      : super(key: key);
 
   @override
   ConsumerState createState() => _TodoWidgetState();
@@ -194,7 +194,9 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(widget.isFirst ? 8 : 0),
+      ),
       child: GestureDetector(
         child: Dismissible(
           key: Key(widget.todo.uuid.toString()),

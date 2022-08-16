@@ -3,7 +3,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/providers/services_providers.dart';
+import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/localization/localizations_delegates.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
@@ -42,44 +44,34 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   @override
   void dispose() {
-    ref.read(ServicesProviders.localServiceProvider).dispose();
+    ref.read(ServicesProviders.serviceUtilProvider).localService.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Theme.of(context).scaffoldBackgroundColor,
-        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarIconBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.dark,
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+
+      // theme
+      theme: CustomTheme.lightTheme,
+      darkTheme: CustomTheme.darkTheme,
+      themeMode: ref.watch(DataProviders.isDarkProvider)
+          ? ThemeMode.dark
+          : ThemeMode.light,
+
+      //localization
+      localizationsDelegates: LocalizationsDelegates.delegates,
+      supportedLocales: S.supportedLocales,
+      locale: S.current,
+
+      // navigation
+      onUnknownRoute: (settings) =>
+          ref.read(navigationProvider).toUnknownPage(),
+      initialRoute: ref.read(navigationProvider).initialRoute,
+      onGenerateRoute: (settings) =>
+          ref.read(navigationProvider).onGenerateRoute(settings),
+      navigatorKey: ref.read(navigationProvider).key,
     );
-
-    return Consumer(builder: (BuildContext context, WidgetRef ref, _) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-
-        // theme
-        theme: CustomTheme.lightTheme,
-        darkTheme: CustomTheme.darkTheme,
-        themeMode: ThemeMode.light,
-
-        //localization
-        localizationsDelegates: LocalizationsDelegates.delegates,
-        supportedLocales: S.supportedLocales,
-        locale: S.current,
-
-        // navigation
-        onUnknownRoute: (settings) =>
-            ref.read(navigationProvider).toUnknownPage(),
-        initialRoute: ref.read(navigationProvider).initialRoute,
-        onGenerateRoute: (settings) =>
-            ref.read(navigationProvider).onGenerateRoute(settings),
-        navigatorKey: ref.read(navigationProvider).key,
-      );
-    });
   }
 }

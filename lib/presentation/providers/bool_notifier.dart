@@ -47,3 +47,20 @@ class IsEditNotifier extends StateNotifier<bool> {
     state = !state;
   }
 }
+
+
+class IsDarkNotifier extends StateNotifier<bool> {
+  IsDarkNotifier() : super(false);
+
+  void setTrue() {
+    state = true;
+  }
+
+  void setFalse() {
+    state = false;
+  }
+
+  void toggle() {
+    state = !state;
+  }
+}

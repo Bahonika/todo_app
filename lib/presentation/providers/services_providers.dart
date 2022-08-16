@@ -4,13 +4,13 @@ import 'package:todo_app/data/api/services/local.dart';
 import 'package:todo_app/data/api/services/remote.dart';
 
 class ServicesProviders{
-  static final remoteServiceProvider = Provider<RemoteService>(
+  static final _remoteServiceProvider = Provider<RemoteService>(
         (ref) {
       return RemoteService();
     },
   );
 
-  static final localServiceProvider = Provider<LocalService>(
+  static final _localServiceProvider = Provider<LocalService>(
         (ref) {
       return LocalService();
     },
@@ -19,8 +19,8 @@ class ServicesProviders{
   static final serviceUtilProvider = Provider<ServiceUtil>(
         (ref) {
       return ServiceUtil(
-        ref.watch(remoteServiceProvider),
-        ref.watch(localServiceProvider),
+        ref.watch(_remoteServiceProvider),
+        ref.watch(_localServiceProvider),
       );
     },
   );

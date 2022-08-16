@@ -15,9 +15,9 @@ class DataProviders {
   static final createScreenProvider =
       StateNotifierProvider.family<CreateScreenNotifier, bool?, Todo>(
           (ref, Todo todo) {
-            // думаю есть вариант сделать это менее громоздким
-            // например создать модель параметров для экрана создания
-            // и внутри одного провайдера контролировать все значения
+    // думаю есть вариант сделать это менее громоздким
+    // например создать модель параметров для экрана создания
+    // и внутри одного провайдера контролировать все значения
     return CreateScreenNotifier(
       isEditNotifier: ref.watch(isEditProvider.notifier),
       selectedDateNotifier: ref.watch(selectedDateProvider.notifier),
@@ -73,4 +73,8 @@ class DataProviders {
       return TodosNotifier(serviceUtil);
     },
   );
+
+  static final isDarkProvider = StateNotifierProvider<IsDarkNotifier, bool>((ref) {
+    return IsDarkNotifier();
+  });
 }

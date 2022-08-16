@@ -12,7 +12,53 @@ import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   final TickerProvider thisVsync;
 
-  const MySliverPersistentHeader({required this.thisVsync});
+  MySliverPersistentHeader({required this.thisVsync});
+
+  List<Offset> list = [];
+
+  void check(WidgetRef ref) {
+
+    List<double> listY = list.map((e) => e.dy).toList()..sort();
+    List<double> listX = list.map((e) => e.dx).toList()..sort();
+
+    Offset maxX = list.firstWhere((element) => element.dx == listX.last); // 3
+    Offset minX = list.firstWhere((element) => element.dx == listX.first); // 1
+    Offset maxY = list.firstWhere((element) => element.dy == listY.last); // 4
+    Offset minY = list.firstWhere((element) => element.dy == listY.first); // 2
+
+    print(minX);
+    print(minY);
+    print(maxX);
+    print(maxY);
+
+
+    final centerX = (minX.dx + minY.dx + maxX.dx + maxY.dx) / 4;
+    final centerY = (minX.dy + minY.dy + maxX.dy + maxY.dy) / 4;
+
+    final centerOffset = Offset(centerX, centerY);
+    print(centerOffset);
+
+    double minDistance = double.infinity;
+    double maxDistance = 0;
+    for (Offset offset in list){
+      final distance = sqrt(pow(offset.dx - centerOffset.dx, 2) + pow(offset.dy - centerOffset.dy, 2));
+      if (distance < minDistance){
+        minDistance = distance;
+      }
+      if (distance > maxDistance){
+        maxDistance = distance;
+      }
+    }
+
+    print("$minDistance:$maxDistance");
+    print("${maxDistance / minDistance}");
+    final isCircle = maxDistance / minDistance < 1.7;
+    print(isCircle);
+
+    if (isCircle){
+      ref.read(DataProviders.isDarkProvider.notifier).toggle();
+    }
+  }
 
   @override
   Widget build(
@@ -22,71 +68,81 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   ) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        return Card(
-          color: background(shrinkOffset, context),
-          margin: EdgeInsets.zero,
-          elevation: elevation(shrinkOffset),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: leftPadding(shrinkOffset),
+        return Listener(
+          onPointerUp: (details) {
+            check(ref);
+            list.clear();
+          },
+          onPointerMove: (details) {
+            list.add(details.position);
+          },
+          child: Card(
+            color: background(shrinkOffset, context),
+            margin: EdgeInsets.zero,
+            elevation: elevation(shrinkOffset),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
             ),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Positioned(
-                  bottom: bottomTitlePadding(shrinkOffset),
-                  child: Text(
-                    S.of(context).myTodos,
-                    style: CustomTextTheme.title(context).copyWith(
-                      fontSize: titleSize(
-                        shrinkOffset,
-                        context,
-                      ),
-                      height: titleHeight(
-                        shrinkOffset,
-                        context,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 18,
-                  child: Opacity(
-                    opacity: opacity(shrinkOffset),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: leftPadding(shrinkOffset),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    bottom: bottomTitlePadding(shrinkOffset),
                     child: Text(
-                      "${S.of(context).done}"
-                      "${ref.watch(completedTodosProvider).length}",
-                      style: CustomTextTheme.subtitle(context),
+                      S.of(context).myTodos,
+                      style: CustomTextTheme.title(context).copyWith(
+                        fontSize: titleSize(
+                          shrinkOffset,
+                          context,
+                        ),
+                        height: titleHeight(
+                          shrinkOffset,
+                          context,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  bottom: bottomIconPadding(shrinkOffset),
-                  right: rightPadding(shrinkOffset),
-                  child: InkWell(
-                    onTap: () =>
-                        ref.read(DataProviders.showAllTodosProvider.notifier).toggle(),
-                    child: ref.watch(DataProviders.showAllTodosProvider)
-                        ? Icon(
-                            Icons.visibility_off,
-                            size: 24,
-                            color: Theme.of(context)
-                                .extension<CustomColors>()!
-                                .colorBlue,
-                          )
-                        : Icon(
-                            Icons.visibility,
-                            size: 24,
-                            color: Theme.of(context)
-                                .extension<CustomColors>()!
-                                .colorBlue,
-                          ),
+                  Positioned(
+                    bottom: 18,
+                    child: Opacity(
+                      opacity: opacity(shrinkOffset),
+                      child: Text(
+                        "${S.of(context).done}"
+                        "${ref.watch(completedTodosProvider).length}",
+                        style: CustomTextTheme.subtitle(context),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: bottomIconPadding(shrinkOffset),
+                    right: rightPadding(shrinkOffset),
+                    child: InkWell(
+                      onTap: () => ref
+                          .read(DataProviders.showAllTodosProvider.notifier)
+                          .toggle(),
+                      child: ref.watch(DataProviders.showAllTodosProvider)
+                          ? Icon(
+                              Icons.visibility_off,
+                              size: 24,
+                              color: Theme.of(context)
+                                  .extension<CustomColors>()!
+                                  .colorBlue,
+                            )
+                          : Icon(
+                              Icons.visibility,
+                              size: 24,
+                              color: Theme.of(context)
+                                  .extension<CustomColors>()!
+                                  .colorBlue,
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
