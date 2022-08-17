@@ -16,11 +16,17 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
 
   List<Offset> list = [];
 
+  // функция, которая расчитвает, нарисовал ли пользователь круг или нет
+  // есть еще пару идей, как сделать это красивее
   void check(WidgetRef ref) {
+    // тут пока просто принты для отслеживания расчетов
+    // знаю, что нехорошо, удалю, когда буду уверен, что все ок
+    // или перенесу в логгер
 
     List<double> listY = list.map((e) => e.dy).toList()..sort();
     List<double> listX = list.map((e) => e.dx).toList()..sort();
 
+    // расчет крайних точек фигуры
     Offset maxX = list.firstWhere((element) => element.dx == listX.last); // 3
     Offset minX = list.firstWhere((element) => element.dx == listX.first); // 1
     Offset maxY = list.firstWhere((element) => element.dy == listY.last); // 4
@@ -31,31 +37,37 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     print(maxX);
     print(maxY);
 
-
+    //расчет координат центра между крайними точками
     final centerX = (minX.dx + minY.dx + maxX.dx + maxY.dx) / 4;
     final centerY = (minX.dy + minY.dy + maxX.dy + maxY.dy) / 4;
 
     final centerOffset = Offset(centerX, centerY);
     print(centerOffset);
 
+    // расчет максимального и минимального "радиусов"
     double minDistance = double.infinity;
     double maxDistance = 0;
-    for (Offset offset in list){
-      final distance = sqrt(pow(offset.dx - centerOffset.dx, 2) + pow(offset.dy - centerOffset.dy, 2));
-      if (distance < minDistance){
+    for (Offset offset in list) {
+      final distance = sqrt(pow(offset.dx - centerOffset.dx, 2) +
+          pow(offset.dy - centerOffset.dy, 2));
+      if (distance < minDistance) {
         minDistance = distance;
       }
-      if (distance > maxDistance){
+      if (distance > maxDistance) {
         maxDistance = distance;
       }
     }
 
     print("$minDistance:$maxDistance");
     print("${maxDistance / minDistance}");
+
+    // похожа ли фигура на окружность
+    // если разница между радиусами небольшая, то окружность
     final isCircle = maxDistance / minDistance < 1.7;
     print(isCircle);
 
-    if (isCircle){
+    // если близко к окружности, то поменять тему
+    if (isCircle) {
       ref.read(DataProviders.isDarkProvider.notifier).toggle();
     }
   }
@@ -69,6 +81,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         return Listener(
+          // считываем движение пальца, пользователь должен нарисовать круг
           onPointerUp: (details) {
             check(ref);
             list.clear();

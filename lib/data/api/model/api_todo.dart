@@ -12,14 +12,6 @@ class ApiTodo {
 
   static Importance _importanceFromString(String stringImportance) {
     return Importance.values.firstWhere((value) => value.name == stringImportance);
-    // switch (stringImportance) {
-    //   case "low":
-    //     return Importance.low;
-    //   case "important":
-    //     return Importance.important;
-    //   default:
-    //     return Importance.basic;
-    // }
   }
 
   ApiTodo.fromApi(Map<String, dynamic> map)

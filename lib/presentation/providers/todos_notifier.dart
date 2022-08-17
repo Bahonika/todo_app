@@ -1,16 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/data/api/service_util.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/presentation/providers/create_screen_parameters_notifier.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 
 import 'package:uuid/uuid.dart';
 
 class TodosNotifier extends StateNotifier<List<Todo>> {
-  TodosNotifier(this.serviceUtil) : super([]) {
+  final CreateScreenParametersNotifier createScreenParametersNotifier;
+  final ServiceUtil serviceUtil;
+
+  TodosNotifier(
+    this.serviceUtil,
+    this.createScreenParametersNotifier,
+  ) : super([]) {
     _init();
   }
 
-  final ServiceUtil serviceUtil;
 
   void _init() async {
     await serviceUtil.localService.init();
@@ -22,37 +28,42 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
     state = data;
   }
 
-  void create(Todo todo) async {
+  void create() async {
+    final todo = generateTodo();
     await serviceUtil.createTodo(todo);
     load();
   }
 
-  Todo alterTodo(WidgetRef ref, Todo todo) {
-    final alteredTodo = todo.copyWith(
-      deadline: ref.read(DataProviders.showDateProvider)
-          ? ref.read(DataProviders.selectedDateProvider)
+  Todo alterTodo() {
+    final parametersState = createScreenParametersNotifier.state;
+
+    final alteredTodo = parametersState.todoForEdit!.copyWith(
+      deadline: parametersState.showDate
+          ? parametersState.date
           : null,
-      text: ref.read(DataProviders.textControllerProvider).text,
+      text: parametersState.textEditingController.text,
       changedAt: DateTime.now(),
-      importance: ref.read(DataProviders.selectedImportanceProvider),
+      importance: parametersState.importance,
       lastUpdatedBy: serviceUtil.localService.deviceId.values.first,
     );
     return alteredTodo;
   }
 
-  Todo generateTodo(WidgetRef ref) {
+
+  Todo generateTodo() {
     Uuid uuid = const Uuid();
+    final parametersState = createScreenParametersNotifier.state;
     final todo = Todo(
       createdAt: DateTime.now(),
       changedAt: DateTime.now(),
       lastUpdatedBy: serviceUtil.localService.deviceId.values.first,
-      deadline: ref.read(DataProviders.showDateProvider)
-          ? ref.read(DataProviders.selectedDateProvider)
+      deadline: parametersState.showDate
+          ? parametersState.date
           : null,
       uuid: uuid.v1(),
       done: false,
-      text: ref.read(DataProviders.textControllerProvider).text,
-      importance: ref.read(DataProviders.selectedImportanceProvider),
+      text: parametersState.textEditingController.text,
+      importance: parametersState.importance,
     );
     return todo;
   }
@@ -63,7 +74,8 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
     load();
   }
 
-  void update(Todo todo) async {
+  void update() async {
+    final todo = alterTodo();
     await serviceUtil.updateTodo(todo);
     load();
   }
@@ -79,7 +91,7 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
   }
 }
 
-final completedTodosProvider = Provider<List<Todo>>((ref) {
+final completedTodosProvider = Provider.autoDispose<List<Todo>>((ref) {
   final todos = ref
       .watch(DataProviders.todosController)
       .where((element) => element.done)
@@ -87,7 +99,7 @@ final completedTodosProvider = Provider<List<Todo>>((ref) {
   return todos;
 });
 
-final uncompletedTodosProvider = Provider<List<Todo>>((ref) {
+final uncompletedTodosProvider = Provider.autoDispose<List<Todo>>((ref) {
   final todos = ref
       .watch(DataProviders.todosController)
       .where((element) => !element.done)

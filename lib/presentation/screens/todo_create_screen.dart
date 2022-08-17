@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
-import 'package:todo_app/main.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
@@ -18,21 +17,15 @@ class TodoCreateScreen extends ConsumerStatefulWidget {
 
 class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   void createTask() {
-    final todo =
-        ref.read(DataProviders.todosController.notifier).generateTodo(ref);
-    ref.read(DataProviders.todosController.notifier).create(todo);
+    ref.watch(DataProviders.todosController.notifier).create();
   }
 
   void editTask() {
-    final todoForEdit = ref.read(DataProviders.todoForEditProvider);
-    final todo = ref
-        .read(DataProviders.todosController.notifier)
-        .alterTodo(ref, todoForEdit!);
-    ref.read(DataProviders.todosController.notifier).update(todo);
+    ref.watch(DataProviders.todosController.notifier).update();
   }
 
   void _tapHandler() {
-    if (ref.watch(DataProviders.isEditProvider)) {
+    if (ref.watch(DataProviders.createParametersProvider).isEdit) {
       editTask();
     } else {
       createTask();
@@ -41,13 +34,12 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void setDefaultDataAndPop() {
-    // не придумал как лучше это сделать пока что
-    ref.refresh(DataProviders.textControllerProvider.notifier);
-    ref.refresh(DataProviders.selectedImportanceProvider.notifier);
-    ref.refresh(DataProviders.selectedDateProvider.notifier);
-    ref.refresh(DataProviders.showDateProvider.notifier);
-    ref.refresh(DataProviders.isEditProvider.notifier);
-    ref.read(navigationProvider).pop();
+    // autoDispose не срабатывает при уходе с экрана, не очень понимаю, почему
+    // если вызывать refresh вручную, то диспоузится и todosController
+    // это приводит к багу. Слишком связно получилось
+
+    // ref.refresh(DataProviders.createParametersProvider);
+    ref.read(DataProviders.navigationProvider).pop();
   }
 
   @override
@@ -103,9 +95,10 @@ class TextFieldTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final parameters = ref.watch(DataProviders.createParametersProvider);
     return WrapCard(
       child: TextFormField(
-        controller: ref.watch(DataProviders.textControllerProvider),
+        controller: parameters.textEditingController,
         style: CustomTextTheme.body(context),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -130,6 +123,9 @@ class ImportanceTile extends ConsumerStatefulWidget {
 class _ImportanceTileState extends ConsumerState<ImportanceTile> {
   @override
   Widget build(BuildContext context) {
+    final parameters = ref.watch(DataProviders.createParametersProvider);
+    final parametersNotifier =
+        ref.watch(DataProviders.createParametersProvider.notifier);
     return ListTile(
       title: Text(
         S.of(context).importance,
@@ -154,14 +150,10 @@ class _ImportanceTileState extends ConsumerState<ImportanceTile> {
           ],
           isDense: true,
           isExpanded: false,
-          value: ref.watch(DataProviders.selectedImportanceProvider),
+          value: parameters.importance,
           style: CustomTextTheme.importanceSubtitle(context),
           icon: const SizedBox(),
-          onChanged: (value) {
-            ref
-                .read(DataProviders.selectedImportanceProvider.notifier)
-                .setImportance(value!);
-          },
+          onChanged: (value) => parametersNotifier.importance = value!,
         ),
       ),
     );
@@ -190,26 +182,27 @@ class DateTile extends ConsumerWidget {
   void setSelectedDate(BuildContext context, WidgetRef ref) {
     selectDate(context).then((value) {
       if (tempPickedDate != null) {
-        ref
-            .read(DataProviders.selectedDateProvider.notifier)
-            .setDate(tempPickedDate!);
+        ref.read(DataProviders.createParametersProvider.notifier).date =
+            tempPickedDate!;
       }
     });
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final parameters = ref.watch(DataProviders.createParametersProvider);
+    final parametersNotifier =
+        ref.watch(DataProviders.createParametersProvider.notifier);
     return ListTile(
       title: Text(
         S.of(context).doneBy,
         style: CustomTextTheme.body(context),
       ),
-      subtitle: ref.watch(DataProviders.showDateProvider)
+      subtitle: parameters.showDate
           ? InkWell(
               onTap: () => setSelectedDate(context, ref),
               child: Text(
-                MyDateFormat().localeFormat(
-                    ref.watch(DataProviders.selectedDateProvider)!),
+                MyDateFormat().localeFormat(parameters.date),
                 style: TextStyle(
                     color:
                         Theme.of(context).extension<CustomColors>()!.colorBlue),
@@ -217,15 +210,13 @@ class DateTile extends ConsumerWidget {
             )
           : const SizedBox(),
       trailing: Switch(
-        value: ref.watch(DataProviders.showDateProvider),
+        value: parameters.showDate,
         activeTrackColor: Theme.of(context)
             .extension<CustomColors>()!
             .colorBlue
             .withOpacity(0.3),
         activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
-        onChanged: (bool value) {
-          ref.read(DataProviders.showDateProvider.notifier).toggle();
-        },
+        onChanged: (bool value) => parametersNotifier.toggleShowDate(),
       ),
     );
   }
@@ -234,35 +225,30 @@ class DateTile extends ConsumerWidget {
 class DeleteTile extends ConsumerWidget {
   const DeleteTile({Key? key}) : super(key: key);
 
-  void delete(WidgetRef ref) {
-    if (ref.watch(DataProviders.isEditProvider)) {
-      final todo = ref.read(DataProviders.todoForEditProvider);
-      ref.read(DataProviders.todosController.notifier).delete(todo!);
-      setDefaultDataAndPop(ref);
-    }
-  }
-
-  void setDefaultDataAndPop(WidgetRef ref) {
-    // не придумал как лучше это сделать пока что
-    ref.refresh(DataProviders.textControllerProvider.notifier);
-    ref.refresh(DataProviders.selectedImportanceProvider.notifier);
-    ref.refresh(DataProviders.selectedDateProvider.notifier);
-    ref.refresh(DataProviders.showDateProvider.notifier);
-    ref.refresh(DataProviders.isEditProvider.notifier);
-    ref.read(navigationProvider).pop();
+  void _pop(WidgetRef ref) {
+    ref.watch(DataProviders.navigationProvider).pop();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final parameters = ref.watch(DataProviders.createParametersProvider);
+
     return TextButton(
-      onPressed: () => delete(ref),
+      onPressed: () {
+        if (parameters.isEdit) {
+          ref
+              .read(DataProviders.todosController.notifier)
+              .delete(parameters.todoForEdit!);
+        }
+        _pop(ref);
+      },
       style: TextButton.styleFrom(
           primary: Theme.of(context).scaffoldBackgroundColor),
       child: Row(
         children: [
           Icon(
             Icons.delete,
-            color: ref.watch(DataProviders.isEditProvider)
+            color: parameters.isEdit
                 ? Theme.of(context).extension<CustomColors>()!.colorRed
                 : Theme.of(context).extension<CustomColors>()!.labelDisable,
           ),
@@ -271,7 +257,7 @@ class DeleteTile extends ConsumerWidget {
             child: Text(
               S.of(context).delete,
               style: TextStyle(
-                color: ref.watch(DataProviders.isEditProvider)
+                color: parameters.isEdit
                     ? Theme.of(context).extension<CustomColors>()!.colorRed
                     : Theme.of(context).extension<CustomColors>()!.labelDisable,
               ),

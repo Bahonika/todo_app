@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
-import 'package:todo_app/main.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
@@ -34,7 +33,7 @@ class TodoListScreen extends ConsumerWidget {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                ref.read(navigationProvider).openCreateTodo();
+                ref.read(DataProviders.navigationProvider).openCreateTodo();
               },
               backgroundColor:
                   Theme.of(context).extension<CustomColors>()!.colorBlue,
@@ -107,10 +106,8 @@ class TextFieldTile extends ConsumerWidget {
   final TextEditingController _controller = TextEditingController();
 
   createTodo(WidgetRef ref) {
-    ref.read(DataProviders.textControllerProvider).text = _controller.text;
-    final todo =
-        ref.read(DataProviders.todosController.notifier).generateTodo(ref);
-    ref.read(DataProviders.todosController.notifier).create(todo);
+    //todo: пока не работает
+    ref.read(DataProviders.createParametersProvider).text = _controller.text;
   }
 
   @override
@@ -178,17 +175,11 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
     }
   }
 
-  void fieldsFill() {
-    ref.read(DataProviders.todoForEditProvider.notifier).setTodo(widget.todo);
-    final todo = ref.read(DataProviders.todoForEditProvider);
-    ref
-        .read(DataProviders.createScreenProvider(todo!).notifier)
-        .setEditingData();
-  }
-
   void toEditScreen() {
-    fieldsFill();
-    ref.read(navigationProvider).openCreateTodo();
+    ref
+        .read(DataProviders.createScreenProvider(widget.todo).notifier)
+        .setEditingData();
+    ref.read(DataProviders.navigationProvider).openCreateTodo();
   }
 
   @override
