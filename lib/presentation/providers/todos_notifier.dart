@@ -35,7 +35,7 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
       text: ref.read(DataProviders.textControllerProvider).text,
       changedAt: DateTime.now(),
       importance: ref.read(DataProviders.selectedImportanceProvider),
-      lastUpdatedBy: "123",
+      lastUpdatedBy: serviceUtil.localService.deviceId.values.first,
     );
     return alteredTodo;
   }
@@ -45,7 +45,7 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
     final todo = Todo(
       createdAt: DateTime.now(),
       changedAt: DateTime.now(),
-      lastUpdatedBy: "123",
+      lastUpdatedBy: serviceUtil.localService.deviceId.values.first,
       deadline: ref.read(DataProviders.showDateProvider)
           ? ref.read(DataProviders.selectedDateProvider)
           : null,

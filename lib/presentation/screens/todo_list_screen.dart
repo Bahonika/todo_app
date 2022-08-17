@@ -83,13 +83,13 @@ class SliverTodoList extends ConsumerWidget {
           shrinkWrap: true,
           controller: ScrollController(),
           itemBuilder: (BuildContext context, index) {
-            if (index == 0) {
+            if (index == todoToShow.length) {
+              return TextFieldTile(); // last tile with text field
+            } else if (index == 0) {
               return TodoWidget(
                 todo: todoToShow[index],
                 isFirst: true,
               );
-            } else if (index == todoToShow.length) {
-              return TextFieldTile(); // last tile with text field
             } else {
               return TodoWidget(todo: todoToShow[index]);
             }

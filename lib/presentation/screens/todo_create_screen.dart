@@ -235,7 +235,21 @@ class DeleteTile extends ConsumerWidget {
   const DeleteTile({Key? key}) : super(key: key);
 
   void delete(WidgetRef ref) {
-    if (!ref.watch(DataProviders.isEditProvider)) {}
+    if (ref.watch(DataProviders.isEditProvider)) {
+      final todo = ref.read(DataProviders.todoForEditProvider);
+      ref.read(DataProviders.todosController.notifier).delete(todo!);
+      setDefaultDataAndPop(ref);
+    }
+  }
+
+  void setDefaultDataAndPop(WidgetRef ref) {
+    // не придумал как лучше это сделать пока что
+    ref.refresh(DataProviders.textControllerProvider.notifier);
+    ref.refresh(DataProviders.selectedImportanceProvider.notifier);
+    ref.refresh(DataProviders.selectedDateProvider.notifier);
+    ref.refresh(DataProviders.showDateProvider.notifier);
+    ref.refresh(DataProviders.isEditProvider.notifier);
+    ref.read(navigationProvider).pop();
   }
 
   @override
@@ -249,8 +263,8 @@ class DeleteTile extends ConsumerWidget {
           Icon(
             Icons.delete,
             color: ref.watch(DataProviders.isEditProvider)
-                ? Theme.of(context).extension<CustomColors>()!.labelDisable
-                : Theme.of(context).extension<CustomColors>()!.colorRed,
+                ? Theme.of(context).extension<CustomColors>()!.colorRed
+                : Theme.of(context).extension<CustomColors>()!.labelDisable,
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -258,8 +272,8 @@ class DeleteTile extends ConsumerWidget {
               S.of(context).delete,
               style: TextStyle(
                 color: ref.watch(DataProviders.isEditProvider)
-                    ? Theme.of(context).extension<CustomColors>()!.labelDisable
-                    : Theme.of(context).extension<CustomColors>()!.colorRed,
+                    ? Theme.of(context).extension<CustomColors>()!.colorRed
+                    : Theme.of(context).extension<CustomColors>()!.labelDisable,
               ),
             ),
           ),
