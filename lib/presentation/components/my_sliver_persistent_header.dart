@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/presentation/components/circle.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/providers/todos_notifier.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
@@ -18,7 +19,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
 
   // функция, которая расчитвает, нарисовал ли пользователь круг или нет
   // есть еще пару идей, как сделать это красивее
-  void check(WidgetRef ref) {
+  void check(WidgetRef ref, bool showCircle) {
     // тут пока просто принты для отслеживания расчетов
     // знаю, что нехорошо, удалю, когда буду уверен, что все ок
     // или перенесу в логгер
@@ -69,6 +70,8 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     // если близко к окружности, то поменять тему
     if (isCircle) {
       ref.read(DataProviders.isDarkProvider.notifier).toggle();
+    } else if (showCircle){
+      ref.read(DataProviders.opacityProvider.notifier).toggle();
     }
   }
 
@@ -83,7 +86,9 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
         return Listener(
           // считываем движение пальца, пользователь должен нарисовать круг
           onPointerUp: (details) {
-            check(ref);
+            if (list.length > 4) {
+              check(ref, maxExtent - shrinkOffset == maxExtent);
+            }
             list.clear();
           },
           onPointerMove: (details) {
@@ -96,66 +101,69 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.zero,
             ),
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: leftPadding(shrinkOffset),
-              ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Positioned(
-                    bottom: bottomTitlePadding(shrinkOffset),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned(
+                  bottom: bottomTitlePadding(shrinkOffset),
+                  left: leftPadding(shrinkOffset),
+                  child: Text(
+                    S.of(context).myTodos,
+                    style: CustomTextTheme.title(context).copyWith(
+                      fontSize: titleSize(
+                        shrinkOffset,
+                        context,
+                      ),
+                      height: titleHeight(
+                        shrinkOffset,
+                        context,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 18,
+                  left: leftPadding(shrinkOffset),
+                  child: Opacity(
+                    opacity: opacity(shrinkOffset),
                     child: Text(
-                      S.of(context).myTodos,
-                      style: CustomTextTheme.title(context).copyWith(
-                        fontSize: titleSize(
-                          shrinkOffset,
-                          context,
-                        ),
-                        height: titleHeight(
-                          shrinkOffset,
-                          context,
-                        ),
-                      ),
+                      "${S.of(context).done}"
+                      "${ref.watch(completedTodosProvider).length}",
+                      style: CustomTextTheme.subtitle(context),
                     ),
                   ),
-                  Positioned(
-                    bottom: 18,
-                    child: Opacity(
-                      opacity: opacity(shrinkOffset),
-                      child: Text(
-                        "${S.of(context).done}"
-                        "${ref.watch(completedTodosProvider).length}",
-                        style: CustomTextTheme.subtitle(context),
-                      ),
-                    ),
+                ),
+                Positioned(
+                  bottom: bottomIconPadding(shrinkOffset),
+                  right: rightPadding(shrinkOffset),
+                  child: InkWell(
+                    onTap: () => ref
+                        .read(DataProviders.showAllTodosProvider.notifier)
+                        .toggle(),
+                    child: ref.watch(DataProviders.showAllTodosProvider)
+                        ? Icon(
+                            Icons.visibility_off,
+                            size: 24,
+                            color: Theme.of(context)
+                                .extension<CustomColors>()!
+                                .colorBlue,
+                          )
+                        : Icon(
+                            Icons.visibility,
+                            size: 24,
+                            color: Theme.of(context)
+                                .extension<CustomColors>()!
+                                .colorBlue,
+                          ),
                   ),
-                  Positioned(
-                    bottom: bottomIconPadding(shrinkOffset),
-                    right: rightPadding(shrinkOffset),
-                    child: InkWell(
-                      onTap: () => ref
-                          .read(DataProviders.showAllTodosProvider.notifier)
-                          .toggle(),
-                      child: ref.watch(DataProviders.showAllTodosProvider)
-                          ? Icon(
-                              Icons.visibility_off,
-                              size: 24,
-                              color: Theme.of(context)
-                                  .extension<CustomColors>()!
-                                  .colorBlue,
-                            )
-                          : Icon(
-                              Icons.visibility,
-                              size: 24,
-                              color: Theme.of(context)
-                                  .extension<CustomColors>()!
-                                  .colorBlue,
-                            ),
-                    ),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Circle(
+                    height: maxExtent - shrinkOffset,
                   ),
-                ],
-              ),
+                )
+              ],
             ),
           ),
         );

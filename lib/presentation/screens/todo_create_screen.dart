@@ -145,7 +145,14 @@ class _ImportanceTileState extends ConsumerState<ImportanceTile> {
             ),
             DropdownMenuItem(
               value: Importance.important,
-              child: Text(S.of(context).important),
+              child: RichText(
+                  text: TextSpan(
+                style: CustomTextTheme.redText(context),
+                children: [
+                  TextSpan(text: S.of(context).importanceEmoji),
+                  TextSpan(text: S.of(context).important),
+                ],
+              )),
             ),
           ],
           isDense: true,

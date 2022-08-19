@@ -5,6 +5,7 @@ import 'package:todo_app/presentation/providers/bool_notifier.dart';
 import 'package:todo_app/domain/models/create_screen_parameters.dart';
 import 'package:todo_app/presentation/providers/create_screen_notifier.dart';
 import 'package:todo_app/presentation/providers/create_screen_parameters_notifier.dart';
+import 'package:todo_app/presentation/providers/opacity_notifier.dart';
 import 'package:todo_app/presentation/providers/services_providers.dart';
 import 'package:todo_app/presentation/providers/todos_notifier.dart';
 
@@ -18,13 +19,18 @@ class DataProviders {
     return CreateScreenParametersNotifier();
   });
 
+  static final opacityProvider =
+      StateNotifierProvider<OpacityNotifier, double>((ref) {
+    return OpacityNotifier();
+  });
+
   static final createScreenProvider = StateNotifierProvider.autoDispose
       .family<CreateScreenNotifier, bool?, Todo>((ref, Todo todo) {
-        // скорее всего все еще неправильно использую family(
+    // скорее всего все еще неправильно использую family(
     return CreateScreenNotifier(
       todoForEdit: todo,
       createScreenParametersNotifier:
-          ref.watch(createParametersProvider.notifier),
+          ref.read(createParametersProvider.notifier),
     );
   });
 
@@ -34,7 +40,7 @@ class DataProviders {
   });
 
   static final todosController =
-      StateNotifierProvider.autoDispose<TodosNotifier, List<Todo>>(
+      StateNotifierProvider.autoDispose<TodosNotifier, ListViewState>(
     (ref) {
       final serviceUtil = ref.watch(ServicesProviders.serviceUtilProvider);
 

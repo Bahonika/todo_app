@@ -12,5 +12,6 @@
     "datePickerDone": "DONE",
     "newTodo": "New",
     "unknownPage": "Unknown page",
-    "emptyField": "Text field can't be empty"
+    "emptyField": "Text field can't be empty",
+    "importanceEmoji": "‼️ "
 }

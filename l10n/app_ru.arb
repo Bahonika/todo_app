@@ -12,5 +12,6 @@
     "datePickerDone": "ГОТОВО",
     "newTodo": "Новое",
     "unknownPage": "Неизвестная страница",
-    "emptyField": "Поле не может быть пустым"
+    "emptyField": "Поле не может быть пустым",
+    "importanceEmoji": "‼️ "
 }

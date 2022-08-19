@@ -6,31 +6,55 @@ import 'package:todo_app/presentation/providers/providers.dart';
 
 import 'package:uuid/uuid.dart';
 
-class TodosNotifier extends StateNotifier<List<Todo>> {
+class ListViewState {
+  final bool isLoading;
+  final List<Todo> todoList;
+  final Object? error;
+
+  ListViewState({required this.isLoading, required this.todoList, this.error});
+
+  static final initial = ListViewState(
+    isLoading: true,
+    todoList: [],
+  );
+}
+
+class TodosNotifier extends StateNotifier<ListViewState> {
   final CreateScreenParametersNotifier createScreenParametersNotifier;
   final ServiceUtil serviceUtil;
 
   TodosNotifier(
     this.serviceUtil,
     this.createScreenParametersNotifier,
-  ) : super([]) {
+  ) : super(ListViewState.initial) {
     _init();
   }
-
 
   void _init() async {
     await serviceUtil.localService.init();
     load();
   }
 
-  void load() async {
-    final data = await serviceUtil.getTodos();
-    state = data;
+  void setErrorState(Object? error, StackTrace stackTrace) {
+    state = ListViewState(
+      isLoading: state.isLoading,
+      todoList: state.todoList,
+      error: error,
+    );
   }
 
+  void load() async {
+    state = ListViewState(isLoading: true, todoList: state.todoList);
+    final data =
+        await serviceUtil.getTodos().onError((error, stackTrace) => []);
+    state = ListViewState(isLoading: false, todoList: data);
+  }
+
+  // я хотел вынести логику создания из этого класса,
+  // но тогда функцию load тоже нужно будет вынести
   void create() async {
     final todo = generateTodo();
-    await serviceUtil.createTodo(todo);
+    await serviceUtil.createTodo(todo).onError(setErrorState);
     load();
   }
 
@@ -38,9 +62,7 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
     final parametersState = createScreenParametersNotifier.state;
 
     final alteredTodo = parametersState.todoForEdit!.copyWith(
-      deadline: parametersState.showDate
-          ? parametersState.date
-          : null,
+      deadline: parametersState.showDate ? parametersState.date : null,
       text: parametersState.textEditingController.text,
       changedAt: DateTime.now(),
       importance: parametersState.importance,
@@ -49,7 +71,6 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
     return alteredTodo;
   }
 
-
   Todo generateTodo() {
     Uuid uuid = const Uuid();
     final parametersState = createScreenParametersNotifier.state;
@@ -57,9 +78,7 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
       createdAt: DateTime.now(),
       changedAt: DateTime.now(),
       lastUpdatedBy: serviceUtil.localService.deviceId.values.first,
-      deadline: parametersState.showDate
-          ? parametersState.date
-          : null,
+      deadline: parametersState.showDate ? parametersState.date : null,
       uuid: uuid.v1(),
       done: false,
       text: parametersState.textEditingController.text,
@@ -69,24 +88,24 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
   }
 
   void delete(Todo todo) async {
-    state.removeWhere((element) => element == todo);
-    await serviceUtil.deleteTodo(todo.uuid);
+    state.todoList.removeWhere((element) => element == todo);
+    await serviceUtil.deleteTodo(todo.uuid).onError(setErrorState);
     load();
   }
 
   void update() async {
     final todo = alterTodo();
-    await serviceUtil.updateTodo(todo);
+    await serviceUtil.updateTodo(todo).onError(setErrorState);
     load();
   }
 
   Future<void> setAsDone(Todo todo) async {
-    await serviceUtil.setDone(todo);
+    await serviceUtil.setDone(todo).onError(setErrorState);
     load();
   }
 
   void setAsUndone(Todo todo) async {
-    await serviceUtil.setUndone(todo);
+    await serviceUtil.setUndone(todo).onError(setErrorState);
     load();
   }
 }
@@ -94,6 +113,7 @@ class TodosNotifier extends StateNotifier<List<Todo>> {
 final completedTodosProvider = Provider.autoDispose<List<Todo>>((ref) {
   final todos = ref
       .watch(DataProviders.todosController)
+      .todoList
       .where((element) => element.done)
       .toList();
   return todos;
@@ -102,6 +122,7 @@ final completedTodosProvider = Provider.autoDispose<List<Todo>>((ref) {
 final uncompletedTodosProvider = Provider.autoDispose<List<Todo>>((ref) {
   final todos = ref
       .watch(DataProviders.todosController)
+      .todoList
       .where((element) => !element.done)
       .toList();
   return todos;

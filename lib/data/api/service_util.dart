@@ -33,7 +33,7 @@ class ServiceUtil {
       _log.i("Get from remote");
       todos = result.map((item) => TodoMapper.fromApi(item)).toList();
     } catch (e) {
-      _log.w("Can't get from remote");
+      _log.w("Can't get from remote", e);
     }
     return todos;
   }

@@ -72,52 +72,61 @@ class SliverTodoList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(DataProviders.todosController);
     var todoToShow = ref.watch(DataProviders.showAllTodosProvider)
-        ? ref.watch(DataProviders.todosController)
+        ? state.todoList
         : ref.watch(uncompletedTodosProvider);
     return SliverToBoxAdapter(
-      child: WrapCard(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          controller: ScrollController(),
-          itemBuilder: (BuildContext context, index) {
-            if (index == todoToShow.length) {
-              return TextFieldTile(); // last tile with text field
-            } else if (index == 0) {
-              return TodoWidget(
-                todo: todoToShow[index],
-                isFirst: true,
-              );
-            } else {
-              return TodoWidget(todo: todoToShow[index]);
-            }
-          },
-          itemCount: todoToShow.length + 1, // todos count + one extra tile
-        ),
+      child: Column(
+        children: [
+          WrapCard(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              controller: ScrollController(),
+              itemBuilder: (BuildContext context, index) {
+                if (index == todoToShow.length) {
+                  return const TextFieldTile(); // last tile with text field
+                } else if (index == 0) {
+                  return TodoWidget(
+                    todo: todoToShow[index],
+                    isFirst: true,
+                  );
+                } else {
+                  return TodoWidget(todo: todoToShow[index]);
+                }
+              },
+              itemCount: todoToShow.length + 1, // todos count + one extra tile
+            ),
+          ),
+          state.isLoading
+              ? CircularProgressIndicator(
+                  color: Theme.of(context).extension<CustomColors>()!.colorBlue,
+                )
+              : const SizedBox(),
+        ],
       ),
     );
   }
 }
 
 class TextFieldTile extends ConsumerWidget {
-  TextFieldTile({Key? key}) : super(key: key);
-
-  final TextEditingController _controller = TextEditingController();
+  const TextFieldTile({Key? key}) : super(key: key);
 
   createTodo(WidgetRef ref) {
     //todo: пока не работает
-    ref.read(DataProviders.createParametersProvider).text = _controller.text;
+    ref.watch(DataProviders.todosController.notifier).create();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final parameters = ref.watch(DataProviders.createParametersProvider);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: const SizedBox(),
         title: TextFormField(
-          controller: _controller,
+          controller: parameters.textEditingController,
           decoration: InputDecoration(
             hintText: S.of(context).newTodo,
             hintStyle: CustomTextTheme.importanceSubtitle(context),
@@ -153,7 +162,7 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
     ref.read(DataProviders.todosController.notifier).delete(widget.todo);
   }
 
-  Future<bool> setAsDone() async {
+  bool setAsDone() {
     ref.read(DataProviders.todosController.notifier).setAsDone(widget.todo);
     return false;
   }
@@ -201,7 +210,7 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
           background: const DismissibleBackground(),
           secondaryBackground: const DismissibleSecondaryBackground(),
           child: InkWell(
-            onTap: () => toEditScreen(),
+            onTap: toEditScreen,
             child: ListTile(
               leading: Checkbox(
                 value: widget.todo.done,
@@ -223,7 +232,7 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
                     children: [
                       if (widget.todo.importance == Importance.important)
                         TextSpan(
-                          text: "‼ ",
+                          text: S.of(context).importanceEmoji,
                           style: TextStyle(
                               color: Theme.of(context)
                                   .extension<CustomColors>()!
