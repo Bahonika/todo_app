@@ -73,9 +73,25 @@ class SliverTodoList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(DataProviders.todosController);
-    var todoToShow = ref.watch(DataProviders.showAllTodosProvider)
+    final todoToShow = ref.watch(DataProviders.showAllTodosProvider)
         ? state.todoList
         : ref.watch(uncompletedTodosProvider);
+
+    ref.listen<ListViewState>(
+      DataProviders.todosController,
+      (previous, next) {
+        if (next.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                next.error.toString(),
+              ),
+            ),
+          );
+        }
+      },
+    );
+
     return SliverToBoxAdapter(
       child: Column(
         children: [

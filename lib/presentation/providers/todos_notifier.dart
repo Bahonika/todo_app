@@ -36,6 +36,7 @@ class TodosNotifier extends StateNotifier<ListViewState> {
   }
 
   void setErrorState(Object? error, StackTrace stackTrace) {
+    print("++++$error");
     state = ListViewState(
       isLoading: state.isLoading,
       todoList: state.todoList,
