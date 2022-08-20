@@ -30,7 +30,7 @@ class DataProviders {
     return CreateScreenNotifier(
       todoForEdit: todo,
       createScreenParametersNotifier:
-          ref.read(createParametersProvider.notifier),
+          ref.watch(createParametersProvider.notifier),
     );
   });
 

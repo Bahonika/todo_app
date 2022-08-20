@@ -22,6 +22,7 @@ class ServiceUtil {
       _log.i("Get from local");
     } catch (e) {
       _log.e("Can't get from local", e);
+      rethrow;
     }
     return todos;
   }
@@ -34,6 +35,7 @@ class ServiceUtil {
       todos = result.map((item) => TodoMapper.fromApi(item)).toList();
     } catch (e) {
       _log.w("Can't get from remote", e);
+      rethrow;
     }
     return todos;
   }
@@ -50,12 +52,14 @@ class ServiceUtil {
       _log.i("Delete on remote");
     } catch (e) {
       _log.w("Can't delete on remote");
+      rethrow;
     }
     try {
       _localService.delete(uuid: uuid);
       _log.i("Delete on local");
     } catch (e) {
       _log.e("Can't delete on local");
+      rethrow;
     }
   }
 
@@ -65,12 +69,14 @@ class ServiceUtil {
       _log.i("Create on local");
     } catch (e) {
       _log.e("Can't create on local");
+      rethrow;
     }
     try {
       await _remoteService.create(todo: todo);
       _log.i("Create on remote");
     } catch (e) {
       _log.w("Can't create on remote", e);
+      rethrow;
     }
   }
 
@@ -80,12 +86,14 @@ class ServiceUtil {
       _log.i("Update local");
     } catch (e) {
       _log.e("Can't update local", e);
+      rethrow;
     }
     try {
       await _remoteService.update(uuid: todo.uuid, todo: todo);
       _log.i("Update remote");
     } catch (e) {
       _log.w("Can't update remote");
+      rethrow;
     }
   }
 
