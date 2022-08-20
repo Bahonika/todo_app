@@ -1,7 +1,34 @@
 import 'package:todo_app/data/api/model/api_todo.dart';
+import 'package:todo_app/data/api/model/local_todo.dart';
 import 'package:todo_app/domain/models/todo.dart';
 
 class TodoMapper {
+  static Todo fromLocal(LocalTodo todo) {
+    return Todo(
+      uuid: todo.uuid,
+      done: todo.done,
+      text: todo.text,
+      importance: todo.importance,
+      deadline: todo.deadline,
+      createdAt: todo.createdAt,
+      changedAt: todo.changedAt,
+      lastUpdatedBy: todo.lastUpdatedBy,
+    );
+  }
+
+  static LocalTodo toLocal(Todo todo) {
+    return LocalTodo(
+      uuid: todo.uuid,
+      done: todo.done,
+      text: todo.text,
+      importance: todo.importance,
+      deadline: todo.deadline,
+      createdAt: todo.createdAt,
+      changedAt: todo.changedAt,
+      lastUpdatedBy: todo.lastUpdatedBy,
+    );
+  }
+
   static Todo fromApi(ApiTodo todo) {
     return Todo(
       uuid: todo.uuid,
