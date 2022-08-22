@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
-import 'package:todo_app/presentation/providers/todos_notifier.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
@@ -73,11 +73,10 @@ class SliverTodoList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(DataProviders.todosController);
-    final todoToShow = ref.watch(DataProviders.showAllTodosProvider)
-        ? state.todoList
-        : ref.watch(uncompletedTodosProvider);
+    final stateNotifier = ref.watch(DataProviders.todosController.notifier);
+    final todos = state.showAll ? state.todos : stateNotifier.unDone;
 
-    ref.listen<ListViewState>(
+    ref.listen<TodoListState>(
       DataProviders.todosController,
       (previous, next) {
         if (next.error != null) {
@@ -101,18 +100,18 @@ class SliverTodoList extends ConsumerWidget {
               shrinkWrap: true,
               controller: ScrollController(),
               itemBuilder: (BuildContext context, index) {
-                if (index == todoToShow.length) {
+                if (index == todos.length) {
                   return const TextFieldTile(); // last tile with text field
                 } else if (index == 0) {
                   return TodoWidget(
-                    todo: todoToShow[index],
+                    todo: todos[index],
                     isFirst: true,
                   );
                 } else {
-                  return TodoWidget(todo: todoToShow[index]);
+                  return TodoWidget(todo: todos[index]);
                 }
               },
-              itemCount: todoToShow.length + 1, // todos count + one extra tile
+              itemCount: todos.length + 1, // todos count + one extra tile
             ),
           ),
           state.isLoading

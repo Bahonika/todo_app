@@ -1,32 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/data/api/service_util.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/providers/create_screen_parameters_notifier.dart';
-import 'package:todo_app/presentation/providers/providers.dart';
 
 import 'package:uuid/uuid.dart';
 
-class ListViewState {
-  final bool isLoading;
-  final List<Todo> todoList;
-  final Object? error;
-
-  ListViewState({required this.isLoading, required this.todoList, this.error});
-
-  static final initial = ListViewState(
-    isLoading: true,
-    todoList: [],
-  );
-}
-
-class TodosNotifier extends StateNotifier<ListViewState> {
+class TodosNotifier extends StateNotifier<TodoListState> {
   final CreateScreenParametersNotifier createScreenParametersNotifier;
   final ServiceUtil serviceUtil;
 
   TodosNotifier(
     this.serviceUtil,
     this.createScreenParametersNotifier,
-  ) : super(ListViewState.initial) {
+  ) : super(
+          TodoListState(
+            showAll: true,
+            isLoading: true,
+            todos: [],
+          ),
+        ) {
     _init();
   }
 
@@ -36,18 +29,44 @@ class TodosNotifier extends StateNotifier<ListViewState> {
   }
 
   void setErrorState(Object? error, StackTrace stackTrace) {
-    state = ListViewState(
+    state = TodoListState(
       isLoading: state.isLoading,
-      todoList: state.todoList,
-      error: error,
+      todos: state.todos,
+      error: error.toString(),
+      showAll: state.showAll,
     );
   }
 
   void load() async {
-    state = ListViewState(isLoading: true, todoList: state.todoList);
+    state = TodoListState(
+      isLoading: true,
+      todos: state.todos,
+      showAll: state.showAll,
+    );
     final data =
         await serviceUtil.getTodos().onError((error, stackTrace) => []);
-    state = ListViewState(isLoading: false, todoList: data);
+    state = TodoListState(
+      isLoading: false,
+      todos: data,
+      showAll: state.showAll,
+    );
+  }
+
+  void toggleFilter() {
+    state = TodoListState(
+      showAll: !state.showAll,
+      isLoading: state.isLoading,
+      todos: state.todos,
+    );
+  }
+
+  List<Todo> get unDone {
+    final data = state.todos.where((element) => !element.done).toList();
+    return data;
+  }
+
+  int get doneLength {
+    return state.todos.length - unDone.length;
   }
 
   // я хотел вынести логику создания из этого класса,
@@ -88,7 +107,7 @@ class TodosNotifier extends StateNotifier<ListViewState> {
   }
 
   void delete(Todo todo) async {
-    state.todoList.removeWhere((element) => element == todo);
+    state.todos.removeWhere((element) => element == todo);
     await serviceUtil.deleteTodo(todo.uuid).onError(setErrorState);
     load();
   }
@@ -109,21 +128,3 @@ class TodosNotifier extends StateNotifier<ListViewState> {
     load();
   }
 }
-
-final completedTodosProvider = Provider.autoDispose<List<Todo>>((ref) {
-  final todos = ref
-      .watch(DataProviders.todosController)
-      .todoList
-      .where((element) => element.done)
-      .toList();
-  return todos;
-});
-
-final uncompletedTodosProvider = Provider.autoDispose<List<Todo>>((ref) {
-  final todos = ref
-      .watch(DataProviders.todosController)
-      .todoList
-      .where((element) => !element.done)
-      .toList();
-  return todos;
-});

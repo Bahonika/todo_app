@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/bool_notifier.dart';
 import 'package:todo_app/domain/models/create_screen_parameters.dart';
@@ -34,13 +35,8 @@ class DataProviders {
     );
   });
 
-  static final showAllTodosProvider =
-      StateNotifierProvider<ShowAllTodosNotifier, bool>((ref) {
-    return ShowAllTodosNotifier();
-  });
-
   static final todosController =
-      StateNotifierProvider.autoDispose<TodosNotifier, ListViewState>(
+      StateNotifierProvider.autoDispose<TodosNotifier, TodoListState>(
     (ref) {
       final serviceUtil = ref.watch(ServicesProviders.serviceUtilProvider);
 

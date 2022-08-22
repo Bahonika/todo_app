@@ -45,7 +45,8 @@ class LocalService {
 
   // todos box
   List<Todo> getTodos() {
-    final data = _todos.values.map((todo) => TodoMapper.fromLocal(todo)).toList();
+    final data =
+        _todos.values.map((todo) => TodoMapper.fromLocal(todo)).toList();
     return data;
   }
 
@@ -68,17 +69,20 @@ class LocalService {
   }
 
   //revision box
+  int getRevision() {
+    final revision = _revision.values.last;
+    return revision;
+  }
 
   void setRevision(int value) {
-    _revision.put(_revisionKey, value);
+    _revision.putAt(0, value);
   }
 
   void incrementRevision() {
-    setRevision(_revision.get(_revisionKey)!);
+    setRevision(_revision.get(_revisionKey)! + 1);
   }
 
   // device id box
-
   void setDeviceId(String value) {
     if (_deviceId.isEmpty) {
       _deviceId.put(_deviceIdKey, value);

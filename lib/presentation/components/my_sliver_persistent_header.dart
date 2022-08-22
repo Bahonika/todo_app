@@ -33,17 +33,11 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     Offset maxY = list.firstWhere((element) => element.dy == listY.last); // 4
     Offset minY = list.firstWhere((element) => element.dy == listY.first); // 2
 
-    print(minX);
-    print(minY);
-    print(maxX);
-    print(maxY);
-
     //расчет координат центра между крайними точками
     final centerX = (minX.dx + minY.dx + maxX.dx + maxY.dx) / 4;
     final centerY = (minX.dy + minY.dy + maxX.dy + maxY.dy) / 4;
 
     final centerOffset = Offset(centerX, centerY);
-    print(centerOffset);
 
     // расчет максимального и минимального "радиусов"
     double minDistance = double.infinity;
@@ -59,18 +53,14 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
       }
     }
 
-    print("$minDistance:$maxDistance");
-    print("${maxDistance / minDistance}");
-
     // похожа ли фигура на окружность
     // если разница между радиусами небольшая, то окружность
     final isCircle = maxDistance / minDistance < 1.7;
-    print(isCircle);
 
     // если близко к окружности, то поменять тему
     if (isCircle) {
       ref.read(DataProviders.isDarkProvider.notifier).toggle();
-    } else if (showCircle){
+    } else if (showCircle) {
       ref.read(DataProviders.opacityProvider.notifier).toggle();
     }
   }
@@ -83,6 +73,9 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   ) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        final state = ref.watch(DataProviders.todosController);
+        final stateNotifier = ref.watch(DataProviders.todosController.notifier);
+
         return Listener(
           // считываем движение пальца, пользователь должен нарисовать круг
           onPointerUp: (details) {
@@ -128,7 +121,7 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                     opacity: opacity(shrinkOffset),
                     child: Text(
                       "${S.of(context).done}"
-                      "${ref.watch(completedTodosProvider).length}",
+                      "${stateNotifier.doneLength}",
                       style: CustomTextTheme.subtitle(context),
                     ),
                   ),
@@ -137,10 +130,8 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                   bottom: bottomIconPadding(shrinkOffset),
                   right: rightPadding(shrinkOffset),
                   child: InkWell(
-                    onTap: () => ref
-                        .read(DataProviders.showAllTodosProvider.notifier)
-                        .toggle(),
-                    child: ref.watch(DataProviders.showAllTodosProvider)
+                    onTap: stateNotifier.toggleFilter,
+                    child: state.showAll
                         ? Icon(
                             Icons.visibility_off,
                             size: 24,

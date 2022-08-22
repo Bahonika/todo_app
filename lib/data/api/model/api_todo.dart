@@ -11,7 +11,8 @@ class ApiTodo {
   final String lastUpdatedBy;
 
   static Importance _importanceFromString(String stringImportance) {
-    return Importance.values.firstWhere((value) => value.name == stringImportance);
+    return Importance.values
+        .firstWhere((value) => value.name == stringImportance);
   }
 
   ApiTodo.fromApi(Map<String, dynamic> map)

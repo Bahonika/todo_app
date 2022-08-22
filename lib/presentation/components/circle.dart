@@ -5,6 +5,7 @@ import 'package:todo_app/presentation/theme/custom_colors.dart';
 
 class Circle extends ConsumerStatefulWidget {
   final double height;
+
   const Circle({required this.height, Key? key}) : super(key: key);
 
   @override
