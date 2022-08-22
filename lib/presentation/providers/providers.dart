@@ -4,7 +4,6 @@ import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/is_dark_notifier.dart';
 import 'package:todo_app/domain/models/create_screen_parameters.dart';
-import 'package:todo_app/presentation/providers/create_screen_notifier.dart';
 import 'package:todo_app/presentation/providers/create_screen_parameters_notifier.dart';
 import 'package:todo_app/presentation/providers/opacity_notifier.dart';
 import 'package:todo_app/presentation/providers/services_providers.dart';
@@ -15,9 +14,14 @@ class DataProviders {
     return NavigationController();
   });
 
-  static final createParametersProvider = StateNotifierProvider.autoDispose<
-      CreateScreenParametersNotifier, CreateScreenParameters>((ref) {
-    return CreateScreenParametersNotifier();
+  static final todoProvider = StateProvider<Todo?>((ref) {
+    return null;
+  });
+
+  static final createParametersProvider = StateNotifierProvider.autoDispose.family<
+      CreateScreenParametersNotifier, CreateScreenParameters, Todo?>((ref, Todo? todo) {
+
+    return CreateScreenParametersNotifier(todo);
   });
 
   static final opacityProvider =
@@ -25,13 +29,13 @@ class DataProviders {
     return OpacityNotifier();
   });
 
-  static final createScreenProvider = StateNotifierProvider.autoDispose
-      .family<CreateScreenNotifier, bool?, Todo>((ref, Todo todo) {
-    return CreateScreenNotifier(
-      todoForEdit: todo,
-      parameters: ref.watch(createParametersProvider.notifier),
-    );
-  });
+  // static final createScreenProvider = StateNotifierProvider.autoDispose
+  //     .family<CreateScreenNotifier, bool?, Todo>((ref, Todo todo) {
+  //   return CreateScreenNotifier(
+  //     todoForEdit: todo,
+  //     parameters: ref.watch(createParametersProvider.notifier),
+  //   );
+  // });
 
   static final todosController =
       StateNotifierProvider.autoDispose<TodosNotifier, TodoListState>(
@@ -41,8 +45,8 @@ class DataProviders {
       // не придумал, как без этого логику вынести в одну функцию в провайдере
       // надо еще подумать, может вообще нужно куда - то в другое место
       // вынести create и update, как предлагалось уже
-
-      final parameters = ref.watch(createParametersProvider.notifier);
+      final todo = ref.watch(todoProvider);
+      final parameters = ref.read(createParametersProvider(todo).notifier);
 
       return TodosNotifier(serviceUtil, parameters);
     },

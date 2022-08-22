@@ -25,7 +25,8 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void _tapHandler() {
-    if (ref.read(DataProviders.createParametersProvider).isEdit) {
+    final todoForEdit = ref.read(DataProviders.todoProvider);
+    if (ref.read(DataProviders.createParametersProvider(todoForEdit)).isEdit) {
       editTask();
     } else {
       createTask();
@@ -37,8 +38,6 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
     // autoDispose не срабатывает при уходе с экрана, не очень понимаю, почему
     // если вызывать refresh вручную, то диспоузится и todosController
     // это приводит к багу. Слишком связно получилось
-
-    // ref.refresh(DataProviders.createParametersProvider);
     ref.read(DataProviders.navigationProvider).pop();
   }
 
@@ -95,7 +94,9 @@ class TextFieldTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final parameters = ref.watch(DataProviders.createParametersProvider);
+    final todoForEdit = ref.watch(DataProviders.todoProvider);
+    final parameters =
+        ref.watch(DataProviders.createParametersProvider(todoForEdit));
     return WrapCard(
       child: TextFormField(
         controller: parameters.textEditingController,
@@ -123,9 +124,11 @@ class ImportanceTile extends ConsumerStatefulWidget {
 class _ImportanceTileState extends ConsumerState<ImportanceTile> {
   @override
   Widget build(BuildContext context) {
-    final parameters = ref.watch(DataProviders.createParametersProvider);
+    final todoForEdit = ref.watch(DataProviders.todoProvider);
+    final parameters =
+        ref.watch(DataProviders.createParametersProvider(todoForEdit));
     final parametersNotifier =
-        ref.watch(DataProviders.createParametersProvider.notifier);
+        ref.watch(DataProviders.createParametersProvider(todoForEdit).notifier);
     return ListTile(
       title: Text(
         S.of(context).importance,
@@ -188,18 +191,22 @@ class DateTile extends ConsumerWidget {
 
   void setSelectedDate(BuildContext context, WidgetRef ref) {
     selectDate(context).then((value) {
+      final todoForEdit = ref.read(DataProviders.todoProvider);
       if (tempPickedDate != null) {
-        ref.read(DataProviders.createParametersProvider.notifier).date =
-            tempPickedDate!;
+        ref
+            .read(DataProviders.createParametersProvider(todoForEdit).notifier)
+            .date = tempPickedDate!;
       }
     });
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final parameters = ref.watch(DataProviders.createParametersProvider);
+    final todoForEdit = ref.watch(DataProviders.todoProvider);
+    final parameters =
+        ref.watch(DataProviders.createParametersProvider(todoForEdit));
     final parametersNotifier =
-        ref.watch(DataProviders.createParametersProvider.notifier);
+        ref.watch(DataProviders.createParametersProvider(todoForEdit).notifier);
     return ListTile(
       title: Text(
         S.of(context).doneBy,
@@ -238,8 +245,9 @@ class DeleteTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final parameters = ref.watch(DataProviders.createParametersProvider);
-
+    final todoForEdit = ref.watch(DataProviders.todoProvider);
+    final parameters =
+        ref.watch(DataProviders.createParametersProvider(todoForEdit));
     return TextButton(
       onPressed: () {
         if (parameters.isEdit) {

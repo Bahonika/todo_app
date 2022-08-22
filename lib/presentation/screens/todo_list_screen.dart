@@ -33,7 +33,8 @@ class TodoListScreen extends ConsumerWidget {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                ref.read(DataProviders.navigationProvider).openCreateTodo();
+                ref.watch(DataProviders.todoProvider.notifier).state = null;
+                ref.watch(DataProviders.navigationProvider).openCreateTodo();
               },
               backgroundColor:
                   Theme.of(context).extension<CustomColors>()!.colorBlue,
@@ -199,9 +200,7 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
   }
 
   void toEditScreen() {
-    ref
-        .read(DataProviders.createScreenProvider(widget.todo).notifier)
-        .setEditingData();
+    ref.read(DataProviders.todoProvider.notifier).state = widget.todo;
     ref.read(DataProviders.navigationProvider).openCreateTodo();
   }
 

@@ -24,6 +24,7 @@ class TodosNotifier extends StateNotifier<TodoListState> {
   }
 
   void _init() async {
+    print("one");
     await serviceUtil.localService.init();
     load();
   }
@@ -91,7 +92,7 @@ class TodosNotifier extends StateNotifier<TodoListState> {
   }
 
   Todo generateTodo() {
-    Uuid uuid = const Uuid();
+    const uuid = Uuid();
     final parametersState = parameters.state;
     final todo = Todo(
       createdAt: DateTime.now(),

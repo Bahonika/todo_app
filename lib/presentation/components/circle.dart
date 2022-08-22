@@ -15,7 +15,7 @@ class Circle extends ConsumerStatefulWidget {
 class _CircleState extends ConsumerState<Circle> {
   @override
   Widget build(BuildContext context) {
-    final height = widget.height - 25;
+    final height = widget.height - 25 > 0 ? widget.height - 25 : 0.0;
     final opacity = ref.watch(DataProviders.opacityProvider);
     final isDark = ref.watch(DataProviders.isDarkProvider);
     final darkColor = Theme.of(context).extension<CustomColors>()!.colorWhite;
