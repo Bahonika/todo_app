@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -9,15 +11,18 @@ import 'package:todo_app/presentation/localization/s.dart';
 
 import 'firebase_options.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  //Crashlytics connect
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  runZonedGuarded(() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    //Crashlytics connect
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  }, (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack);
+  });
 
   runApp(
     const ProviderScope(

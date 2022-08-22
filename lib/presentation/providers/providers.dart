@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/providers/bool_notifier.dart';
+import 'package:todo_app/presentation/providers/is_dark_notifier.dart';
 import 'package:todo_app/domain/models/create_screen_parameters.dart';
 import 'package:todo_app/presentation/providers/create_screen_notifier.dart';
 import 'package:todo_app/presentation/providers/create_screen_parameters_notifier.dart';
@@ -27,10 +27,9 @@ class DataProviders {
 
   static final createScreenProvider = StateNotifierProvider.autoDispose
       .family<CreateScreenNotifier, bool?, Todo>((ref, Todo todo) {
-    // скорее всего все еще неправильно использую family(
     return CreateScreenNotifier(
       todoForEdit: todo,
-      createScreenParametersNotifier:
+      parameters:
           ref.watch(createParametersProvider.notifier),
     );
   });

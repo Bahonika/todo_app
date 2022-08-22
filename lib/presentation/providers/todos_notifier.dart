@@ -7,12 +7,12 @@ import 'package:todo_app/presentation/providers/create_screen_parameters_notifie
 import 'package:uuid/uuid.dart';
 
 class TodosNotifier extends StateNotifier<TodoListState> {
-  final CreateScreenParametersNotifier createScreenParametersNotifier;
+  final CreateScreenParametersNotifier parameters;
   final ServiceUtil serviceUtil;
 
   TodosNotifier(
     this.serviceUtil,
-    this.createScreenParametersNotifier,
+    this.parameters,
   ) : super(
           TodoListState(
             showAll: true,
@@ -78,7 +78,7 @@ class TodosNotifier extends StateNotifier<TodoListState> {
   }
 
   Todo alterTodo() {
-    final parametersState = createScreenParametersNotifier.state;
+    final parametersState = parameters.state;
 
     final alteredTodo = parametersState.todoForEdit!.copyWith(
       deadline: parametersState.showDate ? parametersState.date : null,
@@ -92,7 +92,7 @@ class TodosNotifier extends StateNotifier<TodoListState> {
 
   Todo generateTodo() {
     Uuid uuid = const Uuid();
-    final parametersState = createScreenParametersNotifier.state;
+    final parametersState = parameters.state;
     final todo = Todo(
       createdAt: DateTime.now(),
       changedAt: DateTime.now(),
