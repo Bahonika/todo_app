@@ -86,14 +86,14 @@ class ServiceUtil {
       _log.i("Update local");
     } catch (e) {
       _log.e("Can't update local", e);
-      rethrow;
+      throw ("Try again(");
     }
     try {
       await _remoteService.update(uuid: todo.uuid, todo: todo);
       _log.i("Update remote");
     } catch (e) {
-      _log.w("Can't update remote");
-      rethrow;
+      _log.e("Can't update remote");
+      throw ("Try again(");
     }
   }
 

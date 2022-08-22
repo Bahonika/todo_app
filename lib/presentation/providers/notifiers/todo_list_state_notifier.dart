@@ -18,7 +18,7 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
     _init();
   }
 
-  void _init() async {
+  void _init() {
     load();
   }
 
@@ -31,7 +31,7 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
     );
   }
 
-  void load() async {
+  Future<void> load() async {
     state = TodoListState(
       isLoading: true,
       todos: state.todos,
@@ -63,20 +63,18 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
     return state.todos.length - unDone.length;
   }
 
-  // я хотел вынести логику создания из этого класса,
-  // но тогда функцию load тоже нужно будет вынести
-  void create(Todo todo) async {
+  Future<void> create(Todo todo) async {
     await serviceUtil.createTodo(todo).onError(setErrorState);
     load();
   }
 
-  void delete(Todo todo) async {
+  Future<void> delete(Todo todo) async {
     state.todos.removeWhere((element) => element == todo);
     await serviceUtil.deleteTodo(todo.uuid).onError(setErrorState);
     load();
   }
 
-  void update(Todo todo) async {
+  Future<void> update(Todo todo) async {
     await serviceUtil.updateTodo(todo).onError(setErrorState);
     load();
   }
@@ -86,7 +84,7 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
     load();
   }
 
-  void setAsUndone(Todo todo) async {
+  Future<void> setAsUndone(Todo todo) async {
     await serviceUtil.setUndone(todo).onError(setErrorState);
     load();
   }
