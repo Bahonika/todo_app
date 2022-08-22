@@ -33,14 +33,30 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
     ref.read(DataProviders.todoListStateProvider.notifier).update(alteredTodo);
   }
 
+  bool validating() {
+    final todo = ref.read(DataProviders.todoProvider);
+    final value = ref.read(DataProviders.createParametersProvider(todo).notifier).isCorrect;
+    return value;
+  }
+
   void _tapHandler() {
-    final todoForEdit = ref.read(DataProviders.todoProvider);
-    if (ref.read(DataProviders.createParametersProvider(todoForEdit)).isEdit) {
-      _editTask();
+    if (validating()) {
+      final todoForEdit = ref.read(DataProviders.todoProvider);
+      final params =
+          ref.read(DataProviders.createParametersProvider(todoForEdit));
+      if (params.isEdit) {
+        _editTask();
+      } else {
+        _createTask();
+      }
+      _pop();
     } else {
-      _createTask();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).emptyField),
+        ),
+      );
     }
-    _pop();
   }
 
   void _pop() {

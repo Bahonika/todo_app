@@ -17,7 +17,6 @@ class CreateScreenParametersNotifier
   }
 
   void setAllData() {
-    print(todo);
     if (todo != null) {
       state = state.copyWith(
         importance: todo!.importance,
@@ -28,7 +27,6 @@ class CreateScreenParametersNotifier
       );
     } else {
       state = CreateScreenParameters.defaultParameters;
-      print(state.textEditingController.text);
     }
   }
 
@@ -48,7 +46,6 @@ class CreateScreenParametersNotifier
   }
 
   Todo alterTodo() {
-
     final alteredTodo = todo!.copyWith(
       deadline: state.showDate ? state.date : null,
       text: state.textEditingController.text,
@@ -58,6 +55,8 @@ class CreateScreenParametersNotifier
     );
     return alteredTodo;
   }
+
+  bool get isCorrect => state.textEditingController.text != "";
 
   set importance(Importance value) => state = state.copyWith(importance: value);
 

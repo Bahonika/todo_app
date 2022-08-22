@@ -143,10 +143,18 @@ class _TextFieldTileState extends ConsumerState<TextFieldTile> {
     final createParams =
         ref.read(DataProviders.createParametersProvider(null).notifier);
     createParams.text = _controller.text;
-    final generatedTodo = createParams.generateTodo();
-    ref
-        .read(DataProviders.todoListStateProvider.notifier)
-        .create(generatedTodo);
+    if (createParams.isCorrect) {
+      final generatedTodo = createParams.generateTodo();
+      ref
+          .read(DataProviders.todoListStateProvider.notifier)
+          .create(generatedTodo);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).emptyField),
+        ),
+      );
+    }
   }
 
   @override
