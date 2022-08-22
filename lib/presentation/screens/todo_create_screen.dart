@@ -16,28 +16,34 @@ class TodoCreateScreen extends ConsumerStatefulWidget {
 }
 
 class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
-  void createTask() {
-    ref.read(DataProviders.todosController.notifier).create();
+  void _createTask() {
+    final paramsNotifier =
+        ref.read(DataProviders.createParametersProvider(null).notifier);
+    final generatedTodo = paramsNotifier.generateTodo();
+    ref
+        .read(DataProviders.todoListStateProvider.notifier)
+        .create(generatedTodo);
   }
 
-  void editTask() {
-    ref.read(DataProviders.todosController.notifier).update();
+  void _editTask() {
+    final todoForAlter = ref.read(DataProviders.todoProvider);
+    final paramsNotifier =
+        ref.read(DataProviders.createParametersProvider(todoForAlter).notifier);
+    final alteredTodo = paramsNotifier.alterTodo();
+    ref.read(DataProviders.todoListStateProvider.notifier).update(alteredTodo);
   }
 
   void _tapHandler() {
     final todoForEdit = ref.read(DataProviders.todoProvider);
     if (ref.read(DataProviders.createParametersProvider(todoForEdit)).isEdit) {
-      editTask();
+      _editTask();
     } else {
-      createTask();
+      _createTask();
     }
-    setDefaultDataAndPop();
+    _pop();
   }
 
-  void setDefaultDataAndPop() {
-    // autoDispose не срабатывает при уходе с экрана, не очень понимаю, почему
-    // если вызывать refresh вручную, то диспоузится и todosController
-    // это приводит к багу. Слишком связно получилось
+  void _pop() {
     ref.read(DataProviders.navigationProvider).pop();
   }
 
@@ -52,7 +58,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
             Icons.close,
             color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
           ),
-          onPressed: () => setDefaultDataAndPop(),
+          onPressed: () => _pop(),
         ),
         actions: [
           TextButton(
@@ -248,14 +254,14 @@ class DeleteTile extends ConsumerWidget {
     final todoForEdit = ref.watch(DataProviders.todoProvider);
     final parameters =
         ref.watch(DataProviders.createParametersProvider(todoForEdit));
+    final stateController =
+        ref.watch(DataProviders.todoListStateProvider.notifier);
     return TextButton(
       onPressed: () {
         if (parameters.isEdit) {
-          ref
-              .read(DataProviders.todosController.notifier)
-              .delete(parameters.todoForEdit!);
+          stateController.delete(todoForEdit!);
+          _pop(ref);
         }
-        _pop(ref);
       },
       style: TextButton.styleFrom(
           primary: Theme.of(context).scaffoldBackgroundColor),

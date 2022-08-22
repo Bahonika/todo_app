@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/domain/enums/importance.dart';
-import 'package:todo_app/domain/models/todo.dart';
 
 @immutable
 class CreateScreenParameters {
@@ -9,7 +8,6 @@ class CreateScreenParameters {
   final Importance importance;
   final bool showDate;
   final TextEditingController textEditingController;
-  final Todo? todoForEdit;
 
   const CreateScreenParameters({
     required this.isEdit,
@@ -17,7 +15,6 @@ class CreateScreenParameters {
     required this.importance,
     required this.showDate,
     required this.textEditingController,
-    this.todoForEdit,
   });
 
   CreateScreenParameters copyWith({
@@ -26,7 +23,6 @@ class CreateScreenParameters {
     Importance? importance,
     bool? showDate,
     TextEditingController? textEditingController,
-    Todo? todoForEdit,
   }) {
     return CreateScreenParameters(
       isEdit: isEdit ?? this.isEdit,
@@ -35,7 +31,6 @@ class CreateScreenParameters {
       showDate: showDate ?? this.showDate,
       textEditingController:
           textEditingController ?? this.textEditingController,
-      todoForEdit: todoForEdit ?? this.todoForEdit,
     );
   }
 
@@ -44,6 +39,6 @@ class CreateScreenParameters {
     date: DateTime.now(),
     importance: Importance.basic,
     showDate: false,
-    textEditingController: TextEditingController(),
+    textEditingController: TextEditingController(text: ""),
   );
 }

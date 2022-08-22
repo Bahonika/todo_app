@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/presentation/components/circle.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
-import 'package:todo_app/presentation/providers/todos_notifier.dart';
+import 'package:todo_app/presentation/providers/notifiers/todo_list_state_notifier.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
@@ -73,8 +73,8 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   ) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        final state = ref.watch(DataProviders.todosController);
-        final stateNotifier = ref.watch(DataProviders.todosController.notifier);
+        final state = ref.watch(DataProviders.todoListStateProvider);
+        final stateNotifier = ref.watch(DataProviders.todoListStateProvider.notifier);
 
         return Listener(
           // считываем движение пальца, пользователь должен нарисовать круг

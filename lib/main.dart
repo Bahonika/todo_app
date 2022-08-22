@@ -10,6 +10,7 @@ import 'package:todo_app/presentation/localization/localizations_delegates.dart'
 import 'package:todo_app/presentation/localization/s.dart';
 
 import 'firebase_options.dart';
+import 'presentation/providers/services_providers.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +26,19 @@ void main() {
   });
 
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      child: Consumer(
+        builder: (context, WidgetRef ref, _) => FutureBuilder(
+            future: ref
+                .watch(ServicesProviders.serviceUtilProvider)
+                .localService
+                .init(),
+            builder: (context, snapshot) {
+              return snapshot.connectionState == ConnectionState.done
+                  ? const MyApp()
+                  : const Center(child: CircularProgressIndicator());
+            }),
+      ),
     ),
   );
 }
@@ -44,9 +56,7 @@ class MyApp extends ConsumerWidget {
       // theme
       theme: CustomTheme.lightTheme,
       darkTheme: CustomTheme.darkTheme,
-      themeMode: isDark
-          ? ThemeMode.dark
-          : ThemeMode.light,
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
 
       //localization
       localizationsDelegates: LocalizationsDelegates.delegates,

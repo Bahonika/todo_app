@@ -2,17 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/data/api/service_util.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/domain/models/todo_list_state.dart';
-import 'package:todo_app/presentation/providers/create_screen_parameters_notifier.dart';
 
-import 'package:uuid/uuid.dart';
-
-class TodosNotifier extends StateNotifier<TodoListState> {
-  final CreateScreenParametersNotifier parameters;
+class TodoListStateNotifier extends StateNotifier<TodoListState> {
   final ServiceUtil serviceUtil;
 
-  TodosNotifier(
+  TodoListStateNotifier(
     this.serviceUtil,
-    this.parameters,
   ) : super(
           TodoListState(
             showAll: true,
@@ -24,8 +19,6 @@ class TodosNotifier extends StateNotifier<TodoListState> {
   }
 
   void _init() async {
-    print("one");
-    await serviceUtil.localService.init();
     load();
   }
 
@@ -72,39 +65,9 @@ class TodosNotifier extends StateNotifier<TodoListState> {
 
   // я хотел вынести логику создания из этого класса,
   // но тогда функцию load тоже нужно будет вынести
-  void create() async {
-    final todo = generateTodo();
+  void create(Todo todo) async {
     await serviceUtil.createTodo(todo).onError(setErrorState);
     load();
-  }
-
-  Todo alterTodo() {
-    final parametersState = parameters.state;
-
-    final alteredTodo = parametersState.todoForEdit!.copyWith(
-      deadline: parametersState.showDate ? parametersState.date : null,
-      text: parametersState.textEditingController.text,
-      changedAt: DateTime.now(),
-      importance: parametersState.importance,
-      lastUpdatedBy: serviceUtil.localService.deviceId.values.first,
-    );
-    return alteredTodo;
-  }
-
-  Todo generateTodo() {
-    const uuid = Uuid();
-    final parametersState = parameters.state;
-    final todo = Todo(
-      createdAt: DateTime.now(),
-      changedAt: DateTime.now(),
-      lastUpdatedBy: serviceUtil.localService.deviceId.values.first,
-      deadline: parametersState.showDate ? parametersState.date : null,
-      uuid: uuid.v1(),
-      done: false,
-      text: parametersState.textEditingController.text,
-      importance: parametersState.importance,
-    );
-    return todo;
   }
 
   void delete(Todo todo) async {
@@ -113,8 +76,7 @@ class TodosNotifier extends StateNotifier<TodoListState> {
     load();
   }
 
-  void update() async {
-    final todo = alterTodo();
+  void update(Todo todo) async {
     await serviceUtil.updateTodo(todo).onError(setErrorState);
     load();
   }

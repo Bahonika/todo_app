@@ -33,7 +33,7 @@ class TodoListScreen extends ConsumerWidget {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                ref.watch(DataProviders.todoProvider.notifier).state = null;
+                ref.refresh(DataProviders.todoProvider.notifier).state;
                 ref.watch(DataProviders.navigationProvider).openCreateTodo();
               },
               backgroundColor:
@@ -73,12 +73,13 @@ class SliverTodoList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(DataProviders.todosController);
-    final stateNotifier = ref.watch(DataProviders.todosController.notifier);
+    final state = ref.watch(DataProviders.todoListStateProvider);
+    final stateNotifier =
+        ref.watch(DataProviders.todoListStateProvider.notifier);
     final todos = state.showAll ? state.todos : stateNotifier.unDone;
 
     ref.listen<TodoListState>(
-      DataProviders.todosController,
+      DataProviders.todoListStateProvider,
       (previous, next) {
         if (next.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -126,33 +127,47 @@ class SliverTodoList extends ConsumerWidget {
   }
 }
 
-class TextFieldTile extends ConsumerWidget {
-  const TextFieldTile({Key? key}) : super(key: key);
+class TextFieldTile extends ConsumerStatefulWidget {
+  const TextFieldTile({
+    Key? key,
+  }) : super(key: key);
 
-  createTodo(WidgetRef ref) {
-    //todo: пока не работает
-    // ref.read(DataProviders.todosController.notifier).create();
+  @override
+  ConsumerState createState() => _TextFieldTileState();
+}
+
+class _TextFieldTileState extends ConsumerState<TextFieldTile> {
+  final _controller = TextEditingController();
+
+  createTodo() {
+    final createParams =
+        ref.read(DataProviders.createParametersProvider(null).notifier);
+    createParams.text = _controller.text;
+    final generatedTodo = createParams.generateTodo();
+    ref
+        .read(DataProviders.todoListStateProvider.notifier)
+        .create(generatedTodo);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: const SizedBox(),
         title: TextFormField(
-          controller: TextEditingController(),
+          controller: _controller,
           decoration: InputDecoration(
             hintText: S.of(context).newTodo,
             hintStyle: CustomTextTheme.importanceSubtitle(context),
             border: InputBorder.none,
             suffixIcon: IconButton(
               icon: const Icon(Icons.subdirectory_arrow_left_outlined),
-              onPressed: () => createTodo(ref),
+              onPressed: () => createTodo(),
             ),
           ),
           style: CustomTextTheme.body(context),
-          onFieldSubmitted: (value) => createTodo(ref),
+          onFieldSubmitted: (value) => createTodo(),
           minLines: 1,
           maxLines: 1,
         ),
@@ -174,16 +189,20 @@ class TodoWidget extends ConsumerStatefulWidget {
 
 class _TodoWidgetState extends ConsumerState<TodoWidget> {
   void delete() {
-    ref.read(DataProviders.todosController.notifier).delete(widget.todo);
+    ref.read(DataProviders.todoListStateProvider.notifier).delete(widget.todo);
   }
 
   bool setAsDone() {
-    ref.read(DataProviders.todosController.notifier).setAsDone(widget.todo);
+    ref
+        .read(DataProviders.todoListStateProvider.notifier)
+        .setAsDone(widget.todo);
     return false;
   }
 
   bool setAsUndone() {
-    ref.read(DataProviders.todosController.notifier).setAsUndone(widget.todo);
+    ref
+        .read(DataProviders.todoListStateProvider.notifier)
+        .setAsUndone(widget.todo);
     return false;
   }
 
