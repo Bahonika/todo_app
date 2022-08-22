@@ -37,13 +37,14 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final navigator = ref.watch(DataProviders.navigationProvider);
+    final isDark = ref.watch(DataProviders.isDarkProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
       // theme
       theme: CustomTheme.lightTheme,
       darkTheme: CustomTheme.darkTheme,
-      themeMode: ref.watch(DataProviders.isDarkProvider)
+      themeMode: isDark
           ? ThemeMode.dark
           : ThemeMode.light,
 

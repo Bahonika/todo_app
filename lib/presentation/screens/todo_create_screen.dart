@@ -17,15 +17,15 @@ class TodoCreateScreen extends ConsumerStatefulWidget {
 
 class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   void createTask() {
-    ref.watch(DataProviders.todosController.notifier).create();
+    ref.read(DataProviders.todosController.notifier).create();
   }
 
   void editTask() {
-    ref.watch(DataProviders.todosController.notifier).update();
+    ref.read(DataProviders.todosController.notifier).update();
   }
 
   void _tapHandler() {
-    if (ref.watch(DataProviders.createParametersProvider).isEdit) {
+    if (ref.read(DataProviders.createParametersProvider).isEdit) {
       editTask();
     } else {
       createTask();
@@ -233,7 +233,7 @@ class DeleteTile extends ConsumerWidget {
   const DeleteTile({Key? key}) : super(key: key);
 
   void _pop(WidgetRef ref) {
-    ref.watch(DataProviders.navigationProvider).pop();
+    ref.read(DataProviders.navigationProvider).pop();
   }
 
   @override

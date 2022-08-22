@@ -130,18 +130,17 @@ class TextFieldTile extends ConsumerWidget {
 
   createTodo(WidgetRef ref) {
     //todo: пока не работает
-    ref.watch(DataProviders.todosController.notifier).create();
+    // ref.read(DataProviders.todosController.notifier).create();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final parameters = ref.watch(DataProviders.createParametersProvider);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: ListTile(
         leading: const SizedBox(),
         title: TextFormField(
-          controller: parameters.textEditingController,
+          controller: TextEditingController(),
           decoration: InputDecoration(
             hintText: S.of(context).newTodo,
             hintStyle: CustomTextTheme.importanceSubtitle(context),

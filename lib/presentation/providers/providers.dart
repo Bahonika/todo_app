@@ -29,8 +29,7 @@ class DataProviders {
       .family<CreateScreenNotifier, bool?, Todo>((ref, Todo todo) {
     return CreateScreenNotifier(
       todoForEdit: todo,
-      parameters:
-          ref.watch(createParametersProvider.notifier),
+      parameters: ref.watch(createParametersProvider.notifier),
     );
   });
 
