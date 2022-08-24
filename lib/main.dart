@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,10 @@ import 'presentation/providers/services_providers.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
+
   runZonedGuarded(() async {
+    AppMetrica.activate(const AppMetricaConfig("ff7f421f-c1c5-40bd-b5a5-126f517cdf75"));
+
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );

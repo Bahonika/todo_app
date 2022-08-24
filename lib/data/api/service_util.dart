@@ -1,3 +1,6 @@
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 import 'package:todo_app/data/api/services/local.dart';
 import 'package:todo_app/data/api/services/remote.dart';
@@ -37,6 +40,7 @@ class ServiceUtil {
       _log.w("Can't get from remote", e);
       rethrow;
     }
+
     return todos;
   }
 
@@ -61,6 +65,11 @@ class ServiceUtil {
       _log.e("Can't delete on local");
       rethrow;
     }
+    //todo не работает?
+    AppMetrica.reportEvent("delete_todo");
+    await FirebaseAnalytics.instance.logEvent(
+      name: "delete_todo",
+    );
   }
 
   Future<void> createTodo(Todo todo) async {

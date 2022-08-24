@@ -64,8 +64,12 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
   }
 
   Future<void> create(Todo todo) async {
-    await serviceUtil.createTodo(todo).onError(setErrorState);
-    load();
+    try {
+      await serviceUtil.createTodo(todo);
+      load();
+    } catch (e, s){
+      setErrorState(e, s);
+    }
   }
 
   Future<void> delete(Todo todo) async {
