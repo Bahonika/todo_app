@@ -29,7 +29,8 @@ class TodoMapper {
     );
   }
 
-  static Todo fromApi(ApiTodo todo) {
+  static Todo fromApi(Map<String, dynamic> map) {
+    final todo = ApiTodo.fromMap(map);
     return Todo(
       uuid: todo.uuid,
       done: todo.done,
@@ -61,29 +62,18 @@ class TodoMapper {
         (todo.changedAt.toUtc().microsecondsSinceEpoch / 1000).round();
     map["last_updated_by"] = todo.lastUpdatedBy;
 
-    return {"element": map};
+    return map;
+  }
+
+  static Map<String, dynamic> toApiWithPrefixElement(Todo todo) {
+    return {"element": toApi(todo)};
   }
 
   static Map<String, dynamic> listToApi(List<Todo> todos) {
     final list = <Map<String, dynamic>>[];
 
-    for (int i = 0; i < todos.length; i++) {
-      final map = <String, dynamic>{};
-      map["id"] = todos[i].uuid;
-      map["done"] = todos[i].done;
-      map["text"] = todos[i].text;
-      map["importance"] = todos[i].importance.name;
-
-      //deadline can be null, need to check before mapping
-      if (todos[i].deadline != null) {
-        map["deadline"] =
-            (todos[i].deadline!.toUtc().microsecondsSinceEpoch / 1000).round();
-      }
-
-      map["created_at"] = todos[i].createdAt;
-      map["changed_at"] = todos[i].changedAt;
-      map["last_updated_by"] = todos[i].lastUpdatedBy;
-      list.add(map);
+    for (Todo todo in todos) {
+      list.add(toApi(todo));
     }
 
     return {"list": list};

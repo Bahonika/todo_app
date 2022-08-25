@@ -1,3 +1,4 @@
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app/presentation/components/unknown_page.dart';
 import 'package:todo_app/presentation/navigation/routes.dart';
@@ -25,14 +26,17 @@ class NavigationController {
 
   void openCreateTodo() {
     navigateTo(Routes.createTodo);
+    AppMetrica.reportEvent("open_create_screen");
   }
 
   void openTodoList() {
     navigateTo(Routes.todoList);
+    AppMetrica.reportEvent("open_todo_list_screen");
   }
 
   toUnknownPage() {
     navigateTo(Routes.unknown);
+    AppMetrica.reportEvent("open_error_screen");
   }
 
   MaterialPageRoute onGenerateRoute(settings) {

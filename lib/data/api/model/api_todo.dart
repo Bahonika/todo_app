@@ -15,7 +15,7 @@ class ApiTodo {
         .firstWhere((value) => value.name == stringImportance);
   }
 
-  ApiTodo.fromApi(Map<String, dynamic> map)
+  ApiTodo.fromMap(Map<String, dynamic> map)
       : uuid = map["id"],
         done = map["done"],
         text = map["text"],

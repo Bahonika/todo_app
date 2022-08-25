@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/domain/circle_detector.dart';
 import 'package:todo_app/presentation/components/circle.dart';
+import 'package:todo_app/presentation/components/visibility_switcher.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
-import 'package:todo_app/presentation/providers/notifiers/todo_list_state_notifier.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
@@ -17,54 +18,6 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
 
   List<Offset> list = [];
 
-  // функция, которая расчитвает, нарисовал ли пользователь круг или нет
-  // есть еще пару идей, как сделать это красивее
-  void check(WidgetRef ref, bool showCircle) {
-    // тут пока просто принты для отслеживания расчетов
-    // знаю, что нехорошо, удалю, когда буду уверен, что все ок
-    // или перенесу в логгер
-
-    List<double> listY = list.map((e) => e.dy).toList()..sort();
-    List<double> listX = list.map((e) => e.dx).toList()..sort();
-
-    // расчет крайних точек фигуры
-    Offset maxX = list.firstWhere((element) => element.dx == listX.last); // 3
-    Offset minX = list.firstWhere((element) => element.dx == listX.first); // 1
-    Offset maxY = list.firstWhere((element) => element.dy == listY.last); // 4
-    Offset minY = list.firstWhere((element) => element.dy == listY.first); // 2
-
-    //расчет координат центра между крайними точками
-    final centerX = (minX.dx + minY.dx + maxX.dx + maxY.dx) / 4;
-    final centerY = (minX.dy + minY.dy + maxX.dy + maxY.dy) / 4;
-
-    final centerOffset = Offset(centerX, centerY);
-
-    // расчет максимального и минимального "радиусов"
-    double minDistance = double.infinity;
-    double maxDistance = 0;
-    for (Offset offset in list) {
-      final distance = sqrt(pow(offset.dx - centerOffset.dx, 2) +
-          pow(offset.dy - centerOffset.dy, 2));
-      if (distance < minDistance) {
-        minDistance = distance;
-      }
-      if (distance > maxDistance) {
-        maxDistance = distance;
-      }
-    }
-
-    // похожа ли фигура на окружность
-    // если разница между радиусами небольшая, то окружность
-    final isCircle = maxDistance / minDistance < 1.7;
-
-    // если близко к окружности, то поменять тему
-    if (isCircle) {
-      ref.read(DataProviders.isDarkProvider.notifier).toggle();
-    } else if (showCircle) {
-      ref.read(DataProviders.opacityProvider.notifier).toggle();
-    }
-  }
-
   @override
   Widget build(
     BuildContext context,
@@ -74,13 +27,18 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final state = ref.watch(DataProviders.todoListStateProvider);
-        final stateNotifier = ref.watch(DataProviders.todoListStateProvider.notifier);
+        final stateNotifier =
+            ref.watch(DataProviders.todoListStateProvider.notifier);
 
         return Listener(
-          // считываем движение пальца, пользователь должен нарисовать круг
           onPointerUp: (details) {
             if (list.length > 4) {
-              check(ref, maxExtent - shrinkOffset == maxExtent);
+              final isCircle = CircleDetector().check(list);
+              if (isCircle) {
+                ref.read(DataProviders.isDarkProvider.notifier).toggle();
+              } else if (maxExtent - shrinkOffset == maxExtent) {
+                ref.read(DataProviders.opacityProvider.notifier).toggle();
+              }
             }
             list.clear();
           },
@@ -129,23 +87,9 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
                 Positioned(
                   bottom: bottomIconPadding(shrinkOffset),
                   right: rightPadding(shrinkOffset),
-                  child: InkWell(
-                    onTap: stateNotifier.toggleFilter,
-                    child: state.showAll
-                        ? Icon(
-                            Icons.visibility_off,
-                            size: 24,
-                            color: Theme.of(context)
-                                .extension<CustomColors>()!
-                                .colorBlue,
-                          )
-                        : Icon(
-                            Icons.visibility,
-                            size: 24,
-                            color: Theme.of(context)
-                                .extension<CustomColors>()!
-                                .colorBlue,
-                          ),
+                  child: VisibilitySwitcher(
+                    isFilterOff: state.showAll,
+                    onToggle: stateNotifier.toggleFilter,
                   ),
                 ),
                 Align(

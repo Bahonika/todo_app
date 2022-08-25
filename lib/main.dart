@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/presentation/navigation/navigation_state.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/localization/localizations_delegates.dart';
@@ -16,13 +17,15 @@ import 'presentation/providers/services_providers.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-
   runZonedGuarded(() async {
-    AppMetrica.activate(const AppMetricaConfig("ff7f421f-c1c5-40bd-b5a5-126f517cdf75"));
+    // AppMetrica connect
+    AppMetrica.activate(
+        const AppMetricaConfig("ff7f421f-c1c5-40bd-b5a5-126f517cdf75"));
 
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
     //Crashlytics connect
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   }, (error, stack) {
@@ -47,6 +50,10 @@ void main() {
   );
 }
 
+final navigationKeyProvider = Provider<GlobalKey>((ref) {
+  return GlobalKey();
+});
+
 class MyApp extends ConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -54,7 +61,9 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final navigator = ref.watch(DataProviders.navigationProvider);
     final isDark = ref.watch(DataProviders.isDarkProvider);
-    return MaterialApp(
+    return MaterialApp.router(
+      routerDelegate: ref.read(routerDelegateProvider),
+      routeInformationParser: RouteInformationParserImpl(),
       debugShowCheckedModeBanner: false,
 
       // theme
@@ -68,10 +77,10 @@ class MyApp extends ConsumerWidget {
       locale: S.current,
 
       // navigation
-      onUnknownRoute: (settings) => navigator.toUnknownPage(),
-      initialRoute: navigator.initialRoute,
-      onGenerateRoute: (settings) => navigator.onGenerateRoute(settings),
-      navigatorKey: navigator.key,
+      // onUnknownRoute: (settings) => navigator.toUnknownPage(),
+      // initialRoute: navigator.initialRoute,
+      // onGenerateRoute: (settings) => navigator.onGenerateRoute(settings),
+      // navigatorKey: navigator.key,
     );
   }
 }

@@ -53,11 +53,13 @@ class LocalService {
   void create({required Todo todo}) {
     final localTodo = TodoMapper.toLocal(todo);
     _todos.add(localTodo);
+    incrementRevision();
   }
 
   void delete({required String uuid}) {
     _todos.delete(_todos.keys
         .firstWhere((element) => _todos.toMap()[element]!.uuid == uuid));
+    incrementRevision();
   }
 
   void update({required Todo todo}) {
@@ -66,11 +68,27 @@ class LocalService {
         _todos.keys.firstWhere(
             (element) => _todos.toMap()[element]!.uuid == todo.uuid),
         localTodo);
+    incrementRevision();
+  }
+
+  List<Todo> patch({required List<Todo> todos}) {
+    for (Todo todo in getTodos()) {
+      delete(uuid: todo.uuid);
+    }
+    for (Todo todo in todos) {
+      create(todo: todo);
+    }
+    return getTodos();
   }
 
   //revision box
   int getRevision() {
-    final revision = _revision.values.last;
+    int revision;
+    if (_revision.isEmpty) {
+      _revision.put(_revisionKey, 0);
+    }
+    revision = _revision.get(_revisionKey)!;
+
     return revision;
   }
 
@@ -80,6 +98,7 @@ class LocalService {
 
   void incrementRevision() {
     setRevision(_revision.get(_revisionKey)! + 1);
+    print(getRevision());
   }
 
   // device id box

@@ -12,17 +12,32 @@ import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
-class TodoListScreen extends ConsumerWidget {
-  const TodoListScreen({Key? key}) : super(key: key);
+class TodoListScreen extends ConsumerStatefulWidget {
+  const TodoListScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState createState() => _TodoListScreenState();
+}
+
+class _TodoListScreenState extends ConsumerState<TodoListScreen> {
+  late FocusManager focusManager;
+
+  @override
+  void initState() {
+    super.initState();
+    focusManager = FocusManager();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: Theme.of(context).appBarTheme.systemOverlayStyle!,
       child: SafeArea(
         child: GestureDetector(
           onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
+            focusManager.primaryFocus?.unfocus();
           },
           child: Scaffold(
             body: const CustomScrollView(
@@ -31,17 +46,28 @@ class TodoListScreen extends ConsumerWidget {
                 SliverTodoList(),
               ],
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                ref.refresh(DataProviders.todoProvider.notifier).state;
-                ref.watch(DataProviders.navigationProvider).openCreateTodo();
-              },
-              backgroundColor:
-                  Theme.of(context).extension<CustomColors>()!.colorBlue,
-              child: Icon(
-                Icons.add,
-                color: Theme.of(context).extension<CustomColors>()!.colorWhite,
-              ),
+            floatingActionButton: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 50),
+              reverseDuration: const Duration(milliseconds: 50),
+              child: MediaQuery.of(context).viewInsets.bottom <= 0.0
+                  ? FloatingActionButton(
+                      onPressed: () {
+                        ref.refresh(DataProviders.todoProvider.notifier).state;
+                        ref
+                            .watch(DataProviders.navigationProvider)
+                            .openCreateTodo();
+                      },
+                      backgroundColor: Theme.of(context)
+                          .extension<CustomColors>()!
+                          .colorBlue,
+                      child: Icon(
+                        Icons.add,
+                        color: Theme.of(context)
+                            .extension<CustomColors>()!
+                            .colorWhite,
+                      ),
+                    )
+                  : const SizedBox(),
             ),
           ),
         ),

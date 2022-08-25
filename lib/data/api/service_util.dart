@@ -1,10 +1,9 @@
+import 'dart:async';
+
 import 'package:appmetrica_plugin/appmetrica_plugin.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 import 'package:todo_app/data/api/services/local.dart';
 import 'package:todo_app/data/api/services/remote.dart';
-import 'package:todo_app/data/mappers/todo_mapper.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/logger/logging.dart';
 
@@ -33,21 +32,55 @@ class ServiceUtil {
   Future<List<Todo>> getFromRemote() async {
     List<Todo> todos = [];
     try {
-      final result = await _remoteService.getTodos();
+      todos = await _remoteService.getTodos();
       _log.i("Get from remote");
-      todos = result.map((item) => TodoMapper.fromApi(item)).toList();
     } catch (e) {
       _log.w("Can't get from remote", e);
       rethrow;
     }
-
     return todos;
   }
 
-  Future<List<Todo>> getTodos() async {
-    List<Todo> localTodos = getFromLocal();
-    List<Todo> remoteTodos = await getFromRemote();
-    return localTodos;
+  Stream<List<Todo>> getTodos() async* {
+    final localTodos = getFromLocal();
+    yield localTodos;
+    final localRevision = _localService.getRevision();
+
+    final remoteTodos = await getFromRemote();
+    final remoteRevision = _remoteService.getRevision();
+    final mergedTodos = await mergeRevision(
+      localRevision: localRevision,
+      localTodos: localTodos,
+      remoteRevision: remoteRevision,
+      remoteTodos: remoteTodos,
+    );
+
+    yield mergedTodos;
+  }
+
+  Future<List<Todo>> mergeRevision({
+    required int localRevision,
+    required List<Todo> localTodos,
+    required int remoteRevision,
+    required List<Todo> remoteTodos,
+  }) async {
+    _log.v("localRevision is $localRevision\n"
+        "remoteRevision is $remoteRevision");
+
+    var todos = <Todo>[];
+    if (localRevision > remoteRevision) {
+      todos = await _remoteService.patch(todos: localTodos);
+      _localService.setRevision(remoteRevision);
+      _log.i("Reset local data as foundation");
+    } else if (localRevision < remoteRevision) {
+      todos = _localService.patch(todos: remoteTodos);
+      _localService.setRevision(remoteRevision);
+      _log.i("Reset remote data as foundation");
+    } else {
+      todos = localTodos;
+      _log.i("The revisions are the same");
+    }
+    return todos;
   }
 
   Future<void> deleteTodo(String uuid) async {
@@ -65,11 +98,7 @@ class ServiceUtil {
       _log.e("Can't delete on local");
       rethrow;
     }
-    //todo не работает?
     AppMetrica.reportEvent("delete_todo");
-    await FirebaseAnalytics.instance.logEvent(
-      name: "delete_todo",
-    );
   }
 
   Future<void> createTodo(Todo todo) async {
@@ -87,6 +116,7 @@ class ServiceUtil {
       _log.w("Can't create on remote", e);
       rethrow;
     }
+    AppMetrica.reportEvent("create_todo");
   }
 
   Future<void> updateTodo(Todo todo) async {
@@ -95,19 +125,20 @@ class ServiceUtil {
       _log.i("Update local");
     } catch (e) {
       _log.e("Can't update local", e);
-      throw ("Try again(");
+      rethrow;
     }
     try {
       await _remoteService.update(uuid: todo.uuid, todo: todo);
       _log.i("Update remote");
     } catch (e) {
       _log.e("Can't update remote");
-      throw ("Try again(");
+      rethrow;
     }
   }
 
   Future<void> setDone(Todo todo) async {
     updateTodo(todo.copyWith(done: true, deadline: todo.deadline));
+    AppMetrica.reportEvent("set_done");
   }
 
   Future<void> setUndone(Todo todo) async {

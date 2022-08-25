@@ -37,11 +37,26 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
       todos: state.todos,
       showAll: state.showAll,
     );
-    final data =
-        await serviceUtil.getTodos().onError((error, stackTrace) => []);
+    final streamSub = serviceUtil.getTodos().listen((value) {});
+    streamSub.onData((data) {
+      state = TodoListState(
+        isLoading: false,
+        todos: data,
+        showAll: state.showAll,
+      );
+    });
+  }
+
+  void loadLocal() {
+    state = TodoListState(
+      isLoading: true,
+      todos: state.todos,
+      showAll: state.showAll,
+    );
+    final localTodos = serviceUtil.getFromLocal();
     state = TodoListState(
       isLoading: false,
-      todos: data,
+      todos: localTodos,
       showAll: state.showAll,
     );
   }
@@ -66,30 +81,46 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
   Future<void> create(Todo todo) async {
     try {
       await serviceUtil.createTodo(todo);
-      load();
-    } catch (e, s){
+      loadLocal();
+    } catch (e, s) {
       setErrorState(e, s);
     }
   }
 
   Future<void> delete(Todo todo) async {
-    state.todos.removeWhere((element) => element == todo);
-    await serviceUtil.deleteTodo(todo.uuid).onError(setErrorState);
-    load();
+    try {
+      state.todos.removeWhere((element) => element == todo);
+      await serviceUtil.deleteTodo(todo.uuid).onError(setErrorState);
+      loadLocal();
+    } catch (e, s) {
+      setErrorState(e, s);
+    }
   }
 
   Future<void> update(Todo todo) async {
-    await serviceUtil.updateTodo(todo).onError(setErrorState);
-    load();
+    try {
+      await serviceUtil.updateTodo(todo).onError(setErrorState);
+      loadLocal();
+    } catch (e, s) {
+      setErrorState(e, s);
+    }
   }
 
   Future<void> setAsDone(Todo todo) async {
-    await serviceUtil.setDone(todo).onError(setErrorState);
-    load();
+    try {
+      await serviceUtil.setDone(todo).onError(setErrorState);
+      loadLocal();
+    } catch (e, s) {
+      setErrorState(e, s);
+    }
   }
 
   Future<void> setAsUndone(Todo todo) async {
-    await serviceUtil.setUndone(todo).onError(setErrorState);
-    load();
+    try {
+      await serviceUtil.setUndone(todo).onError(setErrorState);
+      loadLocal();
+    } catch (e, s) {
+      setErrorState(e, s);
+    }
   }
 }
