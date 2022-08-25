@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
+import 'package:todo_app/presentation/navigation/segments.dart';
+import 'package:todo_app/presentation/navigation/navigation_providers.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
+
 
 class TodoCreateScreen extends ConsumerStatefulWidget {
   const TodoCreateScreen({Key? key}) : super(key: key);
@@ -60,7 +63,9 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void _pop() {
-    ref.read(DataProviders.navigationProvider).pop();
+    ref.read(NavigationProviders.routerDelegateProvider).navigate([
+      TodosSegment(),
+    ]);
   }
 
   @override
@@ -262,7 +267,9 @@ class DeleteTile extends ConsumerWidget {
   const DeleteTile({Key? key}) : super(key: key);
 
   void _pop(WidgetRef ref) {
-    ref.read(DataProviders.navigationProvider).pop();
+    ref.read(NavigationProviders.routerDelegateProvider).navigate([
+      TodosSegment(),
+    ]);
   }
 
   @override

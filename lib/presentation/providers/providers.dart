@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/domain/models/todo_list_state.dart';
-import 'package:todo_app/presentation/navigation/navigation_controller.dart';
 import 'package:todo_app/presentation/providers/notifiers/is_dark_notifier.dart';
 import 'package:todo_app/domain/models/create_screen_parameters.dart';
 import 'package:todo_app/presentation/providers/notifiers/create_screen_parameters_notifier.dart';
@@ -10,10 +9,6 @@ import 'package:todo_app/presentation/providers/services_providers.dart';
 import 'package:todo_app/presentation/providers/notifiers/todo_list_state_notifier.dart';
 
 class DataProviders {
-  static final navigationProvider = Provider<NavigationController>((ref) {
-    return NavigationController();
-  });
-
   static final todoProvider = StateProvider<Todo?>((ref) {
     return null;
   });

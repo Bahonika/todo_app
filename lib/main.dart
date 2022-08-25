@@ -5,13 +5,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/presentation/navigation/navigation_state.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
 import 'package:todo_app/presentation/localization/localizations_delegates.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
 import 'firebase_options.dart';
+import 'presentation/navigation/navigation_providers.dart';
+import 'presentation/navigation/route_information_parser.dart';
 import 'presentation/providers/services_providers.dart';
 
 void main() {
@@ -59,11 +60,11 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final navigator = ref.watch(DataProviders.navigationProvider);
+    // final navigator = ref.watch(DataProviders.navigationProvider);
     final isDark = ref.watch(DataProviders.isDarkProvider);
     return MaterialApp.router(
-      routerDelegate: ref.read(routerDelegateProvider),
-      routeInformationParser: RouteInformationParserImpl(),
+      routerDelegate: ref.read(NavigationProviders.routerDelegateProvider),
+      routeInformationParser: TypedSegmentRouteInformationParser(),
       debugShowCheckedModeBanner: false,
 
       // theme

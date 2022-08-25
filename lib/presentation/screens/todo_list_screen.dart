@@ -6,6 +6,8 @@ import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
+import 'package:todo_app/presentation/navigation/segments.dart';
+import 'package:todo_app/presentation/navigation/navigation_providers.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
@@ -53,9 +55,10 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                   ? FloatingActionButton(
                       onPressed: () {
                         ref.refresh(DataProviders.todoProvider.notifier).state;
-                        ref
-                            .watch(DataProviders.navigationProvider)
-                            .openCreateTodo();
+                        ref.read(NavigationProviders.routerDelegateProvider).navigate([
+                          TodosSegment(),
+                          CreateSegment(),
+                        ]);
                       },
                       backgroundColor: Theme.of(context)
                           .extension<CustomColors>()!
@@ -254,7 +257,10 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
 
   void toEditScreen() {
     ref.read(DataProviders.todoProvider.notifier).state = widget.todo;
-    ref.read(DataProviders.navigationProvider).openCreateTodo();
+    ref.read(NavigationProviders.routerDelegateProvider).navigate([
+      TodosSegment(),
+      CreateSegment(uuid: widget.todo.uuid),
+    ]);
   }
 
   @override
