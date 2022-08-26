@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
+import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
-import 'package:todo_app/presentation/navigation/segments.dart';
-import 'package:todo_app/presentation/navigation/navigation_providers.dart';
+import 'package:todo_app/presentation/navigation/riverpod_navigation/segments.dart';
+import 'package:todo_app/presentation/navigation/riverpod_navigation/navigation_providers.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
@@ -12,7 +13,8 @@ import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
 
 class TodoCreateScreen extends ConsumerStatefulWidget {
-  const TodoCreateScreen({Key? key}) : super(key: key);
+  final Todo? todo;
+  const TodoCreateScreen({this.todo, Key? key}) : super(key: key);
 
   @override
   ConsumerState createState() => _TodoCreateScreenState();

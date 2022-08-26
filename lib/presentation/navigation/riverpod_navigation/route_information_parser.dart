@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:todo_app/presentation/navigation/segments.dart';
+import 'package:todo_app/presentation/navigation/riverpod_navigation/segments.dart';
 
 class TypedSegmentRouteInformationParser implements RouteInformationParser<TypedPath> {
   @override

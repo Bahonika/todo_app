@@ -37,14 +37,21 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
       todos: state.todos,
       showAll: state.showAll,
     );
-    final streamSub = serviceUtil.getTodos().listen((value) {});
-    streamSub.onData((data) {
-      state = TodoListState(
-        isLoading: false,
-        todos: data,
-        showAll: state.showAll,
-      );
-    });
+    serviceUtil.getTodos().listen((value) {})
+      ..onData((data) {
+        state = TodoListState(
+          isLoading: true,
+          todos: data,
+          showAll: state.showAll,
+        );
+      })
+      ..onDone(() {
+        state = TodoListState(
+          isLoading: false,
+          todos: state.todos,
+          showAll: state.showAll,
+        );
+      });
   }
 
   void loadLocal() {

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/presentation/navigation/segments.dart';
-import 'package:todo_app/presentation/navigation/navigation_providers.dart';
+import 'package:todo_app/presentation/navigation/riverpod_navigation/navigation_providers.dart';
+import 'package:todo_app/presentation/navigation/riverpod_navigation/segments.dart';
 import 'package:todo_app/presentation/screens/todo_create_screen.dart';
 import 'package:todo_app/presentation/screens/todo_list_screen.dart';
 

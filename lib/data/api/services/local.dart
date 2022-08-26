@@ -98,7 +98,6 @@ class LocalService {
 
   void incrementRevision() {
     setRevision(_revision.get(_revisionKey)! + 1);
-    print(getRevision());
   }
 
   // device id box

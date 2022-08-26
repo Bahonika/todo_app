@@ -11,8 +11,8 @@ import 'package:todo_app/presentation/localization/localizations_delegates.dart'
 import 'package:todo_app/presentation/localization/s.dart';
 
 import 'firebase_options.dart';
-import 'presentation/navigation/navigation_providers.dart';
-import 'presentation/navigation/route_information_parser.dart';
+import 'presentation/navigation/riverpod_navigation/navigation_providers.dart';
+import 'presentation/navigation/riverpod_navigation/route_information_parser.dart';
 import 'presentation/providers/services_providers.dart';
 
 void main() {
@@ -37,6 +37,7 @@ void main() {
     ProviderScope(
       child: Consumer(
         builder: (context, WidgetRef ref, _) => FutureBuilder(
+          //future provider
             future: ref
                 .watch(ServicesProviders.serviceUtilProvider)
                 .localService
@@ -51,16 +52,11 @@ void main() {
   );
 }
 
-final navigationKeyProvider = Provider<GlobalKey>((ref) {
-  return GlobalKey();
-});
-
 class MyApp extends ConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final navigator = ref.watch(DataProviders.navigationProvider);
     final isDark = ref.watch(DataProviders.isDarkProvider);
     return MaterialApp.router(
       routerDelegate: ref.read(NavigationProviders.routerDelegateProvider),
@@ -76,12 +72,6 @@ class MyApp extends ConsumerWidget {
       localizationsDelegates: LocalizationsDelegates.delegates,
       supportedLocales: S.supportedLocales,
       locale: S.current,
-
-      // navigation
-      // onUnknownRoute: (settings) => navigator.toUnknownPage(),
-      // initialRoute: navigator.initialRoute,
-      // onGenerateRoute: (settings) => navigator.onGenerateRoute(settings),
-      // navigatorKey: navigator.key,
     );
   }
 }

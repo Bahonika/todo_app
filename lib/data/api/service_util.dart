@@ -42,12 +42,16 @@ class ServiceUtil {
   }
 
   Stream<List<Todo>> getTodos() async* {
+    // get local and return
     final localTodos = getFromLocal();
     yield localTodos;
     final localRevision = _localService.getRevision();
 
+    // ger remote
     final remoteTodos = await getFromRemote();
     final remoteRevision = _remoteService.getRevision();
+
+    // and check revision
     final mergedTodos = await mergeRevision(
       localRevision: localRevision,
       localTodos: localTodos,
@@ -55,6 +59,7 @@ class ServiceUtil {
       remoteTodos: remoteTodos,
     );
 
+    //return actual
     yield mergedTodos;
   }
 
