@@ -1,21 +1,22 @@
 import 'package:flutter/foundation.dart';
 
 class NavigationState with ChangeNotifier {
-  bool _isWelcome;
-  String? _bookId;
-  NavigationState(this._isWelcome, this._bookId);
-  bool get isWelcome => _isWelcome;
-  String? get bookId => _bookId;
-  set isWelcome(bool val) {
-    _isWelcome = val;
+  bool _isTodos;
+  String? _todoUuid;
+  NavigationState(this._isTodos, this._todoUuid);
+
+  bool get isTodos => _isTodos;
+  String? get todoUuid => _todoUuid;
+  set isTodos(bool val) {
+    _isTodos = val;
     notifyListeners();
   }
 
-  set bookId(String? val) {
-    _bookId = val;
+  set todoUuid(String? val) {
+    _todoUuid = val;
     notifyListeners();
   }
 
   @override
-  String toString() => "Welcome: $_isWelcome, book: $_bookId";
+  String toString() => "Welcome: $_isTodos, book: $_todoUuid";
 }

@@ -1,18 +1,19 @@
 class BookId {
-  String id;
+  String? id;
   BookId(this.id);
 }
+
 class NavigationStateDTO {
-  bool welcome;
-  String? bookId;
-  NavigationStateDTO(this.welcome, this.bookId);
-  NavigationStateDTO.welcome()
-      : welcome = true,
-        bookId = null;
-  NavigationStateDTO.books()
-      : welcome = false,
-        bookId = null;
-  NavigationStateDTO.book(String id)
-      : welcome = false,
-        bookId = id;
+  bool isTodos;
+  String? todoUuid;
+  NavigationStateDTO(this.isTodos, this.todoUuid);
+  NavigationStateDTO.todos()
+      : isTodos = true,
+        todoUuid = null;
+  NavigationStateDTO.create()
+      : isTodos = false,
+        todoUuid = null;
+  NavigationStateDTO.todo(String? id)
+      : isTodos = false,
+        todoUuid = id;
 }

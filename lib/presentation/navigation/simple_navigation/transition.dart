@@ -14,7 +14,6 @@ class BookshelfTransitionDelegate extends TransitionDelegate {
         element.markForPush();
       }
       if (element.isWaitingForExitingDecision) {
-        // print('Element $element is marked for pop');
         element.markForPop();
       }
     }

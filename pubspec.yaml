@@ -50,6 +50,7 @@ dependencies:
   freezed_annotation: ^2.1.0
   logger: ^1.1.0
   appmetrica_plugin: ^1.0.1
+  flutter_staggered_animations: ^1.1.1
 
 
 dev_dependencies:

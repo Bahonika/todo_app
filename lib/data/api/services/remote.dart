@@ -1,4 +1,4 @@
-import 'dart:io';
+// import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:todo_app/data/api/model/api_todo.dart';
@@ -18,7 +18,7 @@ class RemoteService {
       BaseOptions(
         baseUrl: _siteRoot,
         headers: {
-          HttpHeaders.authorizationHeader: "Bearer Ria",
+          // HttpHeaders.authorizationHeader: "Bearer Ria",
           _headerRevisionKey: _revision,
         },
       ),

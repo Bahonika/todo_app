@@ -23,10 +23,11 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
   }
 
   void setErrorState(Object? error, StackTrace stackTrace) {
+    String? errorToShow = error.toString().split("\n").first;
     state = TodoListState(
       isLoading: state.isLoading,
       todos: state.todos,
-      error: error.toString(),
+      error: errorToShow,
       showAll: state.showAll,
     );
   }

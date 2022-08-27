@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
-import 'package:todo_app/presentation/navigation/riverpod_navigation/segments.dart';
-import 'package:todo_app/presentation/navigation/riverpod_navigation/navigation_providers.dart';
+import 'package:todo_app/presentation/navigation/simple_navigation/delegate.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
@@ -55,12 +55,13 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                   ? FloatingActionButton(
                       onPressed: () {
                         ref.refresh(DataProviders.todoProvider.notifier).state;
-                        ref
-                            .read(NavigationProviders.routerDelegateProvider)
-                            .navigate([
-                          TodosSegment(),
-                          CreateSegment(),
-                        ]);
+                        // ref
+                        //     .read(NavigationProviders.routerDelegateProvider)
+                        //     .navigate([
+                        //   TodosSegment(),
+                        //   CreateSegment(),
+                        // ]);
+                        ref.read(routerDelegateProvider).gotoTodo(null);
                       },
                       backgroundColor: Theme.of(context)
                           .extension<CustomColors>()!
@@ -99,6 +100,16 @@ class _MySliverAppBarState extends State<MySliverAppBar>
   }
 }
 
+// todo: delete
+final todo = Todo(uuid: "fghfg",
+  done: false,
+  text: "test1",
+  importance: Importance.basic,
+  createdAt: DateTime.now(),
+  changedAt: DateTime.now(),
+  lastUpdatedBy: "1",
+);
+
 class SliverTodoList extends ConsumerWidget {
   const SliverTodoList({Key? key}) : super(key: key);
 
@@ -108,7 +119,7 @@ class SliverTodoList extends ConsumerWidget {
     final stateNotifier =
         ref.watch(DataProviders.todoListStateProvider.notifier);
     final todos = state.showAll ? state.todos : stateNotifier.unDone;
-
+    todos.add(todo);
     ref.listen<TodoListState>(
       DataProviders.todoListStateProvider,
       (previous, next) {
@@ -133,16 +144,23 @@ class SliverTodoList extends ConsumerWidget {
               shrinkWrap: true,
               controller: ScrollController(),
               itemBuilder: (BuildContext context, index) {
-                if (index == todos.length) {
-                  return const TextFieldTile(); // last tile with text field
-                } else if (index == 0) {
-                  return TodoWidget(
-                    todo: todos[index],
-                    isFirst: true,
-                  );
-                } else {
-                  return TodoWidget(todo: todos[index]);
-                }
+                return AnimationConfiguration.staggeredList(
+                  position: index,
+                  duration: const Duration(milliseconds: 375),
+                  child: SlideAnimation(
+                    horizontalOffset: 50.0,
+                    child: FadeInAnimation(
+                      child: index == todos.length
+                          ? const TextFieldTile() // last tile with text field
+                          : index == 0
+                              ? TodoWidget(
+                                  todo: todos[index],
+                                  isFirst: true,
+                                )
+                              : TodoWidget(todo: todos[index]),
+                    ),
+                  ),
+                );
               },
               itemCount: todos.length + 1, // todos count + one extra tile
             ),
@@ -259,10 +277,12 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
 
   void toEditScreen() {
     ref.read(DataProviders.todoProvider.notifier).state = widget.todo;
-    ref.read(NavigationProviders.routerDelegateProvider).navigate([
-      TodosSegment(),
-      CreateSegment(uuid: widget.todo.uuid),
-    ]);
+    // ref.read(NavigationProviders.routerDelegateProvider).navigate([
+    //   TodosSegment(),
+    //   CreateSegment(uuid: widget.todo.uuid),
+    // ]);
+    (Router.of(context).routerDelegate as BookshelfRouterDelegate)
+        .gotoTodo(widget.todo.uuid);
   }
 
   @override

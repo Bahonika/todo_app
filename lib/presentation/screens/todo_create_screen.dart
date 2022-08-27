@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
-import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
-import 'package:todo_app/presentation/navigation/riverpod_navigation/segments.dart';
-import 'package:todo_app/presentation/navigation/riverpod_navigation/navigation_providers.dart';
+import 'package:todo_app/presentation/navigation/simple_navigation/delegate.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
-
 class TodoCreateScreen extends ConsumerStatefulWidget {
-  final Todo? todo;
-  const TodoCreateScreen({this.todo, Key? key}) : super(key: key);
+  final String? todoUuid;
+
+  const TodoCreateScreen({this.todoUuid, Key? key}) : super(key: key);
 
   @override
   ConsumerState createState() => _TodoCreateScreenState();
 }
 
 class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
+
+  @override
+  void initState() {
+    ref.read(DataProviders.todoProvider.notifier).setTodo(widget.todoUuid);
+    super.initState();
+  }
+
   void _createTask() {
     final paramsNotifier =
         ref.read(DataProviders.createParametersProvider(null).notifier);
@@ -40,7 +45,9 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
 
   bool validating() {
     final todo = ref.read(DataProviders.todoProvider);
-    final value = ref.read(DataProviders.createParametersProvider(todo).notifier).isCorrect;
+    final value = ref
+        .read(DataProviders.createParametersProvider(todo).notifier)
+        .isCorrect;
     return value;
   }
 
@@ -65,9 +72,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void _pop() {
-    ref.read(NavigationProviders.routerDelegateProvider).navigate([
-      TodosSegment(),
-    ]);
+    ref.watch(routerDelegateProvider).gotoList();
   }
 
   @override
@@ -81,7 +86,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
             Icons.close,
             color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
           ),
-          onPressed: () => _pop(),
+          onPressed: _pop,
         ),
         actions: [
           TextButton(
@@ -269,9 +274,7 @@ class DeleteTile extends ConsumerWidget {
   const DeleteTile({Key? key}) : super(key: key);
 
   void _pop(WidgetRef ref) {
-    ref.read(NavigationProviders.routerDelegateProvider).navigate([
-      TodosSegment(),
-    ]);
+    ref.read(routerDelegateProvider).gotoList();
   }
 
   @override
