@@ -88,14 +88,7 @@ class ServiceUtil {
     return todos;
   }
 
-  Future<void> deleteTodo(String uuid) async {
-    try {
-      await _remoteService.delete(uuid: uuid);
-      _log.i("Delete on remote");
-    } catch (e) {
-      _log.w("Can't delete on remote");
-      rethrow;
-    }
+  void deleteLocal(String uuid) {
     try {
       _localService.delete(uuid: uuid);
       _log.i("Delete on local");
@@ -103,6 +96,21 @@ class ServiceUtil {
       _log.e("Can't delete on local");
       rethrow;
     }
+  }
+
+  Future<void> deleteRemote(String uuid) async {
+    try {
+      await _remoteService.delete(uuid: uuid);
+      _log.i("Delete on remote");
+    } catch (e) {
+      _log.w("Can't delete on remote");
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTodo(String uuid) async {
+    deleteRemote(uuid);
+    deleteLocal(uuid);
     AppMetrica.reportEvent("delete_todo");
   }
 
@@ -114,6 +122,7 @@ class ServiceUtil {
       _log.e("Can't create on local");
       rethrow;
     }
+
     try {
       await _remoteService.create(todo: todo);
       _log.i("Create on remote");

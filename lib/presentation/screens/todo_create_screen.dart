@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
+import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/navigation/delegate.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
@@ -31,7 +32,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
         ref.read(DataProviders.todoListStateProvider.notifier);
     final params = ref.read(DataProviders.parametersProvider);
 
-    try {
+    if (paramsNotifier.isCorrect) {
       final todo = paramsNotifier.generateTodo();
       if (params.isEdit) {
         stateController.update(todo);
@@ -39,7 +40,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
         stateController.create(todo);
       }
       _pop();
-    } catch (e) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(S.of(context).emptyField),
@@ -54,6 +55,20 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<TodoListState>(
+      DataProviders.todoListStateProvider,
+      (previous, next) {
+        if (next.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                next.error.toString(),
+              ),
+            ),
+          );
+        }
+      },
+    );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,

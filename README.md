@@ -21,7 +21,7 @@ Features:
    - Cosmetic changes like some animations
 
 Internal:
-   - CI/CD testing and analyzing before pull, tried to build and send the .apk is in github storage, but I haven't been able to figure out the storage .jks file in secrets
+   - CI/CD testing and analyzing before pull, tried to build and send the .apk with key is in github storage, but I haven't been able to figure out the storage .jks file in secrets
    - Connected Logger
    - DI with riverpod
    - dev banner if flag --dart-define=is_test=true has been set

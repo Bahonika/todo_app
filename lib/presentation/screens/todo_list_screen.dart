@@ -176,14 +176,14 @@ class _TextFieldTileState extends ConsumerState<LastTile> {
 
   createTodo() {
     // not the best way to realize it i think
-    final createParams = ref.read(DataProviders.parametersProvider.notifier);
-    createParams.text = _localController.text;
-    final stateController =
-        ref.read(DataProviders.todoListStateProvider.notifier);
-    try {
+    if (_localController.text.isNotEmpty) {
+      final createParams = ref.read(DataProviders.parametersProvider.notifier);
+      createParams.text = _localController.text;
+      final stateController =
+          ref.read(DataProviders.todoListStateProvider.notifier);
       final generatedTodo = createParams.generateTodo();
       stateController.create(generatedTodo);
-    } catch (e) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(S.of(context).emptyField),
