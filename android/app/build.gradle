@@ -56,12 +56,14 @@ android {
 
     signingConfigs {
         release {
-            apply from: '../keystoreConfig.gradle'
+//            apply from: '../keystoreConfig.gradle'
+//
+//            keyAlias keystoreConfig.keyAlias
+//            keyPassword keystoreConfig.keyPassword
+//            storeFile file(keystoreConfig.storeFile)
+//            storePassword keystoreConfig.storePassword
+              signingConfig signingConfigs.debug  // failed to upload .jks file in secrets
 
-            keyAlias keystoreConfig.keyAlias
-            keyPassword keystoreConfig.keyPassword
-            storeFile file(keystoreConfig.storeFile)
-            storePassword keystoreConfig.storePassword
         }
     }
     buildTypes {
