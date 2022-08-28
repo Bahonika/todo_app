@@ -1,54 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/domain/models/todo_list_state.dart';
+import 'package:todo_app/internal/components/banner.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
+import 'package:todo_app/presentation/navigation/delegate.dart';
+import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
-import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
-class TodoListScreen extends StatefulWidget {
-  const TodoListScreen({Key? key}) : super(key: key);
+class TodoListScreen extends ConsumerStatefulWidget {
+  const TodoListScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  State<TodoListScreen> createState() => _TodoListScreenState();
+  ConsumerState createState() => _TodoListScreenState();
 }
 
-class _TodoListScreenState extends State<TodoListScreen>
-    with SingleTickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-    context.read<TodosProvider>().getTodos();
-  }
-
+class _TodoListScreenState extends ConsumerState<TodoListScreen> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: const CustomScrollView(
-          slivers: [
-            MySliverAppBar(),
-            SliverTodoList(),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            context.read<NavigationController>().openCreateTodo();
-          },
-          backgroundColor:
-              Theme.of(context).extension<CustomColors>()!.colorBlue,
-          child: Icon(
-            Icons.add,
-            color: Theme.of(context).extension<CustomColors>()!.colorWhite,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: Theme.of(context).appBarTheme.systemOverlayStyle!,
+      child: TestBanner(
+        child: SafeArea(
+          child: GestureDetector(
+            onTap: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: const Scaffold(
+              body: CustomScrollView(
+                slivers: [
+                  MySliverAppBar(),
+                  SliverTodoList(),
+                ],
+              ),
+              floatingActionButton: AddButton(),
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class AddButton extends ConsumerWidget {
+  const AddButton({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AnimatedSwitcher(
+      // if keyboard opened - hide
+      duration: const Duration(milliseconds: 50),
+      reverseDuration: const Duration(milliseconds: 50),
+      child: MediaQuery.of(context).viewInsets.bottom <= 0.0
+          ? FloatingActionButton(
+              onPressed: () {
+                ref.read(routerDelegateProvider).gotoTodo(null);
+              },
+              backgroundColor:
+                  Theme.of(context).extension<CustomColors>()!.colorBlue,
+              child: Icon(
+                Icons.add,
+                color: Theme.of(context).extension<CustomColors>()!.colorWhite,
+              ),
+            )
+          : const SizedBox(),
     );
   }
 }
@@ -71,50 +97,99 @@ class _MySliverAppBarState extends State<MySliverAppBar>
   }
 }
 
-class SliverTodoList extends StatelessWidget {
+class SliverTodoList extends ConsumerWidget {
   const SliverTodoList({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Consumer<List<Todo>>(builder: (context, todos, _) {
-        // list, that user must see at this moment
-        final List<Todo> todoToShow =
-            context.watch<TodosProvider>().showCompleted
-                ? todos
-                : todos.where((element) => !element.done).toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(DataProviders.todoListStateProvider);
+    final todos = ref.watch(DataProviders.todoListStateProvider.notifier).todos;
+    ref.listen<TodoListState>(
+      DataProviders.todoListStateProvider,
+      (previous, next) {
+        if (next.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                next.error.toString(),
+              ),
+            ),
+          );
+        }
+      },
+    );
 
-        return WrapCard(
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            controller: ScrollController(),
-            itemBuilder: (BuildContext context, index) {
-              if (index == todoToShow.length) {
-                return TextFieldTile(); // last tile with text field
-              } else {
-                return TodoWidget(todo: todoToShow[index]);
-              }
-            },
-            itemCount: todoToShow.length + 1,
+    return SliverToBoxAdapter(
+      child: Column(
+        children: [
+          WrapCard(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              controller: ScrollController(),
+              itemBuilder: (BuildContext context, index) {
+                return AnimationLimiter(
+                  child: AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      horizontalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: index == todos.length
+                            ? const LastTile() // last tile with text field
+                            : index == 0
+                                ? TodoWidget(
+                                    todo: todos[index],
+                                    isFirst: true,
+                                  )
+                                : TodoWidget(todo: todos[index]),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              itemCount: todos.length + 1, // todos count + one extra tile
+            ),
           ),
-        );
-      }),
+          state.isLoading
+              ? CircularProgressIndicator(
+                  color: Theme.of(context).extension<CustomColors>()!.colorBlue,
+                )
+              : const SizedBox(),
+        ],
+      ),
     );
   }
 }
 
-class TextFieldTile extends StatelessWidget {
-  TextFieldTile({Key? key}) : super(key: key);
+class LastTile extends ConsumerStatefulWidget {
+  const LastTile({
+    Key? key,
+  }) : super(key: key);
 
-  final TextEditingController _controller = TextEditingController();
+  @override
+  ConsumerState createState() => _TextFieldTileState();
+}
 
-  createTodo(BuildContext context) {
-    final createProvider = context.read<CreateTaskDataProvider>();
-    createProvider.setControllerText(_controller.text);
-    final Todo todo = createProvider.modelingTodo();
-    context.read<TodosProvider>().createTodo(todo: todo);
-    createProvider.eraseData();
+class _TextFieldTileState extends ConsumerState<LastTile> {
+  final _localController = TextEditingController();
+
+  createTodo() {
+    // not the best way to realize it i think
+    if (_localController.text.isNotEmpty) {
+      final createParams = ref.read(DataProviders.parametersProvider.notifier);
+      createParams.text = _localController.text;
+      final stateController =
+          ref.read(DataProviders.todoListStateProvider.notifier);
+      final generatedTodo = createParams.generateTodo();
+      stateController.create(generatedTodo);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).emptyField),
+        ),
+      );
+    }
   }
 
   @override
@@ -124,49 +199,53 @@ class TextFieldTile extends StatelessWidget {
       child: ListTile(
         leading: const SizedBox(),
         title: TextFormField(
-          controller: _controller,
+          controller: _localController,
           decoration: InputDecoration(
             hintText: S.of(context).newTodo,
             hintStyle: CustomTextTheme.importanceSubtitle(context),
             border: InputBorder.none,
             suffixIcon: IconButton(
               icon: const Icon(Icons.subdirectory_arrow_left_outlined),
-              onPressed: () => createTodo(context),
+              onPressed: () => createTodo(),
             ),
           ),
           style: CustomTextTheme.body(context),
-          onSaved: (value) => createTodo(context),
-          onEditingComplete: () => createTodo(context),
-          onFieldSubmitted: (value) => createTodo(context),
+          onFieldSubmitted: (value) => createTodo(),
           minLines: 1,
-          maxLines: null,
+          maxLines: 1,
         ),
       ),
     );
   }
 }
 
-class TodoWidget extends StatefulWidget {
+class TodoWidget extends ConsumerStatefulWidget {
   final Todo todo;
+  final bool isFirst;
 
-  const TodoWidget({required this.todo, Key? key}) : super(key: key);
+  const TodoWidget({required this.todo, this.isFirst = false, Key? key})
+      : super(key: key);
 
   @override
-  State<TodoWidget> createState() => _TodoWidgetState();
+  ConsumerState createState() => _TodoWidgetState();
 }
 
-class _TodoWidgetState extends State<TodoWidget> {
+class _TodoWidgetState extends ConsumerState<TodoWidget> {
   void delete() {
-    context.read<TodosProvider>().deleteTodo(widget.todo.uuid);
+    ref.read(DataProviders.todoListStateProvider.notifier).delete(widget.todo);
   }
 
-  Future<bool> setAsDone() async {
-    context.read<TodosProvider>().setAsDone(widget.todo);
+  bool setAsDone() {
+    ref
+        .read(DataProviders.todoListStateProvider.notifier)
+        .setAsDone(widget.todo);
     return false;
   }
 
   bool setAsUndone() {
-    context.read<TodosProvider>().setAsUndone(widget.todo);
+    ref
+        .read(DataProviders.todoListStateProvider.notifier)
+        .setAsUndone(widget.todo);
     return false;
   }
 
@@ -182,33 +261,21 @@ class _TodoWidgetState extends State<TodoWidget> {
     }
   }
 
-  void fieldsFill() {
-    var provider = context.read<CreateTaskDataProvider>();
-    provider.setControllerText(widget.todo.text);
-    if (widget.todo.deadline != null) {
-      provider.selectedDate = widget.todo.deadline!;
-      provider.showDate = true;
-    }
-    provider.selectedImportance = widget.todo.importance;
-  }
-
   void toEditScreen() {
-    fieldsFill();
-    context.read<NavigationController>().openCreateTodo(
-          isEdit: true,
-          todoForEdit: widget.todo,
-        );
+    ref.watch(routerDelegateProvider).gotoTodo(widget.todo.uuid);
   }
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(widget.isFirst ? 8 : 0),
+      ),
       child: GestureDetector(
         child: Dismissible(
           key: Key(widget.todo.uuid.toString()),
           direction: DismissDirection.horizontal,
-          confirmDismiss: (direction) => confirmDismiss(direction),
+          confirmDismiss: confirmDismiss,
           onDismissed: (direction) {
             if (direction == DismissDirection.endToStart) {
               delete();
@@ -217,7 +284,7 @@ class _TodoWidgetState extends State<TodoWidget> {
           background: const DismissibleBackground(),
           secondaryBackground: const DismissibleSecondaryBackground(),
           child: InkWell(
-            onTap: () => toEditScreen(),
+            onTap: toEditScreen,
             child: ListTile(
               leading: Checkbox(
                 value: widget.todo.done,
@@ -239,7 +306,7 @@ class _TodoWidgetState extends State<TodoWidget> {
                     children: [
                       if (widget.todo.importance == Importance.important)
                         TextSpan(
-                          text: "‼ ",
+                          text: S.of(context).importanceEmoji,
                           style: TextStyle(
                               color: Theme.of(context)
                                   .extension<CustomColors>()!

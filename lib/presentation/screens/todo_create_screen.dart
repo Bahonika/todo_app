@@ -1,44 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
-import 'package:todo_app/domain/models/todo.dart';
+import 'package:todo_app/domain/models/todo_list_state.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
+import 'package:todo_app/presentation/navigation/delegate.dart';
+import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
-import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
 
-class TodoCreateScreen extends StatefulWidget {
-  final bool isEdit;
-  final Todo? todoForEdit;
+class TodoCreateScreen extends ConsumerStatefulWidget {
+  final String? todoUuid;
 
-  const TodoCreateScreen({Key? key, this.isEdit = false, this.todoForEdit})
-      : super(key: key);
+  const TodoCreateScreen({this.todoUuid, Key? key}) : super(key: key);
 
   @override
-  State<TodoCreateScreen> createState() => _TodoCreateScreenState();
+  ConsumerState createState() => _TodoCreateScreenState();
 }
 
-class _TodoCreateScreenState extends State<TodoCreateScreen> {
-  void createTask() {
-    final Todo todo = context.read<CreateTaskDataProvider>().modelingTodo();
-    context.read<TodosProvider>().createTodo(todo: todo);
-    context.read<CreateTaskDataProvider>().eraseData();
+class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
+  @override
+  void initState() {
+    ref.read(DataProviders.todoProvider.notifier).setTodo(widget.todoUuid);
+    super.initState();
   }
 
-  void editTask() {
-    final Todo todo = context
-        .read<CreateTaskDataProvider>()
-        .modelingTodo(todo: widget.todoForEdit);
-    context.read<TodosProvider>().updateTodo(todo);
-    context.read<CreateTaskDataProvider>().eraseData();
+  void _tapHandler() {
+    final paramsNotifier = ref.read(DataProviders.parametersProvider.notifier);
+    final stateController =
+        ref.read(DataProviders.todoListStateProvider.notifier);
+    final params = ref.read(DataProviders.parametersProvider);
+
+    if (paramsNotifier.isCorrect) {
+      final todo = paramsNotifier.generateTodo();
+      if (params.isEdit) {
+        stateController.update(todo);
+      } else {
+        stateController.create(todo);
+      }
+      _pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).emptyField),
+        ),
+      );
+    }
+  }
+
+  void _pop() {
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<TodoListState>(
+      DataProviders.todoListStateProvider,
+      (previous, next) {
+        if (next.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                next.error.toString(),
+              ),
+            ),
+          );
+        }
+      },
+    );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -48,29 +78,11 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
             Icons.close,
             color: Theme.of(context).extension<CustomColors>()!.labelPrimary,
           ),
-          onPressed: () {
-            if (widget.isEdit) {
-              context.read<CreateTaskDataProvider>().eraseData();
-            }
-            context.read<NavigationController>().pop();
-          },
+          onPressed: _pop,
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              if (context
-                  .read<CreateTaskDataProvider>()
-                  .controller
-                  .text
-                  .isNotEmpty) {
-                if (widget.isEdit) {
-                  editTask();
-                } else {
-                  createTask();
-                }
-                context.read<NavigationController>().pop();
-              }
-            },
+            onPressed: () => _tapHandler(),
             child: Text(
               S.of(context).save,
               style: TextStyle(
@@ -83,17 +95,17 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const TextFieldTile(),
-            const ImportanceTile(),
-            const Padding(
+          children: const [
+            TextFieldTile(),
+            ImportanceTile(),
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Divider(),
             ),
-            const DateTile(),
-            const Divider(),
-            DeleteTile(isDisabled: !widget.isEdit, todo: widget.todoForEdit),
-            const SizedBox(
+            DateTile(),
+            Divider(),
+            DeleteTile(),
+            SizedBox(
               height: 50,
             ),
           ],
@@ -103,16 +115,15 @@ class _TodoCreateScreenState extends State<TodoCreateScreen> {
   }
 }
 
-class TextFieldTile extends StatelessWidget {
+class TextFieldTile extends ConsumerWidget {
   const TextFieldTile({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    var controller = context.watch<CreateTaskDataProvider>().controller;
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final parameters = ref.watch(DataProviders.parametersProvider);
     return WrapCard(
       child: TextFormField(
-        controller: controller,
+        controller: parameters.textEditingController,
         style: CustomTextTheme.body(context),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -127,16 +138,14 @@ class TextFieldTile extends StatelessWidget {
   }
 }
 
-class ImportanceTile extends StatefulWidget {
+class ImportanceTile extends ConsumerWidget {
   const ImportanceTile({Key? key}) : super(key: key);
 
   @override
-  State<ImportanceTile> createState() => _ImportanceTileState();
-}
-
-class _ImportanceTileState extends State<ImportanceTile> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final parameters = ref.watch(DataProviders.parametersProvider);
+    final parametersNotifier =
+        ref.watch(DataProviders.parametersProvider.notifier);
     return ListTile(
       title: Text(
         S.of(context).importance,
@@ -156,34 +165,37 @@ class _ImportanceTileState extends State<ImportanceTile> {
             ),
             DropdownMenuItem(
               value: Importance.important,
-              child: Text(S.of(context).important),
+              child: RichText(
+                  text: TextSpan(
+                style: CustomTextTheme.redText(context),
+                children: [
+                  TextSpan(text: S.of(context).importanceEmoji),
+                  TextSpan(text: S.of(context).important),
+                ],
+              )),
             ),
           ],
           isDense: true,
           isExpanded: false,
-          value: context.watch<CreateTaskDataProvider>().selectedImportance,
+          value: parameters.importance,
           style: CustomTextTheme.importanceSubtitle(context),
           icon: const SizedBox(),
-          onChanged: (value) {
-            context.read<CreateTaskDataProvider>().selectedImportance = value!;
-          },
+          onChanged: (value) => parametersNotifier.importance = value!,
         ),
       ),
     );
   }
 }
 
-class DateTile extends StatelessWidget {
+class DateTile extends ConsumerWidget {
   const DateTile({Key? key}) : super(key: key);
 
   static DateTime? tempPickedDate;
 
-  Future<void> selectDate(BuildContext context) async {
-    final createTaskProvider =
-        Provider.of<CreateTaskDataProvider>(context, listen: false);
-
-    final String hintText = createTaskProvider.selectedDate.year.toString();
-    final DateTime initialDate = createTaskProvider.selectedDate;
+  Future<void> selectDate(BuildContext context, WidgetRef ref) async {
+    final String hintText = DateTime.now().year.toString();
+    final DateTime initialDate =
+        ref.watch(DataProviders.parametersProvider).date;
 
     tempPickedDate = await showDatePicker(
       context: context,
@@ -195,27 +207,30 @@ class DateTile extends StatelessWidget {
     );
   }
 
-  void setSelectedDate(BuildContext context) {
-    selectDate(context).then((value) {
+  void setSelectedDate(BuildContext context, WidgetRef ref) {
+    selectDate(context, ref).then((value) {
       if (tempPickedDate != null) {
-        context.read<CreateTaskDataProvider>().selectedDate = tempPickedDate!;
+        ref.read(DataProviders.parametersProvider.notifier).date =
+            tempPickedDate!;
       }
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final parameters = ref.watch(DataProviders.parametersProvider);
+    final parametersNotifier =
+        ref.watch(DataProviders.parametersProvider.notifier);
     return ListTile(
       title: Text(
         S.of(context).doneBy,
         style: CustomTextTheme.body(context),
       ),
-      subtitle: context.watch<CreateTaskDataProvider>().showDate
+      subtitle: parameters.showDate
           ? InkWell(
-              onTap: () => setSelectedDate(context),
+              onTap: () => setSelectedDate(context, ref),
               child: Text(
-                MyDateFormat().localeFormat(
-                    context.watch<CreateTaskDataProvider>().selectedDate),
+                MyDateFormat().localeFormat(parameters.date),
                 style: TextStyle(
                     color:
                         Theme.of(context).extension<CustomColors>()!.colorBlue),
@@ -223,56 +238,57 @@ class DateTile extends StatelessWidget {
             )
           : const SizedBox(),
       trailing: Switch(
-        value: context.watch<CreateTaskDataProvider>().showDate,
+        value: parameters.showDate,
         activeTrackColor: Theme.of(context)
             .extension<CustomColors>()!
             .colorBlue
             .withOpacity(0.3),
         activeColor: Theme.of(context).extension<CustomColors>()!.colorBlue,
-        onChanged: (bool value) {
-          context.read<CreateTaskDataProvider>().showDate = value;
-        },
+        onChanged: (bool value) => parametersNotifier.toggleShowDate(),
       ),
     );
   }
 }
 
-class DeleteTile extends StatelessWidget {
-  final bool isDisabled;
-  final Todo? todo;
+class DeleteTile extends ConsumerWidget {
+  const DeleteTile({Key? key}) : super(key: key);
 
-  const DeleteTile({Key? key, required this.isDisabled, this.todo})
-      : super(key: key);
-
-  void delete(BuildContext context) {
-    if (!isDisabled) {
-      Provider.of<TodosProvider>(context, listen: false).deleteTodo(todo!.uuid);
-      context.read<NavigationController>().pop();
-    }
+  void _pop(WidgetRef ref) {
+    ref.read(routerDelegateProvider).gotoList();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todoForEdit = ref.watch(DataProviders.todoProvider);
+    final parameters = ref.watch(DataProviders.parametersProvider);
+    final stateController =
+        ref.watch(DataProviders.todoListStateProvider.notifier);
+
     return TextButton(
-      onPressed: () => delete(context),
+      onPressed: () {
+        if (parameters.isEdit) {
+          stateController.delete(todoForEdit!);
+          _pop(ref);
+        }
+      },
       style: TextButton.styleFrom(
           primary: Theme.of(context).scaffoldBackgroundColor),
       child: Row(
         children: [
           Icon(
             Icons.delete,
-            color: isDisabled
-                ? Theme.of(context).extension<CustomColors>()!.labelDisable
-                : Theme.of(context).extension<CustomColors>()!.colorRed,
+            color: parameters.isEdit
+                ? Theme.of(context).extension<CustomColors>()!.colorRed
+                : Theme.of(context).extension<CustomColors>()!.labelDisable,
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
               S.of(context).delete,
               style: TextStyle(
-                color: isDisabled
-                    ? Theme.of(context).extension<CustomColors>()!.labelDisable
-                    : Theme.of(context).extension<CustomColors>()!.colorRed,
+                color: parameters.isEdit
+                    ? Theme.of(context).extension<CustomColors>()!.colorRed
+                    : Theme.of(context).extension<CustomColors>()!.labelDisable,
               ),
             ),
           ),

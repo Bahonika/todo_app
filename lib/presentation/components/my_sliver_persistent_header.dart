@@ -2,18 +2,21 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/domain/circle_detector.dart';
+import 'package:todo_app/presentation/components/circle.dart';
+import 'package:todo_app/presentation/components/visibility_switcher.dart';
+import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/localization/s.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
-
-import '../../domain/models/todo.dart';
 
 class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
   final TickerProvider thisVsync;
 
-  const MySliverPersistentHeader({required this.thisVsync});
+  MySliverPersistentHeader({required this.thisVsync});
+
+  List<Offset> list = [];
 
   @override
   Widget build(
@@ -21,77 +24,85 @@ class MySliverPersistentHeader implements SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return Consumer<List<Todo>>(
-      builder: (context, todos, _) => Card(
-        color: background(shrinkOffset, context),
-        margin: EdgeInsets.zero,
-        elevation: elevation(shrinkOffset),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: leftPadding(shrinkOffset),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned(
-                bottom: bottomTitlePadding(shrinkOffset),
-                child: Text(
-                  S.of(context).myTodos,
-                  style: CustomTextTheme.title(context).copyWith(
-                    fontSize: titleSize(
-                      shrinkOffset,
-                      context,
-                    ),
-                    height: titleHeight(
-                      shrinkOffset,
-                      context,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 18,
-                child: Opacity(
-                  opacity: opacity(shrinkOffset),
+    return Consumer(
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        final state = ref.watch(DataProviders.todoListStateProvider);
+        final stateNotifier =
+            ref.watch(DataProviders.todoListStateProvider.notifier);
+
+        return Listener(
+          onPointerUp: (details) {
+            if (list.length > 4) {
+              final isCircle = CircleDetector().check(list);
+              if (isCircle) {
+                ref.read(DataProviders.isDarkProvider.notifier).toggle();
+              } else if (maxExtent - shrinkOffset == maxExtent) {
+                ref.read(DataProviders.opacityProvider.notifier).toggle();
+              }
+            }
+            list.clear();
+          },
+          onPointerMove: (details) {
+            list.add(details.position);
+          },
+          child: Card(
+            color: background(shrinkOffset, context),
+            margin: EdgeInsets.zero,
+            elevation: elevation(shrinkOffset),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned(
+                  bottom: bottomTitlePadding(shrinkOffset),
+                  left: leftPadding(shrinkOffset),
                   child: Text(
-                    "${S.of(context).done}"
-                    "${todos.where((element) => element.done).length}",
-                    style: CustomTextTheme.subtitle(context),
+                    S.of(context).myTodos,
+                    style: CustomTextTheme.title(context).copyWith(
+                      fontSize: titleSize(
+                        shrinkOffset,
+                        context,
+                      ),
+                      height: titleHeight(
+                        shrinkOffset,
+                        context,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: bottomIconPadding(shrinkOffset),
-                right: rightPadding(shrinkOffset),
-                child: InkWell(
-                  onTap: () {
-                    context.read<TodosProvider>().showCompleted =
-                        !context.read<TodosProvider>().showCompleted;
-                  },
-                  child: context.watch<TodosProvider>().showCompleted
-                      ? Icon(
-                          Icons.visibility_off,
-                          size: 24,
-                          color: Theme.of(context)
-                              .extension<CustomColors>()!
-                              .colorBlue,
-                        )
-                      : Icon(
-                          Icons.visibility,
-                          size: 24,
-                          color: Theme.of(context)
-                              .extension<CustomColors>()!
-                              .colorBlue,
-                        ),
+                Positioned(
+                  bottom: 18,
+                  left: leftPadding(shrinkOffset),
+                  child: Opacity(
+                    opacity: opacity(shrinkOffset),
+                    child: Text(
+                      "${S.of(context).done}"
+                      "${stateNotifier.doneLength}",
+                      style: CustomTextTheme.subtitle(context),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: bottomIconPadding(shrinkOffset),
+                  right: rightPadding(shrinkOffset),
+                  child: VisibilitySwitcher(
+                    isFilterOff: state.showAll,
+                    onToggle: stateNotifier.toggleFilter,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Circle(
+                    height: maxExtent - shrinkOffset,
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

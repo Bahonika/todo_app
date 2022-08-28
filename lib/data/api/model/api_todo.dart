@@ -11,18 +11,11 @@ class ApiTodo {
   final String lastUpdatedBy;
 
   static Importance _importanceFromString(String stringImportance) {
-    return Importance.values.firstWhere((value) => value.name == stringImportance);
-    // switch (stringImportance) {
-    //   case "low":
-    //     return Importance.low;
-    //   case "important":
-    //     return Importance.important;
-    //   default:
-    //     return Importance.basic;
-    // }
+    return Importance.values
+        .firstWhere((value) => value.name == stringImportance);
   }
 
-  ApiTodo.fromApi(Map<String, dynamic> map)
+  ApiTodo.fromMap(Map<String, dynamic> map)
       : uuid = map["id"],
         done = map["done"],
         text = map["text"],

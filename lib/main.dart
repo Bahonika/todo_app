@@ -1,101 +1,81 @@
+import 'dart:async';
+
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:todo_app/data/api/services/local.dart';
-import 'package:todo_app/domain/models/todo.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_app/presentation/navigation/delegate.dart';
+import 'package:todo_app/presentation/navigation/parser.dart';
+import 'package:todo_app/presentation/navigation/provider.dart';
+import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/theme.dart';
-import 'package:todo_app/presentation/localization/localozations_delegates.dart';
-import 'package:todo_app/presentation/navigation/navigation_controller.dart';
-import 'package:todo_app/presentation/providers/create_task_data_provider.dart';
-import 'package:todo_app/presentation/providers/revision_provider.dart';
-import 'package:todo_app/presentation/providers/todos_provider.dart';
+import 'package:todo_app/presentation/localization/localizations_delegates.dart';
 import 'package:todo_app/presentation/localization/s.dart';
 
 import 'firebase_options.dart';
+import 'presentation/providers/services_providers.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  //init hive storage
-  final LocalService localService = LocalService.localService();
-  await localService.init();
+    // AppMetrica connect
+    AppMetrica.activate(
+        const AppMetricaConfig("ff7f421f-c1c5-40bd-b5a5-126f517cdf75"));
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  //Crashlytics connect
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    //Crashlytics connect
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => TodosProvider()),
-        ChangeNotifierProvider(create: (_) => CreateTaskDataProvider()),
-        ChangeNotifierProvider(create: (_) => RevisionProvider()),
-        StreamProvider<List<Todo>>(
-          create: (context) =>
-              Provider.of<TodosProvider>(context, listen: false).todoListStream,
-          initialData: const <Todo>[],
-        )
-      ],
-      child: const MyApp(),
-    ),
-  );
+    runApp(
+      ProviderScope(
+        child: Consumer(
+          builder: (context, WidgetRef ref, _) => FutureBuilder(
+              // init local storage
+              // not the best place to do it
+              // but working ok
+              future: ref
+                  .watch(ServicesProviders.serviceUtilProvider)
+                  .localService
+                  .init(),
+              builder: (context, snapshot) {
+                return snapshot.connectionState == ConnectionState.done
+                    ? const MyApp()
+                    : const Center(child: CircularProgressIndicator());
+              }),
+        ),
+      ),
+    );
+  }, (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack);
+  });
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = ref.watch(DataProviders.isDarkProvider);
+    return MaterialApp.router(
+      routerDelegate: ref.watch(routerDelegateProvider),
+      routeInformationParser: BooksShelfRouteInformationParser(),
+      routeInformationProvider: DebugRouteInformationProvider(),
 
-class _MyAppState extends State<MyApp> {
-  @override
-  void dispose() {
-    LocalService.localService().dispose();
-    super.dispose();
-  }
+      debugShowCheckedModeBanner: false,
+      // theme
+      theme: CustomTheme.lightTheme,
+      darkTheme: CustomTheme.darkTheme,
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
 
-  @override
-  Widget build(BuildContext context) {
-    late final navigationController = NavigationController();
-
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Theme.of(context).scaffoldBackgroundColor,
-        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarIconBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
-
-    return Provider<NavigationController>.value(
-      value: navigationController,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-
-        // theme
-        theme: CustomTheme.lightTheme,
-        darkTheme: CustomTheme.darkTheme,
-        themeMode: ThemeMode.light,
-
-        //localization
-        localizationsDelegates: LocalizationsDelegates.delegates,
-        supportedLocales: S.supportedLocales,
-        locale: S.current,
-
-        // navigation
-        onUnknownRoute: (settings) => navigationController.toUnknownPage(),
-        initialRoute: navigationController.initialRoute,
-        onGenerateRoute: (settings) =>
-            navigationController.onGenerateRoute(settings),
-        navigatorKey: navigationController.key,
-      ),
+      //localization
+      localizationsDelegates: LocalizationsDelegates.delegates,
+      supportedLocales: S.supportedLocales,
+      locale: S.current,
     );
   }
 }

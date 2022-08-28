@@ -35,10 +35,10 @@ class CustomTextTheme {
         );
   }
 
-  static TextStyle error(BuildContext context) {
+  static TextStyle redText(BuildContext context) {
     return Theme.of(context)
         .textTheme
-        .bodyText1!
+        .button!
         .copyWith(color: Theme.of(context).extension<CustomColors>()!.colorRed);
   }
 }

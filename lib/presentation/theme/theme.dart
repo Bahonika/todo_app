@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 
 class CustomTheme {
-  // static final RemoteConfigService _remoteConfigService =
-  //     RemoteConfigService.getInstance() as RemoteConfigService;
-  //
   static bool isImportanceRed = true;
 
   static const TextTheme textTheme = TextTheme(
@@ -45,6 +43,15 @@ class CustomTheme {
       extensions: [CustomColors.light],
       textTheme: textTheme,
       scaffoldBackgroundColor: CustomColors.light.backPrimary,
+      backgroundColor: CustomColors.light.backPrimary,
+      appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          systemNavigationBarColor: CustomColors.light.backPrimary,
+          statusBarColor: CustomColors.light.backPrimary,
+          statusBarBrightness: Brightness.dark,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+      ),
       switchTheme: SwitchThemeData(
         trackColor: MaterialStateColor.resolveWith(
           (states) => CustomColors.light.supportOverlay,
@@ -63,6 +70,14 @@ class CustomTheme {
       extensions: [CustomColors.dark],
       textTheme: textTheme,
       scaffoldBackgroundColor: CustomColors.dark.backPrimary,
+      appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          systemNavigationBarColor: CustomColors.dark.backPrimary,
+          statusBarColor: CustomColors.dark.backPrimary,
+          statusBarBrightness: Brightness.light,
+          statusBarIconBrightness: Brightness.light,
+        ),
+      ),
       switchTheme: SwitchThemeData(
           trackColor: MaterialStateColor.resolveWith(
               (states) => CustomColors.dark.supportOverlay),
