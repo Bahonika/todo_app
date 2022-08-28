@@ -136,7 +136,7 @@ class SliverTodoList extends ConsumerWidget {
                       horizontalOffset: 50.0,
                       child: FadeInAnimation(
                         child: index == todos.length
-                            ? const TextFieldTile() // last tile with text field
+                            ? const LastTile() // last tile with text field
                             : index == 0
                                 ? TodoWidget(
                                     todo: todos[index],
@@ -162,8 +162,8 @@ class SliverTodoList extends ConsumerWidget {
   }
 }
 
-class TextFieldTile extends ConsumerStatefulWidget {
-  const TextFieldTile({
+class LastTile extends ConsumerStatefulWidget {
+  const LastTile({
     Key? key,
   }) : super(key: key);
 
@@ -171,7 +171,7 @@ class TextFieldTile extends ConsumerStatefulWidget {
   ConsumerState createState() => _TextFieldTileState();
 }
 
-class _TextFieldTileState extends ConsumerState<TextFieldTile> {
+class _TextFieldTileState extends ConsumerState<LastTile> {
   final _localController = TextEditingController();
 
   createTodo() {

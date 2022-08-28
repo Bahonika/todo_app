@@ -17,9 +17,9 @@ import 'firebase_options.dart';
 import 'presentation/providers/services_providers.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
   runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
     // AppMetrica connect
     AppMetrica.activate(
         const AppMetricaConfig("ff7f421f-c1c5-40bd-b5a5-126f517cdf75"));
@@ -30,27 +30,29 @@ void main() {
 
     //Crashlytics connect
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    runApp(
+      ProviderScope(
+        child: Consumer(
+          builder: (context, WidgetRef ref, _) => FutureBuilder(
+            //future provider
+              future: ref
+                  .watch(ServicesProviders.serviceUtilProvider)
+                  .localService
+                  .init(),
+              builder: (context, snapshot) {
+                return snapshot.connectionState == ConnectionState.done
+                    ? const MyApp()
+                    : const Center(child: CircularProgressIndicator());
+              }),
+        ),
+      ),
+    );
   }, (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack);
   });
 
-  runApp(
-    ProviderScope(
-      child: Consumer(
-        builder: (context, WidgetRef ref, _) => FutureBuilder(
-          //future provider
-            future: ref
-                .watch(ServicesProviders.serviceUtilProvider)
-                .localService
-                .init(),
-            builder: (context, snapshot) {
-              return snapshot.connectionState == ConnectionState.done
-                  ? const MyApp()
-                  : const Center(child: CircularProgressIndicator());
-            }),
-      ),
-    ),
-  );
+
 }
 
 class MyApp extends ConsumerWidget {
