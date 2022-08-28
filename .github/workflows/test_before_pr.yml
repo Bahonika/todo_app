@@ -25,7 +25,7 @@ jobs:
       - run: flutter test
 #      - run: flutter test integration_test
       
-      - run: flutter build apk --release --split-per-abi 
+      - run: flutter build apk --release
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
