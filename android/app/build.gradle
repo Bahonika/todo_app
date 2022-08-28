@@ -56,19 +56,20 @@ android {
 
     signingConfigs {
         release {
+//            failed to upload .jks file in secrets
 //            apply from: '../keystoreConfig.gradle'
 //
 //            keyAlias keystoreConfig.keyAlias
 //            keyPassword keystoreConfig.keyPassword
 //            storeFile file(keystoreConfig.storeFile)
 //            storePassword keystoreConfig.storePassword
-              signingConfig signingConfigs.debug  // failed to upload .jks file in secrets
-
         }
     }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
+//            signingConfig signingConfigs.release
         }
     }
 }

@@ -25,16 +25,16 @@ jobs:
       - run: flutter test
 #      - run: flutter test integration_test
       
-#      - run: flutter build apk --release
-#        env:
-#          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-#          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-#          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-#          STORE_FILE: ${{ secrets.STORE_FILE }}
-#
-#      - uses: actions/upload-artifact@v1
-#        with:
-#          name: APK for QA
-#          path: build/app/outputs/apk/dev/debug/app-armeabi-v7a-release.apk
+      - run: flutter build apk --release --split-per-abi
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          STORE_FILE: ${{ secrets.STORE_FILE }}
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: APK for QA
+          path: build/app/outputs/apk/dev/debug/app-armeabi-v7a-release.apk
 
 

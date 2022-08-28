@@ -17,17 +17,19 @@ Features:
    - Create one integration test with creating and deleting todo
    - Navigator 2.0 and deeplinks to all screens. It seems that the link to todo even works, checked in web*
    - Implemented support for landscape orientation and large screens 
+   - Encapsulated theme from comfort using
+   - Cosmetic changes like some animations
 
 Internal:
    - CI/CD testing and analyzing before pull, tried to build and send the .apk is in github storage, but I haven't been able to figure out the storage .jks file in secrets
    - Connected Logger
    - DI with riverpod
    - dev banner if flag --dart-define=is_test=true has been set
-   - Connected AppMetrica 
+   - Connected AppMetrica for analytics
    - Connected Crashlitics
 
 APK:
-   - https://disk.yandex.ru/d/IH_w8AT6P2VB6w
+   - https://disk.yandex.ru/d/qLc3FgaWnEDWuw
 
 Firebase:
    - https://console.firebase.google.com/u/0/project/done-9bf58/overview
@@ -36,6 +38,9 @@ AppMetrica
    - https://appmetrica.yandex.ru/statistic?appId=4271599
 
 Images:
-   - ![1](https://user-images.githubusercontent.com/74249484/183281965-5e93414e-fcd7-4c40-ab2a-ecdc2bc84253.png)
-   - ![2](https://user-images.githubusercontent.com/74249484/183281981-3de0862a-e01e-497c-b330-a940659efe7c.png)
-   - ![3](https://user-images.githubusercontent.com/74249484/183281983-570ab4e6-e2eb-4590-9d3d-677d2cd9d71c.png)
+   - ![1](https://user-images.githubusercontent.com/74249484/187086751-df9bf344-096f-4340-a143-c8dcab95a89e.png)
+   - ![2](https://user-images.githubusercontent.com/74249484/187086753-42155fc1-00e3-4406-9fae-50c136501412.png)
+   - ![3](https://user-images.githubusercontent.com/74249484/187086757-3951b4cd-29c8-4510-b360-27c5ce7dbc4c.png)
+
+
+
