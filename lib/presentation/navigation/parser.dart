@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
-import 'package:todo_app/presentation/navigation/simple_navigation/models.dart';
-import 'package:todo_app/presentation/navigation/simple_navigation/paths.dart';
+import 'package:todo_app/presentation/navigation/paths.dart';
 
+import 'models.dart';
 
-//Transform state <-> URL
 class BooksShelfRouteInformationParser
     extends RouteInformationParser<NavigationStateDTO> {
   @override
@@ -14,9 +13,9 @@ class BooksShelfRouteInformationParser
       return Future.value(NavigationStateDTO.todos());
     }
     switch (uri.pathSegments[0]) {
-      case Paths.books:
+      case Paths.create:
         return Future.value(NavigationStateDTO.create());
-      case Paths.book:
+      case Paths.todo:
         return Future.value(
             NavigationStateDTO.todo(uri.pathSegments[1]));
       default:
@@ -27,11 +26,11 @@ class BooksShelfRouteInformationParser
   @override
   RouteInformation? restoreRouteInformation(NavigationStateDTO configuration) {
     if (configuration.isTodos) {
-      return const RouteInformation(location: Paths.welcome);
+      return const RouteInformation(location: "/${Paths.todos}");
     }
     if (configuration.todoUuid == null) {
-      return const RouteInformation(location: "/${Paths.books}");
+      return const RouteInformation(location: "/${Paths.create}");
     }
-    return RouteInformation(location: "/${Paths.book}/${configuration.todoUuid}");
+    return RouteInformation(location: "/${Paths.todo}/${configuration.todoUuid}");
   }
 }

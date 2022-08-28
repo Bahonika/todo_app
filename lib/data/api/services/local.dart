@@ -1,4 +1,4 @@
-// import 'dart:io';
+import 'dart:io';
 
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,14 +29,14 @@ class LocalService {
   final uuid = const Uuid();
 
   Future<void> init() async {
-    // final Directory directory = await getApplicationDocumentsDirectory();
-    // Hive.init(directory.path);
-    // Hive.registerAdapter(LocalTodoAdapter());
-    // Hive.registerAdapter(ImportanceAdapter());
-    // _todos = await Hive.openBox<LocalTodo>(_todosKey);
-    // _revision = await Hive.openBox<int>(_revisionKey);
-    // _deviceId = await Hive.openBox<String>(_deviceIdKey);
-    // setDeviceId(uuid.v1());
+    final Directory directory = await getApplicationDocumentsDirectory();
+    Hive.init(directory.path);
+    Hive.registerAdapter(LocalTodoAdapter());
+    Hive.registerAdapter(ImportanceAdapter());
+    _todos = await Hive.openBox<LocalTodo>(_todosKey);
+    _revision = await Hive.openBox<int>(_revisionKey);
+    _deviceId = await Hive.openBox<String>(_deviceIdKey);
+    setDeviceId(uuid.v1());
   }
 
   void dispose() {

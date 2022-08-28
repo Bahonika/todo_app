@@ -9,16 +9,15 @@ import 'package:todo_app/presentation/providers/notifiers/todo_notifier.dart';
 import 'package:todo_app/presentation/providers/services_providers.dart';
 import 'package:todo_app/presentation/providers/notifiers/todo_list_state_notifier.dart';
 
-
 class DataProviders {
-  static final todoProvider = StateNotifierProvider.autoDispose<TodoNotifier, Todo?>((ref) {
+  static final todoProvider =
+      StateNotifierProvider.autoDispose<TodoNotifier, Todo?>((ref) {
     final todos = ref.watch(DataProviders.todoListStateProvider).todos;
     return TodoNotifier(todos);
   });
 
-  static final createParametersProvider = StateNotifierProvider.autoDispose
-      .family<CreateScreenParametersNotifier, CreateScreenParameters, Todo?>(
-          (ref, Todo? todo) {
+  static final parametersProvider = StateNotifierProvider.autoDispose<
+      CreateScreenParametersNotifier, CreateScreenParameters>((ref) {
     final serviceUtil = ref.watch(ServicesProviders.serviceUtilProvider);
     final todo = ref.watch(todoProvider);
     return CreateScreenParametersNotifier(todo, serviceUtil);

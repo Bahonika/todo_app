@@ -77,6 +77,12 @@ class TodoListStateNotifier extends StateNotifier<TodoListState> {
     );
   }
 
+  List<Todo> get todos {
+    return state.showAll
+        ? state.todos
+        : state.todos.where((element) => !element.done).toList();
+  }
+
   List<Todo> get unDone {
     final data = state.todos.where((element) => !element.done).toList();
     return data;

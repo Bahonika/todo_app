@@ -1,18 +1,19 @@
 
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_app/presentation/navigation/simple_navigation/state.dart';
-import 'package:todo_app/presentation/navigation/simple_navigation/transition.dart';
+import 'package:todo_app/presentation/navigation/models.dart';
+import 'package:todo_app/presentation/navigation/state.dart';
+import 'package:todo_app/presentation/navigation/transition.dart';
 import 'package:todo_app/presentation/screens/todo_create_screen.dart';
 import 'package:todo_app/presentation/screens/todo_list_screen.dart';
 
-import 'models.dart';
 
-final routerDelegateProvider = Provider<BookshelfRouterDelegate>((ref) {
-  return BookshelfRouterDelegate();
+final routerDelegateProvider = Provider<TodoRouterDelegate>((ref) {
+  return TodoRouterDelegate();
 });
 
-class BookshelfRouterDelegate extends RouterDelegate<NavigationStateDTO>
+class TodoRouterDelegate extends RouterDelegate<NavigationStateDTO>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<NavigationStateDTO> {
   NavigationState state = NavigationState(true, null);
 
@@ -23,10 +24,10 @@ class BookshelfRouterDelegate extends RouterDelegate<NavigationStateDTO>
   bool get isBookDetails => !state.isTodos && state.todoUuid != null;
 
   void gotoList() {
-    print("hey");
     state
       ..isTodos = true
       ..todoUuid = null;
+    AppMetrica.reportEvent("open_todo_list");
     notifyListeners();
   }
 
@@ -34,6 +35,7 @@ class BookshelfRouterDelegate extends RouterDelegate<NavigationStateDTO>
     state
       ..isTodos = false
       ..todoUuid = id;
+    AppMetrica.reportEvent("open_create_screen");
     notifyListeners();
   }
 
@@ -47,7 +49,7 @@ class BookshelfRouterDelegate extends RouterDelegate<NavigationStateDTO>
   Widget build(BuildContext context) {
     return Navigator(
       onPopPage: _onPopPage,
-      transitionDelegate: BookshelfTransitionDelegate(),
+      transitionDelegate: TodoTransitionDelegate(),
       key: navigatorKey,
       pages: [
         if (state.isTodos)
@@ -56,7 +58,7 @@ class BookshelfRouterDelegate extends RouterDelegate<NavigationStateDTO>
           ),
         if (!state.isTodos && state.todoUuid == null)
           const MaterialPage(
-            child: TodoCreateScreen(),
+            child: TodoCreateScreen(todoUuid: null,),
           ),
         if (state.todoUuid != null)
           MaterialPage(

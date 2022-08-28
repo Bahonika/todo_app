@@ -4,7 +4,7 @@ import 'package:todo_app/domain/circle_detector.dart';
 void main(){
   final detector = CircleDetector();
 
-  test("line test", (){
+  test("Line test", (){
     final list = [
       const Offset(0, 1),
       const Offset(0, 1),
@@ -26,7 +26,7 @@ void main(){
 
   });
 
-  test("second square test", () {
+  test("Second square test", () {
     final list = [
       const Offset(0, 0),
       const Offset(5, 0),

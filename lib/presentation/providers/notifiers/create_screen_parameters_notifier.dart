@@ -27,11 +27,21 @@ class CreateScreenParametersNotifier
       );
     } else {
       state = CreateScreenParameters.defaultParameters;
+      state.textEditingController.clear();
     }
   }
 
-  Todo generateTodo() {
+  Todo generateTodo(){
+    if (state.isEdit) {
+      return alteredTodo();
+    } else {
+      return newTodo();
+    }
+  }
+
+  Todo newTodo (){
     const uuid = Uuid();
+    if (!isCorrect) throw(isCorrect);
     final todo = Todo(
       uuid: uuid.v1(),
       done: false,
@@ -45,7 +55,8 @@ class CreateScreenParametersNotifier
     return todo;
   }
 
-  Todo alterTodo() {
+  Todo alteredTodo() {
+    if (!isCorrect) throw(isCorrect);
     final alteredTodo = todo!.copyWith(
       deadline: state.showDate ? state.date : null,
       text: state.textEditingController.text,

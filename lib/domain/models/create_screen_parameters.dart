@@ -39,6 +39,6 @@ class CreateScreenParameters {
     date: DateTime.now(),
     importance: Importance.basic,
     showDate: false,
-    textEditingController: TextEditingController(text: ""),
+    textEditingController: TextEditingController(),
   );
 }

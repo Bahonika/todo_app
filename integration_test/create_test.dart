@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:intl/intl.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/main.dart' as app;
 import 'package:todo_app/presentation/components/date_format.dart';
@@ -30,9 +29,6 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      // context to use localization files
-      BuildContext context = tester.element(find.byType(Scaffold));
-
       final fab = find.byType(FloatingActionButton);
       expect(fab, findsOneWidget);
 
@@ -41,6 +37,8 @@ void main() {
 
       final createScreen = find.byType(TodoCreateScreen);
       expect(createScreen, findsOneWidget);
+      BuildContext context = tester
+          .element(find.byType(Scaffold)); // context to use localization files
 
       final textField = find.byType(TextFieldTile);
       expect(textField, findsOneWidget);
@@ -59,8 +57,11 @@ void main() {
       await tester.tap(dateText);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text(DateFormat.d().format(DateTime.now()
-          .add(const Duration(days: 1))))); // don't test at last day of month))
+      final nextButton = find.byTooltip("Next month");
+      await tester.tap(nextButton);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("1"));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(S.of(context).datePickerDone));

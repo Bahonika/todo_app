@@ -6,6 +6,10 @@ class TodoNotifier extends StateNotifier<Todo?> {
   final List<Todo> todos;
 
   void setTodo(String? uuid){
-    state = todos.firstWhere((todo) => todo.uuid == uuid);
+    if (uuid == null){
+      state = null;
+    } else {
+      state = todos.firstWhere((todo) => todo.uuid == uuid);
+    }
   }
 }

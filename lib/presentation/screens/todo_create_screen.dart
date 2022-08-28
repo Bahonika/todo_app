@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
-import 'package:todo_app/presentation/navigation/simple_navigation/delegate.dart';
+import 'package:todo_app/presentation/navigation/delegate.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/components/wrap_card.dart';
@@ -19,50 +19,27 @@ class TodoCreateScreen extends ConsumerStatefulWidget {
 }
 
 class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
-
   @override
   void initState() {
     ref.read(DataProviders.todoProvider.notifier).setTodo(widget.todoUuid);
     super.initState();
   }
 
-  void _createTask() {
-    final paramsNotifier =
-        ref.read(DataProviders.createParametersProvider(null).notifier);
-    final generatedTodo = paramsNotifier.generateTodo();
-    ref
-        .read(DataProviders.todoListStateProvider.notifier)
-        .create(generatedTodo);
-  }
-
-  void _editTask() {
-    final todoForAlter = ref.read(DataProviders.todoProvider);
-    final paramsNotifier =
-        ref.read(DataProviders.createParametersProvider(todoForAlter).notifier);
-    final alteredTodo = paramsNotifier.alterTodo();
-    ref.read(DataProviders.todoListStateProvider.notifier).update(alteredTodo);
-  }
-
-  bool validating() {
-    final todo = ref.read(DataProviders.todoProvider);
-    final value = ref
-        .read(DataProviders.createParametersProvider(todo).notifier)
-        .isCorrect;
-    return value;
-  }
-
   void _tapHandler() {
-    if (validating()) {
-      final todoForEdit = ref.read(DataProviders.todoProvider);
-      final params =
-          ref.read(DataProviders.createParametersProvider(todoForEdit));
+    final paramsNotifier = ref.read(DataProviders.parametersProvider.notifier);
+    final stateController =
+        ref.read(DataProviders.todoListStateProvider.notifier);
+    final params = ref.read(DataProviders.parametersProvider);
+
+    try {
+      final todo = paramsNotifier.generateTodo();
       if (params.isEdit) {
-        _editTask();
+        stateController.update(todo);
       } else {
-        _createTask();
+        stateController.create(todo);
       }
       _pop();
-    } else {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(S.of(context).emptyField),
@@ -128,9 +105,7 @@ class TextFieldTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todoForEdit = ref.watch(DataProviders.todoProvider);
-    final parameters =
-        ref.watch(DataProviders.createParametersProvider(todoForEdit));
+    final parameters = ref.watch(DataProviders.parametersProvider);
     return WrapCard(
       child: TextFormField(
         controller: parameters.textEditingController,
@@ -158,11 +133,9 @@ class ImportanceTile extends ConsumerStatefulWidget {
 class _ImportanceTileState extends ConsumerState<ImportanceTile> {
   @override
   Widget build(BuildContext context) {
-    final todoForEdit = ref.watch(DataProviders.todoProvider);
-    final parameters =
-        ref.watch(DataProviders.createParametersProvider(todoForEdit));
+    final parameters = ref.watch(DataProviders.parametersProvider);
     final parametersNotifier =
-        ref.watch(DataProviders.createParametersProvider(todoForEdit).notifier);
+        ref.watch(DataProviders.parametersProvider.notifier);
     return ListTile(
       title: Text(
         S.of(context).importance,
@@ -209,9 +182,9 @@ class DateTile extends ConsumerWidget {
 
   static DateTime? tempPickedDate;
 
-  Future<void> selectDate(BuildContext context) async {
+  Future<void> selectDate(BuildContext context, WidgetRef ref) async {
     final String hintText = DateTime.now().year.toString();
-    final DateTime initialDate = DateTime.now();
+    final DateTime initialDate = ref.watch(DataProviders.parametersProvider).date;
 
     tempPickedDate = await showDatePicker(
       context: context,
@@ -224,23 +197,19 @@ class DateTile extends ConsumerWidget {
   }
 
   void setSelectedDate(BuildContext context, WidgetRef ref) {
-    selectDate(context).then((value) {
-      final todoForEdit = ref.read(DataProviders.todoProvider);
+    selectDate(context, ref).then((value) {
       if (tempPickedDate != null) {
-        ref
-            .read(DataProviders.createParametersProvider(todoForEdit).notifier)
-            .date = tempPickedDate!;
+        ref.read(DataProviders.parametersProvider.notifier).date =
+            tempPickedDate!;
       }
     });
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todoForEdit = ref.watch(DataProviders.todoProvider);
-    final parameters =
-        ref.watch(DataProviders.createParametersProvider(todoForEdit));
+    final parameters = ref.watch(DataProviders.parametersProvider);
     final parametersNotifier =
-        ref.watch(DataProviders.createParametersProvider(todoForEdit).notifier);
+        ref.watch(DataProviders.parametersProvider.notifier);
     return ListTile(
       title: Text(
         S.of(context).doneBy,
@@ -280,10 +249,10 @@ class DeleteTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todoForEdit = ref.watch(DataProviders.todoProvider);
-    final parameters =
-        ref.watch(DataProviders.createParametersProvider(todoForEdit));
+    final parameters = ref.watch(DataProviders.parametersProvider);
     final stateController =
         ref.watch(DataProviders.todoListStateProvider.notifier);
+
     return TextButton(
       onPressed: () {
         if (parameters.isEdit) {

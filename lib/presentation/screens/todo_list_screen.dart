@@ -5,9 +5,10 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:todo_app/domain/enums/importance.dart';
 import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/domain/models/todo_list_state.dart';
+import 'package:todo_app/internal/components/banner.dart';
 import 'package:todo_app/presentation/components/date_format.dart';
 import 'package:todo_app/presentation/components/my_sliver_persistent_header.dart';
-import 'package:todo_app/presentation/navigation/simple_navigation/delegate.dart';
+import 'package:todo_app/presentation/navigation/delegate.dart';
 import 'package:todo_app/presentation/providers/providers.dart';
 import 'package:todo_app/presentation/theme/custom_colors.dart';
 import 'package:todo_app/presentation/theme/custom_text_theme.dart';
@@ -24,60 +25,56 @@ class TodoListScreen extends ConsumerStatefulWidget {
 }
 
 class _TodoListScreenState extends ConsumerState<TodoListScreen> {
-  late FocusManager focusManager;
-
-  @override
-  void initState() {
-    super.initState();
-    focusManager = FocusManager();
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: Theme.of(context).appBarTheme.systemOverlayStyle!,
-      child: SafeArea(
-        child: GestureDetector(
-          onTap: () {
-            focusManager.primaryFocus?.unfocus();
-          },
-          child: Scaffold(
-            body: const CustomScrollView(
-              slivers: [
-                MySliverAppBar(),
-                SliverTodoList(),
-              ],
-            ),
-            floatingActionButton: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 50),
-              reverseDuration: const Duration(milliseconds: 50),
-              child: MediaQuery.of(context).viewInsets.bottom <= 0.0
-                  ? FloatingActionButton(
-                      onPressed: () {
-                        ref.refresh(DataProviders.todoProvider.notifier).state;
-                        // ref
-                        //     .read(NavigationProviders.routerDelegateProvider)
-                        //     .navigate([
-                        //   TodosSegment(),
-                        //   CreateSegment(),
-                        // ]);
-                        ref.read(routerDelegateProvider).gotoTodo(null);
-                      },
-                      backgroundColor: Theme.of(context)
-                          .extension<CustomColors>()!
-                          .colorBlue,
-                      child: Icon(
-                        Icons.add,
-                        color: Theme.of(context)
-                            .extension<CustomColors>()!
-                            .colorWhite,
-                      ),
-                    )
-                  : const SizedBox(),
+      child: TestBanner(
+        child: SafeArea(
+          child: GestureDetector(
+            onTap: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: const Scaffold(
+              body: CustomScrollView(
+                slivers: [
+                  MySliverAppBar(),
+                  SliverTodoList(),
+                ],
+              ),
+              floatingActionButton: AddButton(),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class AddButton extends ConsumerWidget {
+  const AddButton({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AnimatedSwitcher(
+      // if keyboard opened - hide
+      duration: const Duration(milliseconds: 50),
+      reverseDuration: const Duration(milliseconds: 50),
+      child: MediaQuery.of(context).viewInsets.bottom <= 0.0
+          ? FloatingActionButton(
+              onPressed: () {
+                ref.read(routerDelegateProvider).gotoTodo(null);
+              },
+              backgroundColor:
+                  Theme.of(context).extension<CustomColors>()!.colorBlue,
+              child: Icon(
+                Icons.add,
+                color: Theme.of(context).extension<CustomColors>()!.colorWhite,
+              ),
+            )
+          : const SizedBox(),
     );
   }
 }
@@ -100,26 +97,13 @@ class _MySliverAppBarState extends State<MySliverAppBar>
   }
 }
 
-// todo: delete
-final todo = Todo(uuid: "fghfg",
-  done: false,
-  text: "test1",
-  importance: Importance.basic,
-  createdAt: DateTime.now(),
-  changedAt: DateTime.now(),
-  lastUpdatedBy: "1",
-);
-
 class SliverTodoList extends ConsumerWidget {
   const SliverTodoList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(DataProviders.todoListStateProvider);
-    final stateNotifier =
-        ref.watch(DataProviders.todoListStateProvider.notifier);
-    final todos = state.showAll ? state.todos : stateNotifier.unDone;
-    todos.add(todo);
+    final todos = ref.watch(DataProviders.todoListStateProvider.notifier).todos;
     ref.listen<TodoListState>(
       DataProviders.todoListStateProvider,
       (previous, next) {
@@ -144,20 +128,22 @@ class SliverTodoList extends ConsumerWidget {
               shrinkWrap: true,
               controller: ScrollController(),
               itemBuilder: (BuildContext context, index) {
-                return AnimationConfiguration.staggeredList(
-                  position: index,
-                  duration: const Duration(milliseconds: 375),
-                  child: SlideAnimation(
-                    horizontalOffset: 50.0,
-                    child: FadeInAnimation(
-                      child: index == todos.length
-                          ? const TextFieldTile() // last tile with text field
-                          : index == 0
-                              ? TodoWidget(
-                                  todo: todos[index],
-                                  isFirst: true,
-                                )
-                              : TodoWidget(todo: todos[index]),
+                return AnimationLimiter(
+                  child: AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      horizontalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: index == todos.length
+                            ? const TextFieldTile() // last tile with text field
+                            : index == 0
+                                ? TodoWidget(
+                                    todo: todos[index],
+                                    isFirst: true,
+                                  )
+                                : TodoWidget(todo: todos[index]),
+                      ),
                     ),
                   ),
                 );
@@ -186,18 +172,18 @@ class TextFieldTile extends ConsumerStatefulWidget {
 }
 
 class _TextFieldTileState extends ConsumerState<TextFieldTile> {
-  final _controller = TextEditingController();
+  final _localController = TextEditingController();
 
   createTodo() {
-    final createParams =
-        ref.read(DataProviders.createParametersProvider(null).notifier);
-    createParams.text = _controller.text;
-    if (createParams.isCorrect) {
+    // not the best way to realize it i think
+    final createParams = ref.read(DataProviders.parametersProvider.notifier);
+    createParams.text = _localController.text;
+    final stateController =
+        ref.read(DataProviders.todoListStateProvider.notifier);
+    try {
       final generatedTodo = createParams.generateTodo();
-      ref
-          .read(DataProviders.todoListStateProvider.notifier)
-          .create(generatedTodo);
-    } else {
+      stateController.create(generatedTodo);
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(S.of(context).emptyField),
@@ -213,7 +199,7 @@ class _TextFieldTileState extends ConsumerState<TextFieldTile> {
       child: ListTile(
         leading: const SizedBox(),
         title: TextFormField(
-          controller: _controller,
+          controller: _localController,
           decoration: InputDecoration(
             hintText: S.of(context).newTodo,
             hintStyle: CustomTextTheme.importanceSubtitle(context),
@@ -276,12 +262,7 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
   }
 
   void toEditScreen() {
-    ref.read(DataProviders.todoProvider.notifier).state = widget.todo;
-    // ref.read(NavigationProviders.routerDelegateProvider).navigate([
-    //   TodosSegment(),
-    //   CreateSegment(uuid: widget.todo.uuid),
-    // ]);
-    (Router.of(context).routerDelegate as BookshelfRouterDelegate)
+    (Router.of(context).routerDelegate as TodoRouterDelegate)
         .gotoTodo(widget.todo.uuid);
   }
 

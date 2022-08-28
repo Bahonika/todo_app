@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NavigationController {
   final GlobalKey<NavigatorState> _key = GlobalKey();
@@ -19,8 +18,3 @@ class NavigationController {
     return _key.currentState?.push<T>(route) as Future<T>;
   }
 }
-
-
-final navigationProvider = StateProvider<NavigationController>((ref) {
-  return NavigationController();
-});

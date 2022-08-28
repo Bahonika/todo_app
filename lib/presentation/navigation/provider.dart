@@ -9,13 +9,4 @@ class DebugRouteInformationProvider extends PlatformRouteInformationProvider {
             initialRouteInformation: RouteInformation(
                 location: PlatformDispatcher.instance.defaultRouteName));
 
-  @override
-  Future<bool> didPushRoute(String route) {
-    return super.didPushRoute(route);
-  }
-
-  @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
-    return super.didPushRouteInformation(routeInformation);
-  }
 }

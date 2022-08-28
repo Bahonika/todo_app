@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:todo_app/presentation/logger/logging.dart';
+import 'package:todo_app/internal/logger/logging.dart';
 
 class CircleDetector {
   final logger = Logging.logger();

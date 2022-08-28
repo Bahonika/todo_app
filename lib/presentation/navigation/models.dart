@@ -1,8 +1,3 @@
-class BookId {
-  String? id;
-  BookId(this.id);
-}
-
 class NavigationStateDTO {
   bool isTodos;
   String? todoUuid;

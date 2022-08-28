@@ -5,7 +5,7 @@ import 'package:logger/logger.dart';
 import 'package:todo_app/data/api/services/local.dart';
 import 'package:todo_app/data/api/services/remote.dart';
 import 'package:todo_app/domain/models/todo.dart';
-import 'package:todo_app/presentation/logger/logging.dart';
+import 'package:todo_app/internal/logger/logging.dart';
 
 class ServiceUtil {
   final RemoteService _remoteService;
