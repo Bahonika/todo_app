@@ -58,10 +58,10 @@ android {
         release {
             apply from: '../keystoreConfig.gradle'
 
-            keyAlias keystoreConfig['keyAlias']
-            keyPassword keystoreConfig['keyPassword']
-            storeFile keystoreConfig['storeFile'] ? file(keystoreConfig['storeFile']) : null
-            storePassword keystoreConfig['storePassword']
+            keyAlias keystoreConfig.keyAlias
+            keyPassword keystoreConfig.keyPassword
+            storeFile file(keystoreConfig.storeFile)
+            storePassword keystoreConfig.storePassword
         }
     }
     buildTypes {
