@@ -262,8 +262,7 @@ class _TodoWidgetState extends ConsumerState<TodoWidget> {
   }
 
   void toEditScreen() {
-    (Router.of(context).routerDelegate as TodoRouterDelegate)
-        .gotoTodo(widget.todo.uuid);
+    ref.watch(routerDelegateProvider).gotoTodo(widget.todo.uuid);
   }
 
   @override

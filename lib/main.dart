@@ -35,7 +35,9 @@ void main() {
       ProviderScope(
         child: Consumer(
           builder: (context, WidgetRef ref, _) => FutureBuilder(
-            //future provider
+              // init local storage
+              // not the best place to do it
+              // but working ok
               future: ref
                   .watch(ServicesProviders.serviceUtilProvider)
                   .localService
@@ -51,8 +53,6 @@ void main() {
   }, (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack);
   });
-
-
 }
 
 class MyApp extends ConsumerWidget {

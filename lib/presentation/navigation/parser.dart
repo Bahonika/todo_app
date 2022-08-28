@@ -16,8 +16,7 @@ class BooksShelfRouteInformationParser
       case Paths.create:
         return Future.value(NavigationStateDTO.create());
       case Paths.todo:
-        return Future.value(
-            NavigationStateDTO.todo(uri.pathSegments[1]));
+        return Future.value(NavigationStateDTO.todo(uri.pathSegments[1]));
       default:
         return Future.value(NavigationStateDTO.todos());
     }
@@ -31,6 +30,7 @@ class BooksShelfRouteInformationParser
     if (configuration.todoUuid == null) {
       return const RouteInformation(location: "/${Paths.create}");
     }
-    return RouteInformation(location: "/${Paths.todo}/${configuration.todoUuid}");
+    return RouteInformation(
+        location: "/${Paths.todo}/${configuration.todoUuid}");
   }
 }

@@ -3,12 +3,12 @@ class NavigationStateDTO {
   String? todoUuid;
   NavigationStateDTO(this.isTodos, this.todoUuid);
   NavigationStateDTO.todos()
-      : isTodos = true,
+      : isTodos = false,
         todoUuid = null;
   NavigationStateDTO.create()
-      : isTodos = false,
+      : isTodos = true,
         todoUuid = null;
   NavigationStateDTO.todo(String? id)
-      : isTodos = false,
+      : isTodos = true,
         todoUuid = id;
 }

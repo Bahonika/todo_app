@@ -5,8 +5,11 @@ class VisibilitySwitcher extends StatelessWidget {
   final bool isFilterOff;
   final VoidCallback? onToggle;
 
-  const VisibilitySwitcher({required this.isFilterOff, this.onToggle, Key? key, })
-      : super(key: key);
+  const VisibilitySwitcher({
+    required this.isFilterOff,
+    this.onToggle,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,3 @@
-
 import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,14 +7,13 @@ import 'package:todo_app/presentation/navigation/transition.dart';
 import 'package:todo_app/presentation/screens/todo_create_screen.dart';
 import 'package:todo_app/presentation/screens/todo_list_screen.dart';
 
-
 final routerDelegateProvider = Provider<TodoRouterDelegate>((ref) {
   return TodoRouterDelegate();
 });
 
 class TodoRouterDelegate extends RouterDelegate<NavigationStateDTO>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<NavigationStateDTO> {
-  NavigationState state = NavigationState(true, null);
+  NavigationState state = NavigationState(false, null);
 
   bool get isWelcome => state.isTodos;
 
@@ -25,7 +23,7 @@ class TodoRouterDelegate extends RouterDelegate<NavigationStateDTO>
 
   void gotoList() {
     state
-      ..isTodos = true
+      ..isTodos = false
       ..todoUuid = null;
     AppMetrica.reportEvent("open_todo_list");
     notifyListeners();
@@ -33,7 +31,7 @@ class TodoRouterDelegate extends RouterDelegate<NavigationStateDTO>
 
   void gotoTodo(String? id) {
     state
-      ..isTodos = false
+      ..isTodos = true
       ..todoUuid = id;
     AppMetrica.reportEvent("open_create_screen");
     notifyListeners();
@@ -52,15 +50,16 @@ class TodoRouterDelegate extends RouterDelegate<NavigationStateDTO>
       transitionDelegate: TodoTransitionDelegate(),
       key: navigatorKey,
       pages: [
-        if (state.isTodos)
+        const MaterialPage(
+          child: TodoListScreen(),
+        ),
+        if (state.isTodos && state.todoUuid == null)
           const MaterialPage(
-            child: TodoListScreen(),
+            child: TodoCreateScreen(
+              todoUuid: null,
+            ),
           ),
-        if (!state.isTodos && state.todoUuid == null)
-          const MaterialPage(
-            child: TodoCreateScreen(todoUuid: null,),
-          ),
-        if (state.todoUuid != null)
+        if (state.isTodos && state.todoUuid != null)
           MaterialPage(
             child: TodoCreateScreen(
               todoUuid: state.todoUuid,

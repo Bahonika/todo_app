@@ -5,7 +5,7 @@ class OpacityNotifier extends StateNotifier<double> {
 
   double get opacity => state;
 
-  void toggle() async{
+  Future<void> toggle() async {
     state = 1.0;
     await Future.delayed(const Duration(milliseconds: 500));
     state = 0.0;

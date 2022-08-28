@@ -49,7 +49,7 @@ class _TodoCreateScreenState extends ConsumerState<TodoCreateScreen> {
   }
 
   void _pop() {
-    ref.watch(routerDelegateProvider).gotoList();
+    Navigator.pop(context);
   }
 
   @override
@@ -123,16 +123,11 @@ class TextFieldTile extends ConsumerWidget {
   }
 }
 
-class ImportanceTile extends ConsumerStatefulWidget {
+class ImportanceTile extends ConsumerWidget {
   const ImportanceTile({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<ImportanceTile> createState() => _ImportanceTileState();
-}
-
-class _ImportanceTileState extends ConsumerState<ImportanceTile> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final parameters = ref.watch(DataProviders.parametersProvider);
     final parametersNotifier =
         ref.watch(DataProviders.parametersProvider.notifier);
@@ -184,7 +179,8 @@ class DateTile extends ConsumerWidget {
 
   Future<void> selectDate(BuildContext context, WidgetRef ref) async {
     final String hintText = DateTime.now().year.toString();
-    final DateTime initialDate = ref.watch(DataProviders.parametersProvider).date;
+    final DateTime initialDate =
+        ref.watch(DataProviders.parametersProvider).date;
 
     tempPickedDate = await showDatePicker(
       context: context,

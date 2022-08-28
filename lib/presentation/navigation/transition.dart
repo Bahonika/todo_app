@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 
-
 class TodoTransitionDelegate extends TransitionDelegate {
   @override
   Iterable<RouteTransitionRecord> resolve(

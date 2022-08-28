@@ -12,5 +12,4 @@ class Logging {
     );
     return _logger!;
   }
-
 }
